@@ -1,12 +1,74 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Menu, X, ShoppingCart } from 'lucide-react';
+import Container from './Container';
+import Button from '../ui/Button';
+import PizzaLogo from '../ui/PizzaLogo';
 
 function Header() {
-  return (
-    <header>
-      <Link to="/">Fast Pizza</Link>
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-      <p>John Doe</p>
-    </header>
+  const navLinks = [
+    { name: 'Home', to: '/' },
+    { name: 'Menu', to: '/menu' },
+    { name: 'Order', to: '/order' },
+  ];
+
+  return (
+    <nav className="bg-white shadow-md sticky top-0 z-50">
+      <Container className="flex items-center justify-between h-16">
+        {/* Logo */}
+        <Link to="/" className="flex items-center space-x-2">
+          <PizzaLogo />
+        </Link>
+
+        {/* Desktop Links */}
+        <div className="hidden md:flex items-center space-x-6">
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="text-text text-xl hover:text-primary font-medium"
+            >
+              {link.name}
+            </Link>
+          ))}
+          <Button variant="primary">
+            <ShoppingCart className="w-5 h-5 mr-2" />
+            Cart
+          </Button>
+        </div>
+
+        {/* Mobile Hamburger */}
+        <div className="md:hidden flex items-center">
+          <Button variant="ghost" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </Button>
+        </div>
+      </Container>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white shadow-md">
+          <Container className="flex flex-col py-4 space-y-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="text-text hover:text-primary font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {link.name}
+              </Link>
+            ))}
+            <Button variant="primary">
+              <ShoppingCart className="w-5 h-5 mr-2" />
+              Cart
+            </Button>
+          </Container>
+        </div>
+      )}
+    </nav>
   );
 }
 export default Header;
