@@ -4,6 +4,7 @@ import { Menu, X, ShoppingCart } from 'lucide-react';
 import Container from './Container';
 import Button from '../ui/Button';
 import PizzaLogo from '../ui/PizzaLogo';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,7 +16,7 @@ function Header() {
   ];
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-(--sp-black) shadow-md sticky top-0 z-50">
       <Container className="flex items-center justify-between h-16">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
@@ -34,40 +35,53 @@ function Header() {
             </Link>
           ))}
           <Button variant="primary">
-            <ShoppingCart className="w-5 h-5 mr-2" />
+            <ShoppingCart className="w-6 h-6 mr-2" />
             Cart
           </Button>
         </div>
 
         {/* Mobile Hamburger */}
         <div className="md:hidden flex items-center">
-          <Button variant="ghost" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          <Button
+            variant="ghost"
+            className="border"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </Button>
         </div>
       </Container>
 
       {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-white shadow-md">
-          <Container className="flex flex-col py-4 space-y-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="text-text hover:text-primary font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <Button variant="primary">
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              Cart
-            </Button>
-          </Container>
-        </div>
-      )}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            className="md:hidden overflow-hidden bg-(--sp-) shadow-md"
+          >
+            <Container className="flex flex-col py-4 space-y-4">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="text-text hover:text-primary font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              ))}
+
+              <Button variant="primary">
+                <ShoppingCart className="w-5 h-5 mr-2" />
+                Cart
+              </Button>
+            </Container>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

@@ -44,7 +44,7 @@ function PizzaLogo({ className = 'w-60 h-24' }) {
 
       {/* WORDMARK */}
       <div className="leading-none">
-        <div className="text-2xl font-black tracking-wide text-zinc-900">SAMURAI</div>
+        <div className="text-2xl font-black tracking-wide text-(--sp-gold)">SAMURAI</div>
         <div className="text-2xl font-black tracking-wide text-red-700 text-center">PIZZA</div>
       </div>
     </motion.div>
