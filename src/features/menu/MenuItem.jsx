@@ -1,5 +1,6 @@
-import { formatCurrency } from '../../utils/helpers';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
+import { formatCurrency } from '../../utils/helpers';
 import Button from '../../ui/Button';
 
 function MenuItem({ pizza }) {
@@ -30,7 +31,10 @@ function MenuItem({ pizza }) {
 
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-black/10" />
-
+      {/* Price Badge */}
+      <div className="absolute top-3 right-3 z-20 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-black shadow">
+        {formatCurrency(unitPrice.toFixed(2))}
+      </div>
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col justify-between p-4 text-white">
         {/* Top */}
@@ -51,10 +55,13 @@ function MenuItem({ pizza }) {
         </div>
 
         {/* Bottom */}
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-semibold">{formatCurrency(unitPrice.toFixed(2))}</span>
-
-          <Button variant="primary">Add to Cart</Button>
+        <div className="flex justify-end">
+          <Button
+            variant="primary"
+            onClick={() => toast.success(`${name} added to cart`, { id: name })}
+          >
+            Add to Cart
+          </Button>
         </div>
       </div>
     </motion.div>

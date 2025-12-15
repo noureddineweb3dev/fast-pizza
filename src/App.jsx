@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Menu from './features/menu/Menu';
 import Home from './layout/Home';
 import Cart from './features/cart/Cart';
@@ -21,6 +22,19 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: '#1f2937',
+            color: '#fff',
+          },
+        }}
+      />
+      <RouterProvider router={router} />;
+    </>
+  );
 }
 export default App;
