@@ -1,3 +1,5 @@
+import Button from '../ui/Button';
+
 function Home() {
   return (
     <div>
