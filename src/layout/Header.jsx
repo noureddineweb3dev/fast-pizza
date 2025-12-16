@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { Menu, X, ShoppingCart } from 'lucide-react';
 import Container from './Container';
 import Button from '../ui/Button';
@@ -26,13 +26,13 @@ function Header() {
         {/* Desktop Links */}
         <div className="hidden md:flex items-center space-x-6">
           {navLinks.map((link) => (
-            <Link
+            <NavLink
               key={link.to}
               to={link.to}
               className="text-text text-xl hover:text-primary font-medium"
             >
               {link.name}
-            </Link>
+            </NavLink>
           ))}
           <Button variant="primary">
             <ShoppingCart className="w-6 h-6 mr-2" />
@@ -64,14 +64,14 @@ function Header() {
           >
             <Container className="flex flex-col py-4 space-y-4">
               {navLinks.map((link) => (
-                <Link
+                <NavLink
                   key={link.to}
                   to={link.to}
                   className="text-text hover:text-primary font-medium"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.name}
-                </Link>
+                </NavLink>
               ))}
 
               <Button variant="primary">
