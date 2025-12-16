@@ -7,10 +7,12 @@ import CreateOrder from './features/user/CreateOrder';
 import Order from './features/order/Order';
 import AppLayout from './layout/AppLayout';
 import { loader as menuLoader } from './features/menu/Menu';
+import SanuraiError from './ui/SanuraiError';
 
 const router = createBrowserRouter([
   {
     element: <AppLayout />,
+    errorElement: <SanuraiError />,
     children: [
       { path: '/', element: <Home /> },
       { path: '/menu', element: <Menu />, loader: menuLoader },
