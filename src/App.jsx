@@ -7,15 +7,16 @@ import CreateOrder from './features/user/CreateOrder';
 import Order from './features/order/Order';
 import AppLayout from './layout/AppLayout';
 import { loader as menuLoader } from './features/menu/Menu';
-import SanuraiError from './ui/SanuraiError';
+import SamuraiError from './ui/SamuraiError';
+import MenuError from './features/menu/MenuError';
 
 const router = createBrowserRouter([
   {
     element: <AppLayout />,
-    errorElement: <SanuraiError />,
+    errorElement: <SamuraiError />,
     children: [
       { path: '/', element: <Home /> },
-      { path: '/menu', element: <Menu />, loader: menuLoader },
+      { path: '/menu', element: <Menu />, loader: menuLoader, errorElement: <MenuError /> },
       { path: '/cart', element: <Cart /> },
       { path: '/order/new', element: <CreateOrder /> },
       { path: 'order/:orderId', element: <Order /> },

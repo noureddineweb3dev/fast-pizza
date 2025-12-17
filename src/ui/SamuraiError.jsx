@@ -1,7 +1,7 @@
 import { useRouteError, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-function SanuraiError() {
+function SamuraiError() {
   const error = useRouteError();
   return (
     <motion.div
@@ -52,4 +52,4 @@ function SanuraiError() {
     </motion.div>
   );
 }
-export default SanuraiError;
+export default SamuraiError;
