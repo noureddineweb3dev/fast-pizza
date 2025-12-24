@@ -9,6 +9,7 @@ import AppLayout from './layout/AppLayout';
 import { loader as menuLoader } from './features/menu/Menu';
 import SamuraiError from './ui/SamuraiError';
 import MenuError from './features/menu/MenuError';
+import OrderSearch from './features/order/OrderSearch';
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
       { path: '/', element: <Home /> },
       { path: '/menu', element: <Menu />, loader: menuLoader, errorElement: <MenuError /> },
       { path: '/cart', element: <Cart /> },
+      { path: '/order', element: <OrderSearch /> },
       { path: '/order/new', element: <CreateOrder /> },
       { path: 'order/:orderId', element: <Order /> },
     ],
