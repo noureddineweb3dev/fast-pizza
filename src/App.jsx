@@ -10,6 +10,8 @@ import { loader as menuLoader } from './features/menu/Menu';
 import SamuraiError from './ui/SamuraiError';
 import MenuError from './features/menu/MenuError';
 import OrderSearch from './features/order/OrderSearch';
+import { loader as orderLoader } from './features/order/Order';
+import OrderError from './features/order/OrderError';
 
 const router = createBrowserRouter([
   {
@@ -21,7 +23,12 @@ const router = createBrowserRouter([
       { path: '/cart', element: <Cart /> },
       { path: '/order', element: <OrderSearch /> },
       { path: '/order/new', element: <CreateOrder /> },
-      { path: 'order/:orderId', element: <Order /> },
+      {
+        path: 'order/:orderId',
+        element: <Order />,
+        loader: orderLoader,
+        errorElement: <OrderError />,
+      },
     ],
   },
 ]);
