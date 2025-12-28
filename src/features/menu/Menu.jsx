@@ -5,6 +5,7 @@ import MenuHero from './MenuHero';
 
 function Menu() {
   const menu = useLoaderData();
+  console.log(menu);
   return (
     <>
       <MenuHero />

@@ -4,7 +4,7 @@ import { formatCurrency } from '../../utils/helpers';
 import Button from '../../ui/Button';
 
 function MenuItem({ pizza }) {
-  const { name, ingredients, imageUrl, unitPrice, soldOut } = pizza;
+  const { name, ingredients, image, price } = pizza;
   return (
     <motion.div
       whileHover="hover"
@@ -19,7 +19,7 @@ function MenuItem({ pizza }) {
     >
       {/* Background Image */}
       <motion.img
-        src={imageUrl}
+        src={image}
         alt={name}
         variants={{
           rest: { scale: 1 },
@@ -33,7 +33,7 @@ function MenuItem({ pizza }) {
       <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-black/10" />
       {/* Price Badge */}
       <div className="absolute top-3 right-3 z-20 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-black shadow">
-        {formatCurrency(unitPrice.toFixed(2))}
+        {formatCurrency(price.toFixed(2))}
       </div>
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col justify-between p-4 text-white">

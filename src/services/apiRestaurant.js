@@ -1,4 +1,4 @@
-const API_URL = 'https://react-fast-pizza-api.jonas.io/api';
+const API_URL = 'http://localhost:5000/api';
 
 export async function getMenu() {
   const res = await fetch(`${API_URL}/menu`);
@@ -6,6 +6,7 @@ export async function getMenu() {
   if (!res.ok) throw Error('Failed getting menu');
 
   const { data } = await res.json();
+  console.log(data);
   return data;
 }
 
