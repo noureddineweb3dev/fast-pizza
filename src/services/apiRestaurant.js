@@ -1,54 +1,40 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_SAMURAI_PIZZA_API_URL;
 
-export async function getMenu() {
-  const res = await fetch(`${API_URL}/menu`);
+async function fetchJSON(url, options = {}) {
+  const res = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    ...options,
+  });
 
-  if (!res.ok) throw Error('Failed getting menu');
+  const data = await res.json();
 
-  const { data } = await res.json();
-  console.log(data);
-  return data;
-}
-
-export async function getOrder(id) {
-  const res = await fetch(`${API_URL}/order/${id}`);
-  if (!res.ok) throw Error(`Couldn't find order #${id}`);
-
-  const { data } = await res.json();
-  return data;
-}
-
-export async function createOrder(newOrder) {
-  try {
-    const res = await fetch(`${API_URL}/order`, {
-      method: 'POST',
-      body: JSON.stringify(newOrder),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!res.ok) throw Error();
-    const { data } = await res.json();
-    return data;
-  } catch {
-    throw Error('Failed creating your order');
+  if (!res.ok) {
+    throw new Error(data.message || 'Something went wrong');
   }
+
+  return data.data;
 }
 
-export async function updateOrder(id, updateObj) {
-  try {
-    const res = await fetch(`${API_URL}/order/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(updateObj),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+export function getMenu() {
+  return fetchJSON(`${API_URL}/menu`);
+}
 
-    if (!res.ok) throw Error();
-    // We don't need the data, so we don't return anything
-  } catch {
-    throw Error('Failed updating your order');
-  }
+export function getOrder(id) {
+  return fetchJSON(`${API_URL}/order/${id}`);
+}
+
+export function createOrder(newOrder) {
+  return fetchJSON(`${API_URL}/order`, {
+    method: 'POST',
+    body: JSON.stringify(newOrder),
+  });
+}
+
+export function updateOrder(id, updateObj) {
+  return fetchJSON(`${API_URL}/order/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(updateObj),
+  });
 }
