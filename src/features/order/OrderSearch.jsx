@@ -29,7 +29,7 @@ function OrderSearch() {
         <form onSubmit={handleSubmit} className="flex items-center gap-3">
           <input
             type="text"
-            placeholder="Order ID (e.g. X9A23)"
+            placeholder="Order ID (e.g. SDDS0001)"
             value={orderId}
             onChange={(e) => setOrderId(e.target.value.toUpperCase())}
             className="flex-1 border rounded-md px-4 py-3 text-(--sp-black) focus:outline-none focus:ring-2 focus:ring-red-600"

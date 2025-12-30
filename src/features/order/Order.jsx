@@ -23,7 +23,7 @@ function Order() {
 
       {/* Delivery info */}
       <div className="bg-white rounded-lg shadow p-6 space-y-2">
-        <p className="font-medium">
+        <p className="font-medium text-neutral-700">
           Estimated delivery:
           <span className="ml-2 text-red-700 font-semibold">{estimatedDelivery}</span>
         </p>
@@ -34,7 +34,7 @@ function Order() {
       </div>
 
       {/* Order items */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-lg shadow p-6 text-neutral-700">
         <h2 className="text-xl font-semibold mb-4">🍕 Your Order</h2>
 
         <ul className="divide-y">
@@ -50,7 +50,7 @@ function Order() {
       </div>
 
       {/* Price summary */}
-      <div className="bg-gray-50 rounded-lg p-6 space-y-2">
+      <div className="bg-gray-50 rounded-lg p-6 space-y-2 text-neutral-700">
         <p className="flex justify-between">
           <span>Order price</span>
           <span>${orderPrice.toFixed(2)}</span>

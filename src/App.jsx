@@ -3,7 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import Menu from './features/menu/Menu';
 import Home from './layout/Home';
 import Cart from './features/cart/Cart';
-import CreateOrder from './features/user/CreateOrder';
+import CreateOrder from './features/order/CreateOrder';
 import Order from './features/order/Order';
 import AppLayout from './layout/AppLayout';
 import { loader as menuLoader } from './features/menu/Menu';

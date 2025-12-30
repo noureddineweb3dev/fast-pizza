@@ -13,6 +13,7 @@ async function fetchJSON(url, options = {}) {
   if (!res.ok) {
     throw new Error(data.message || 'Something went wrong');
   }
+  console.log('API Response:', data);
 
   return data.data;
 }
@@ -22,18 +23,18 @@ export function getMenu() {
 }
 
 export function getOrder(id) {
-  return fetchJSON(`${API_URL}/order/${id}`);
+  return fetchJSON(`${API_URL}/orders/${id}`);
 }
 
 export function createOrder(newOrder) {
-  return fetchJSON(`${API_URL}/order`, {
+  return fetchJSON(`${API_URL}/orders`, {
     method: 'POST',
     body: JSON.stringify(newOrder),
   });
 }
 
 export function updateOrder(id, updateObj) {
-  return fetchJSON(`${API_URL}/order/${id}`, {
+  return fetchJSON(`${API_URL}/orders/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(updateObj),
   });
