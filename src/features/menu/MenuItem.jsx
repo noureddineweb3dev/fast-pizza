@@ -5,6 +5,10 @@ import Button from '../../ui/Button';
 
 function MenuItem({ pizza }) {
   const { name, ingredients, image, price } = pizza;
+  function handleAddToCart() {
+    toast.success(`${name} added to cart`, { id: name });
+  }
+
   return (
     <motion.div
       whileHover="hover"
@@ -56,10 +60,7 @@ function MenuItem({ pizza }) {
 
         {/* Bottom */}
         <div className="flex justify-end">
-          <Button
-            variant="primary"
-            onClick={() => toast.success(`${name} added to cart`, { id: name })}
-          >
+          <Button variant="primary" onClick={handleAddToCart}>
             Add to Cart
           </Button>
         </div>

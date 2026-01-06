@@ -16,7 +16,7 @@ function Header() {
   ];
 
   return (
-    <nav className="bg-(--sp-black) shadow-md sticky top-0 z-50">
+    <nav className="bg-sp-black shadow-md sticky top-0 z-50">
       <Container className="flex items-center justify-between h-16">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
@@ -29,7 +29,7 @@ function Header() {
             <NavLink
               key={link.to}
               to={link.to}
-              className="text-text text-xl hover:text-primary font-medium"
+              className="text-sp-white text-xl hover:text-sp-gold font-medium transition-colors"
             >
               {link.name}
             </NavLink>
@@ -44,7 +44,7 @@ function Header() {
         <div className="md:hidden flex items-center">
           <Button
             variant="ghost"
-            className="border"
+            className="border border-sp-white"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -60,14 +60,14 @@ function Header() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.4, ease: 'easeInOut' }}
-            className="md:hidden overflow-hidden bg-(--sp-) shadow-md"
+            className="md:hidden overflow-hidden bg-sp-black shadow-md"
           >
             <Container className="flex flex-col py-4 space-y-4">
               {navLinks.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
-                  className="text-text hover:text-primary font-medium"
+                  className="text-sp-white hover:text-sp-gold font-medium transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.name}
@@ -85,4 +85,5 @@ function Header() {
     </nav>
   );
 }
+
 export default Header;

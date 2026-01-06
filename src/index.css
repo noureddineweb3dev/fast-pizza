@@ -1,21 +1,27 @@
 @import 'tailwindcss';
 
-:root {
-  --sp-black: #0b0b0b; /* Primary background */
-  --sp-red: #991b1b; /* Samurai red */
-  --sp-gold: #f59e0b; /* Premium gold */
-  --sp-cheese: #fde68a; /* Cheese highlight */
-  --sp-gray: #27272a; /* Neutral UI */
-  --sp-white: #fafafa; /* Text on dark */
+/* stylelint-disable-next-line at-rule-no-unknown */
+@theme {
+  --color-sp-black: #0b0b0b;
+  --color-sp-red: #991b1b;
+  --color-sp-gold: #f59e0b;
+  --color-sp-cheese: #fde68a;
+  --color-sp-gray: #27272a;
+  --color-sp-white: #fafafa;
+
+  --font-family-display: ui-serif, Georgia, Cambria, serif;
 }
+
+/* Global styles */
 body {
-  background-color: var(--sp-gold);
-  color: var(--sp-white);
+  background-color: var(--color-sp-gold);
+  color: var(--color-sp-white);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Active link style for React Router */
 .active {
   font-weight: 700;
-  color: var(--sp-red);
+  color: var(--color-sp-red);
 }
