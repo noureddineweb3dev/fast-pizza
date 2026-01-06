@@ -3,9 +3,10 @@ import { motion } from 'framer-motion';
 
 function SamuraiError() {
   const error = useRouteError();
+
   return (
     <motion.div
-      className="min-h-screen flex flex-col items-center justify-center bg-linear-to-b from-gray-100 via-red-50 to-yellow-50 text-center p-6 relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-100 via-red-50 to-yellow-50 text-center p-6 relative overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -39,7 +40,7 @@ function SamuraiError() {
 
       <p className="text-lg max-w-xl text-gray-700 mb-6">
         Our fearless Pizza Samurai was delivering at lightning speed but ended up in the wrong dojo.
-        Don’t worry — we can guide you back to safety.
+        Don't worry — we can guide you back to safety.
       </p>
 
       {/* Go Home Button */}
@@ -52,4 +53,5 @@ function SamuraiError() {
     </motion.div>
   );
 }
+
 export default SamuraiError;

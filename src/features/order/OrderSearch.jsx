@@ -32,12 +32,12 @@ function OrderSearch() {
             placeholder="Order ID (e.g. SDDS0001)"
             value={orderId}
             onChange={(e) => setOrderId(e.target.value.toUpperCase())}
-            className="flex-1 border rounded-md px-4 py-3 text-(--sp-black) focus:outline-none focus:ring-2 focus:ring-red-600"
+            className="flex-1 border border-gray-300 rounded-md px-4 py-3 text-sp-black focus:outline-none focus:ring-2 focus:ring-red-600"
           />
 
           <Button
             type="submit"
-            className=" cursor-pointer text-white px-5 py-3 rounded-md flex items-center gap-2 disabled:bg-gray-500 disabled:cursor-not-allowed"
+            className="cursor-pointer text-white px-5 py-3 rounded-md flex items-center gap-2 disabled:bg-gray-500 disabled:cursor-not-allowed"
             disabled={!orderId.trim()}
           >
             <Search className="w-5 h-5" />
@@ -51,4 +51,5 @@ function OrderSearch() {
     </div>
   );
 }
+
 export default OrderSearch;
