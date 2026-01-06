@@ -1,14 +1,52 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+// ============================================
+// LOCALSTORAGE HELPERS
+// ============================================
+
+// Load cart from localStorage
+function loadCartFromStorage() {
+  try {
+    const serializedCart = localStorage.getItem('cart');
+    if (serializedCart === null) {
+      return [];
+    }
+    return JSON.parse(serializedCart);
+  } catch (err) {
+    console.error('Error loading cart from localStorage:', err);
+    return [];
+  }
+}
+
+// Save cart to localStorage
+function saveCartToStorage(cart) {
+  try {
+    const serializedCart = JSON.stringify(cart);
+    localStorage.setItem('cart', serializedCart);
+  } catch (err) {
+    console.error('Error saving cart to localStorage:', err);
+  }
+}
+
+// ============================================
+// INITIAL STATE
+// ============================================
+
+// Load cart from localStorage on app start
 const initialState = {
-  cart: [],
+  cart: loadCartFromStorage(),
 };
+
+// ============================================
+// CART SLICE
+// ============================================
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
 
   reducers: {
+    // Action: Add item to cart
     addItem(state, action) {
       const newItem = action.payload;
 
@@ -23,10 +61,15 @@ const cartSlice = createSlice({
           totalPrice: newItem.quantity * newItem.unitPrice,
         });
       }
+
+      saveCartToStorage(state.cart);
     },
 
+    // Action: Remove item completely from cart
     deleteItem(state, action) {
       state.cart = state.cart.filter((item) => item.pizzaId !== action.payload);
+
+      saveCartToStorage(state.cart);
     },
 
     increaseItemQuantity(state, action) {
@@ -35,6 +78,8 @@ const cartSlice = createSlice({
       if (item) {
         item.quantity++;
         item.totalPrice = item.quantity * item.unitPrice;
+
+        saveCartToStorage(state.cart);
       }
     },
 
@@ -48,15 +93,25 @@ const cartSlice = createSlice({
         if (item.quantity === 0) {
           state.cart = state.cart.filter((i) => i.pizzaId !== action.payload);
         }
+
+        saveCartToStorage(state.cart);
       }
     },
 
+    // Action: Clear entire cart
     clearCart(state) {
       state.cart = [];
+
+      saveCartToStorage(state.cart);
     },
   },
 });
 
+// ============================================
+// EXPORTS
+// ============================================
+
+// Export actions
 export const { addItem, deleteItem, increaseItemQuantity, decreaseItemQuantity, clearCart } =
   cartSlice.actions;
 
