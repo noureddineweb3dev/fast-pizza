@@ -110,7 +110,7 @@ export function calculateEstimatedDelivery(isPriority) {
   const hours = now.getHours().toString().padStart(2, '0');
   const mins = now.getMinutes().toString().padStart(2, '0');
 
-  return `${hours}:${mins}`;
+  return `${hours > 12 ? hours - 12 : hours}:${mins} ${hours >= 12 ? 'PM' : 'AM'}`;
 }
 
 /**
