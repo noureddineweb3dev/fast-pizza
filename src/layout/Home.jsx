@@ -2,14 +2,13 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Search, Zap, Flame } from 'lucide-react';
 import Container from './Container';
-import Button from '../ui/Button';
 
 function Home() {
   return (
     <div className="space-y-24">
       {/* ================= HERO ================= */}
-      <section className="relative overflow-hidden bg-linear-to-br from-red-800 to-black text-white">
-        <Container className="min-h-[80vh] flex flex-col justify-center gap-10">
+      <section className="relative overflow-hidden bg-gradient-to-br from-red-800 to-black text-white rounded-xl">
+        <Container className="min-h-[80vh] flex flex-col justify-center gap-10 py-12">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -27,7 +26,7 @@ function Home() {
           <div className="flex flex-wrap gap-4">
             <Link
               to="/menu"
-              className="bg-red-600 hover:bg-red-700 px-6 py-4 rounded-lg font-semibold flex items-center gap-2"
+              className="bg-red-600 hover:bg-red-700 px-6 py-4 rounded-lg font-semibold flex items-center gap-2 transition-colors"
             >
               <ShoppingBag />
               Order Now
@@ -35,7 +34,7 @@ function Home() {
 
             <Link
               to="/order"
-              className="border border-white/30 hover:bg-white/10 px-6 py-4 rounded-lg flex items-center gap-2"
+              className="border border-white/30 hover:bg-white/10 px-6 py-4 rounded-lg flex items-center gap-2 transition-colors"
             >
               <Search />
               Track Order
@@ -44,7 +43,9 @@ function Home() {
         </Container>
 
         {/* Decorative blade */}
-        <div className="absolute right-50 top-1/2 -translate-y-1/2 opacity-20 text-[400px]">🥷</div>
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-20 text-[400px] pointer-events-none">
+          🥷
+        </div>
       </section>
 
       {/* ================= SPEED SECTION ================= */}
@@ -71,9 +72,9 @@ function Home() {
       </section>
 
       {/* ================= FEATURED MENU ================= */}
-      <section className="bg-gray-50 py-20">
+      <section className="bg-gray-50 py-20 rounded-xl">
         <Container className="text-center space-y-8">
-          <h2 className="text-(--sp-black) text-4xl font-bold">Samurai’s Choice 🍕</h2>
+          <h2 className="text-sp-black text-4xl font-bold">Samurai's Choice 🍕</h2>
 
           <p className="text-gray-600 max-w-xl mx-auto">
             Our most legendary pizzas, chosen by masters.
@@ -82,16 +83,13 @@ function Home() {
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
             <MenuPreview
               title="Ronin Pepperoni"
-              sourceURL="../public/images/pizzas/ronin-pepperoni.png"
+              sourceURL="/public/images/pizzas/ronin-pepperoni.png"
             />
             <MenuPreview
               title="Katana Margherita"
-              sourceURL="../public/images/pizzas/katana-margherita.png"
+              sourceURL="/public/images/pizzas/katana-margherita.png"
             />
-            <MenuPreview
-              title="Shogun Fire"
-              sourceURL="../public/images/pizzas/shogun-inferno.png"
-            />
+            <MenuPreview title="Shogun Fire" sourceURL="/public/images/pizzas/shogun-inferno.png" />
           </div>
 
           <Link to="/menu" className="inline-block mt-8 text-red-600 font-semibold hover:underline">
@@ -103,7 +101,7 @@ function Home() {
       {/* ================= BRAND STORY ================= */}
       <section>
         <Container className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
+          <div className="text-sp-black">
             <h2 className="text-4xl font-bold mb-4">Why Pizza Samurai?</h2>
             <p className="text-gray-600 leading-relaxed">
               We believe pizza should be delivered with discipline, precision, and honor. Every
@@ -112,19 +110,19 @@ function Home() {
           </div>
 
           <div className="bg-black text-white rounded-xl p-8 shadow-xl">
-            <p className="italic text-lg">“A samurai arrives exactly when the pizza is ready.”</p>
+            <p className="italic text-lg">"A samurai arrives exactly when the pizza is ready."</p>
             <p className="mt-4 text-sm opacity-70">— Ancient Delivery Scrolls</p>
           </div>
         </Container>
       </section>
 
       {/* ================= CTA ================= */}
-      <section className="py-24 bg-red-700 text-white text-center">
+      <section className="py-24 bg-red-700 text-white text-center rounded-xl">
         <h2 className="text-4xl font-bold mb-6">Ready to slice the hunger?</h2>
 
         <Link
           to="/menu"
-          className="bg-white text-red-700 px-8 py-4 rounded-lg font-bold hover:bg-gray-100"
+          className="inline-block bg-white text-red-700 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors"
         >
           Order Your Pizza
         </Link>
@@ -141,7 +139,7 @@ function Feature({ icon, title, text }) {
       <div className="mx-auto w-24 h-24 flex items-center justify-center bg-red-100 text-red-600 rounded-full">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold">{title}</h3>
+      <h3 className="text-xl font-semibold text-sp-black">{title}</h3>
       <p className="text-gray-600">{text}</p>
     </div>
   );
@@ -149,10 +147,9 @@ function Feature({ icon, title, text }) {
 
 function MenuPreview({ title, sourceURL }) {
   return (
-    <div className="bg-white text-gray-600 rounded-xl shadow p-6 hover:shadow-lg transition">
-      <img src={sourceURL} alt={title} />
-      <div className="h-32 bg-gray-200 rounded mb-4" />
-      <h3 className="font-semibold text-lg">{title}</h3>
+    <div className="bg-white text-gray-600 rounded-xl shadow p-6 hover:shadow-lg transition-shadow">
+      <img src={sourceURL} alt={title} className="w-full h-48 object-cover rounded-lg mb-4" />
+      <h3 className="font-semibold text-lg text-sp-black">{title}</h3>
     </div>
   );
 }
