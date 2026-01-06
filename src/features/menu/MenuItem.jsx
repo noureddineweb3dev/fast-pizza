@@ -1,11 +1,32 @@
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useDispatch, useSelector } from 'react-redux';
 import { formatCurrency } from '../../utils/helpers';
 import Button from '../../ui/Button';
+import { addItem, getCurrentQuantityById } from '../../store/cartSlice';
 
 function MenuItem({ pizza }) {
-  const { name, ingredients, image, price } = pizza;
+  const dispatch = useDispatch();
+  const { id, name, ingredients, image, price: unitPrice, soldOut } = pizza;
+
+  // Get current quantity of this pizza in cart
+  const currentQuantity = useSelector(getCurrentQuantityById(id));
+  const isInCart = currentQuantity > 0;
+
   function handleAddToCart() {
+    // Create the item object to add
+    const newItem = {
+      pizzaId: id,
+      name,
+      quantity: 1,
+      unitPrice,
+      totalPrice: unitPrice,
+    };
+
+    // Dispatch the action to Redux store
+    dispatch(addItem(newItem));
+
+    // Show success toast
     toast.success(`${name} added to cart`, { id: name });
   }
 
@@ -19,7 +40,9 @@ function MenuItem({ pizza }) {
         hover: { y: -6 },
       }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className="relative aspect-4/5 overflow-hidden rounded-xl shadow-md hover:shadow-2xl"
+      className={`relative aspect-4/5 overflow-hidden rounded-xl shadow-md hover:shadow-2xl ${
+        soldOut ? 'opacity-70 grayscale' : ''
+      }`}
     >
       {/* Background Image */}
       <motion.img
@@ -35,10 +58,19 @@ function MenuItem({ pizza }) {
 
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-black/10" />
+
       {/* Price Badge */}
       <div className="absolute top-3 right-3 z-20 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-black shadow">
-        {formatCurrency(price.toFixed(2))}
+        {formatCurrency(unitPrice)}
       </div>
+
+      {/* Sold Out Badge */}
+      {soldOut && (
+        <div className="absolute top-3 left-3 z-20 rounded-full bg-red-600 px-3 py-1 text-sm font-semibold text-white shadow">
+          SOLD OUT
+        </div>
+      )}
+
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col justify-between p-4 text-white">
         {/* Top */}
@@ -59,13 +91,26 @@ function MenuItem({ pizza }) {
         </div>
 
         {/* Bottom */}
-        <div className="flex justify-end">
-          <Button variant="primary" onClick={handleAddToCart}>
-            Add to Cart
+        <div className="flex justify-between items-center">
+          {/* Show quantity if in cart */}
+          {isInCart && (
+            <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+              {currentQuantity} in cart
+            </span>
+          )}
+
+          <Button
+            variant="primary"
+            onClick={handleAddToCart}
+            disabled={soldOut}
+            className="ml-auto"
+          >
+            {soldOut ? 'Sold Out' : 'Add to Cart'}
           </Button>
         </div>
       </div>
     </motion.div>
   );
 }
+
 export default MenuItem;

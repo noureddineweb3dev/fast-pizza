@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Menu, X, ShoppingCart } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import Container from './Container';
 import Button from '../ui/Button';
 import PizzaLogo from '../ui/PizzaLogo';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getTotalCartQuantity } from '../store/cartSlice';
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const totalCartQuantity = useSelector(getTotalCartQuantity);
 
   const navLinks = [
     { name: 'Home', to: '/' },
@@ -34,10 +37,17 @@ function Header() {
               {link.name}
             </NavLink>
           ))}
-          <Button variant="primary">
-            <ShoppingCart className="w-6 h-6 mr-2" />
-            Cart
-          </Button>
+          <Link to="/cart">
+            <Button variant="primary" className="relative">
+              <ShoppingCart className="w-6 h-6 mr-2" />
+              Cart
+              {totalCartQuantity > 0 && (
+                <span className="absolute -top-2 -right-2 bg-sp-gold text-sp-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                  {totalCartQuantity}
+                </span>
+              )}
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Hamburger */}
@@ -74,10 +84,17 @@ function Header() {
                 </NavLink>
               ))}
 
-              <Button variant="primary">
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                Cart
-              </Button>
+              <Link to="/cart" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button variant="primary" className="relative w-full">
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  Cart
+                  {totalCartQuantity > 0 && (
+                    <span className="ml-2 bg-sp-gold text-sp-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                      {totalCartQuantity}
+                    </span>
+                  )}
+                </Button>
+              </Link>
             </Container>
           </motion.div>
         )}
