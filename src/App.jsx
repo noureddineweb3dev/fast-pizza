@@ -3,7 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import Menu from './features/menu/Menu';
 import Home from './layout/Home';
 import Cart from './features/cart/Cart';
-import CreateOrder from './features/order/CreateOrder';
+import CreateOrder, { action as createOrderAction } from './features/order/CreateOrder';
 import Order from './features/order/Order';
 import AppLayout from './layout/AppLayout';
 import { loader as menuLoader } from './features/menu/Menu';
@@ -19,10 +19,19 @@ const router = createBrowserRouter([
     errorElement: <SamuraiError />,
     children: [
       { path: '/', element: <Home /> },
-      { path: '/menu', element: <Menu />, loader: menuLoader, errorElement: <MenuError /> },
+      {
+        path: '/menu',
+        element: <Menu />,
+        loader: menuLoader,
+        errorElement: <MenuError />,
+      },
       { path: '/cart', element: <Cart /> },
       { path: '/order', element: <OrderSearch /> },
-      { path: '/order/new', element: <CreateOrder /> },
+      {
+        path: '/order/new',
+        element: <CreateOrder />,
+        action: createOrderAction, // Connect form action
+      },
       {
         path: 'order/:orderId',
         element: <Order />,
@@ -49,4 +58,5 @@ function App() {
     </>
   );
 }
+
 export default App;

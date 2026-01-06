@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 
-/* stylelint-disable-next-line at-rule-no-unknown */
 @theme {
   --color-sp-black: #0b0b0b;
   --color-sp-red: #991b1b;
@@ -24,4 +23,22 @@ body {
 .active {
   font-weight: 700;
   color: var(--color-sp-red);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-sp-gray);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-sp-red);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-sp-gold);
 }
