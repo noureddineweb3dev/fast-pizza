@@ -1,10 +1,20 @@
-import { getOrder } from '../../services/apiRestaurant';
+import { useEffect } from 'react';
 import { useLoaderData } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { getOrder } from '../../services/apiRestaurant';
+import { clearCart } from '../../store/cartSlice';
+import { formatCurrency } from '../../utils/helpers';
 
 function Order() {
   const order = useLoaderData();
+  const dispatch = useDispatch();
 
   const { id, status, priority, priorityPrice, orderPrice, estimatedDelivery, cart } = order;
+
+  // Clear cart when order is successfully loaded
+  useEffect(() => {
+    dispatch(clearCart());
+  }, [dispatch]);
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
@@ -43,7 +53,7 @@ function Order() {
               <span>
                 {item.quantity}× {item.name}
               </span>
-              <span className="font-medium">${item.totalPrice.toFixed(2)}</span>
+              <span className="font-medium">{formatCurrency(item.totalPrice)}</span>
             </li>
           ))}
         </ul>
@@ -53,19 +63,19 @@ function Order() {
       <div className="bg-gray-50 rounded-lg p-6 space-y-2 text-neutral-700">
         <p className="flex justify-between">
           <span>Order price</span>
-          <span>${orderPrice.toFixed(2)}</span>
+          <span>{formatCurrency(orderPrice)}</span>
         </p>
 
         {priority && (
           <p className="flex justify-between text-red-700 font-medium">
             <span>Priority fee</span>
-            <span>${priorityPrice.toFixed(2)}</span>
+            <span>{formatCurrency(priorityPrice)}</span>
           </p>
         )}
 
         <p className="flex justify-between font-bold text-lg">
           <span>Total</span>
-          <span>${(orderPrice + priorityPrice).toFixed(2)}</span>
+          <span>{formatCurrency(orderPrice + priorityPrice)}</span>
         </p>
       </div>
     </div>
