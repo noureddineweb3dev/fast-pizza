@@ -4,6 +4,7 @@ import Footer from './Footer';
 import Container from './Container';
 import AnimatedOutlet from '../ui/AnimatedOutlet';
 import PageSkeleton from '../ui/PageSkeleton';
+import CartOverview from '../features/cart/CartOverview';
 
 function AppLayout() {
   const navigation = useNavigation();
@@ -16,6 +17,8 @@ function AppLayout() {
       <main className="flex-1 py-6">
         <Container>{isLoading ? <PageSkeleton /> : <AnimatedOutlet />}</Container>
       </main>
+
+      <CartOverview />
 
       <Footer />
     </div>
