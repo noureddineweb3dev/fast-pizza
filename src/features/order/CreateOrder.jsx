@@ -23,16 +23,15 @@ function CreateOrder() {
 
   const formErrors = useActionData();
 
-  // Get cart data from Redux
   const cart = useSelector(getCart);
   const orderPrice = useSelector(getTotalCartPrice);
 
-  // Local state for form fields
   const [customer, setCustomer] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [priority, setPriority] = useState(false);
 
+  // Local state for real-time validation errors
   const [errors, setErrors] = useState({});
 
   // Track which fields have been touched
@@ -42,7 +41,6 @@ function CreateOrder() {
     address: false,
   });
 
-  // Calculate prices and delivery time
   const priorityFee = priority ? calculatePriorityFee(orderPrice) : 0;
   const totalPrice = calculateTotalPrice(orderPrice, priority);
   const estimatedDelivery = calculateEstimatedDelivery(priority);
@@ -72,11 +70,9 @@ function CreateOrder() {
     });
   };
 
-  // Clear error when user starts typing
   const handleChange = (fieldName, value, setter) => {
     setter(value);
 
-    // Clear error for this field if it was touched
     if (touched[fieldName] && errors[fieldName]) {
       setErrors({ ...errors, [fieldName]: null });
     }
@@ -213,7 +209,7 @@ function CreateOrder() {
 
               {priority && (
                 <div className="flex justify-between text-red-700 font-medium">
-                  <span>Priority fee (15%)</span>
+                  <span>Priority fee (20%)</span>
                   <span>{formatCurrency(priorityFee)}</span>
                 </div>
               )}
@@ -242,9 +238,7 @@ function CreateOrder() {
   );
 }
 
-// ============================================
 // FORM FIELD COMPONENT
-// ============================================
 
 function Field({
   icon,
@@ -276,7 +270,7 @@ function Field({
         onBlur={onBlur}
         required={required}
         className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 transition ${
-          error ? 'border-red-500 focus:ring-red-600' : 'border-gray-300 focus:ring-red-600'
+          error ? 'border-red-500 focus:ring-red-600 error' : 'border-gray-300 focus:ring-red-600'
         }`}
       />
 
@@ -291,9 +285,7 @@ function Field({
   );
 }
 
-// ============================================
-// FORM ACTION
-// ============================================
+// FORM ACTION (handles form submission)
 
 export async function action({ request }) {
   const formData = await request.formData();
@@ -306,15 +298,12 @@ export async function action({ request }) {
     address: data.address,
   });
 
-  // If validation fails, return errors to display in form
   if (!validation.isValid) {
     return validation.errors;
   }
 
-  // Parse cart from JSON
   const cart = JSON.parse(data.cart);
 
-  // Create order object for API
   const order = {
     customer: data.customer,
     phone: data.phone,
@@ -324,10 +313,8 @@ export async function action({ request }) {
   };
 
   try {
-    // Send order to API
     const newOrder = await createOrder(order);
 
-    // Success! Redirect to order page
     return redirect(`/order/${newOrder.id}`);
   } catch (error) {
     // If API call fails, return error
