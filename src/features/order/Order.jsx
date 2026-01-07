@@ -3,6 +3,7 @@ import { useLoaderData } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { getOrder } from '../../services/apiRestaurant';
 import { clearCart } from '../../store/cartSlice';
+import { addOrderToHistory } from '../../store/orderHistorySlice';
 import { formatCurrency } from '../../utils/helpers';
 
 function Order() {
@@ -11,10 +12,33 @@ function Order() {
 
   const { id, status, priority, priorityPrice, orderPrice, estimatedDelivery, cart } = order;
 
-  // Clear cart when order is successfully loaded
+  // Clear cart and save order to history when order is successfully loaded
   useEffect(() => {
     dispatch(clearCart());
-  }, [dispatch]);
+
+    // Save order to history
+    dispatch(
+      addOrderToHistory({
+        id,
+        customer: order.customer || 'Guest',
+        status,
+        totalPrice: orderPrice + priorityPrice,
+        items: cart,
+        priority,
+        estimatedDelivery,
+      })
+    );
+  }, [
+    dispatch,
+    id,
+    status,
+    orderPrice,
+    priorityPrice,
+    cart,
+    priority,
+    estimatedDelivery,
+    order.customer,
+  ]);
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
