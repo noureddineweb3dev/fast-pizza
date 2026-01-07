@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Form, redirect, useActionData, useNavigation } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { MapPin, Phone, User, Truck, Clock, FastForward, AlertCircle } from 'lucide-react';
 import Button from '../../ui/Button';
-import { getCart, getTotalCartPrice, clearCart } from '../../store/cartSlice';
+import { getCart, getTotalCartPrice } from '../../store/cartSlice';
 import { formatCurrency } from '../../utils/helpers';
 import { createOrder } from '../../services/apiRestaurant';
 import {
   validateOrderForm,
+  isValidName,
+  isValidPhone,
+  isValidAddress,
   calculatePriorityFee,
   calculateEstimatedDelivery,
   calculateTotalPrice,
@@ -16,10 +19,8 @@ import EmptyCart from '../cart/EmptyCart';
 
 function CreateOrder() {
   const navigation = useNavigation();
-  const dispatch = useDispatch();
   const isSubmitting = navigation.state === 'submitting';
 
-  // Get form validation errors from action
   const formErrors = useActionData();
 
   // Get cart data from Redux
@@ -32,13 +33,58 @@ function CreateOrder() {
   const [address, setAddress] = useState('');
   const [priority, setPriority] = useState(false);
 
+  const [errors, setErrors] = useState({});
+
+  // Track which fields have been touched
+  const [touched, setTouched] = useState({
+    customer: false,
+    phone: false,
+    address: false,
+  });
+
   // Calculate prices and delivery time
   const priorityFee = priority ? calculatePriorityFee(orderPrice) : 0;
   const totalPrice = calculateTotalPrice(orderPrice, priority);
   const estimatedDelivery = calculateEstimatedDelivery(priority);
 
-  // If cart is empty, show empty cart page
+  // Validate individual field on blur
+  const handleBlur = (fieldName) => {
+    setTouched({ ...touched, [fieldName]: true });
+
+    let validation;
+    switch (fieldName) {
+      case 'customer':
+        validation = isValidName(customer);
+        break;
+      case 'phone':
+        validation = isValidPhone(phone);
+        break;
+      case 'address':
+        validation = isValidAddress(address);
+        break;
+      default:
+        return;
+    }
+
+    setErrors({
+      ...errors,
+      [fieldName]: validation.valid ? null : validation.error,
+    });
+  };
+
+  // Clear error when user starts typing
+  const handleChange = (fieldName, value, setter) => {
+    setter(value);
+
+    // Clear error for this field if it was touched
+    if (touched[fieldName] && errors[fieldName]) {
+      setErrors({ ...errors, [fieldName]: null });
+    }
+  };
+
   if (cart.length === 0) return <EmptyCart />;
+
+  const displayErrors = formErrors || errors;
 
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-xl shadow overflow-hidden">
@@ -60,8 +106,9 @@ function CreateOrder() {
             inputType="text"
             placeholderText="John Samurai"
             value={customer}
-            onChange={(e) => setCustomer(e.target.value)}
-            error={formErrors?.customer}
+            onChange={(e) => handleChange('customer', e.target.value, setCustomer)}
+            onBlur={() => handleBlur('customer')}
+            error={touched.customer && displayErrors?.customer}
             required
           />
 
@@ -73,8 +120,9 @@ function CreateOrder() {
             inputType="tel"
             placeholderText="+212 6xx xxx xxx"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            error={formErrors?.phone}
+            onChange={(e) => handleChange('phone', e.target.value, setPhone)}
+            onBlur={() => handleBlur('phone')}
+            error={touched.phone && displayErrors?.phone}
             required
           />
 
@@ -86,8 +134,9 @@ function CreateOrder() {
             inputType="text"
             placeholderText="Street, city, apartment"
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            error={formErrors?.address}
+            onChange={(e) => handleChange('address', e.target.value, setAddress)}
+            onBlur={() => handleBlur('address')}
+            error={touched.address && displayErrors?.address}
             required
           />
 
@@ -125,7 +174,7 @@ function CreateOrder() {
 
           {/* Payment Info */}
           <div className="flex items-center gap-3 rounded-lg bg-red-50 p-4 text-red-700">
-            <Truck className="w-6 h-6 shrink-0" />
+            <Truck className="w-6 h-6 flex-shrink-0" />
             <p className="text-sm font-medium">
               Payment is made <strong>in cash upon delivery</strong>.
             </p>
@@ -205,6 +254,7 @@ function Field({
   placeholderText,
   value,
   onChange,
+  onBlur,
   error,
   required = false,
 }) {
@@ -223,15 +273,16 @@ function Field({
         placeholder={placeholderText}
         value={value}
         onChange={onChange}
+        onBlur={onBlur}
         required={required}
         className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 transition ${
           error ? 'border-red-500 focus:ring-red-600' : 'border-gray-300 focus:ring-red-600'
         }`}
       />
 
-      {/* Error message */}
+      {/* Error message with animation */}
       {error && (
-        <div className="flex items-center gap-2 text-sm text-red-600">
+        <div className="flex items-center gap-2 text-sm text-red-600 animate-shake">
           <AlertCircle className="w-4 h-4" />
           <span>{error}</span>
         </div>
@@ -241,7 +292,7 @@ function Field({
 }
 
 // ============================================
-// FORM ACTION (handles form submission)
+// FORM ACTION
 // ============================================
 
 export async function action({ request }) {
@@ -277,7 +328,6 @@ export async function action({ request }) {
     const newOrder = await createOrder(order);
 
     // Success! Redirect to order page
-    // Note: We can't call dispatch here, so we'll clear cart in a different way
     return redirect(`/order/${newOrder.id}`);
   } catch (error) {
     // If API call fails, return error
