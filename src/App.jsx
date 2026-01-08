@@ -5,6 +5,7 @@ import Home from './layout/Home';
 import Cart from './features/cart/Cart';
 import CreateOrder, { action as createOrderAction } from './features/order/CreateOrder';
 import Order from './features/order/Order';
+import OrderHistory from './features/order/OrderHistory';
 import AppLayout from './layout/AppLayout';
 import { loader as menuLoader } from './features/menu/Menu';
 import SamuraiError from './ui/SamuraiError';
@@ -27,10 +28,11 @@ const router = createBrowserRouter([
       },
       { path: '/cart', element: <Cart /> },
       { path: '/order', element: <OrderSearch /> },
+      { path: '/order/history', element: <OrderHistory /> },
       {
         path: '/order/new',
         element: <CreateOrder />,
-        action: createOrderAction, // Connect form action
+        action: createOrderAction,
       },
       {
         path: 'order/:orderId',
