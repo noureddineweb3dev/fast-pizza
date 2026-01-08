@@ -4,6 +4,7 @@ import userReducer from './userSlice';
 import orderHistoryReducer from './orderHistorySlice';
 import ratingReducer from './ratingSlice';
 import favoritesReducer from './favoritesSlice';
+import adminReducer from './adminSlice';
 
 const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
     orderHistory: orderHistoryReducer,
     rating: ratingReducer,
     favorites: favoritesReducer,
+    admin: adminReducer,
   },
 });
 
