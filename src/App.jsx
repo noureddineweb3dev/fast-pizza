@@ -13,6 +13,7 @@ import MenuError from './features/menu/MenuError';
 import OrderSearch from './features/order/OrderSearch';
 import { loader as orderLoader } from './features/order/Order';
 import OrderError from './features/order/OrderError';
+import Favorites from './features/favorites/Favorites';
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
         errorElement: <MenuError />,
       },
       { path: '/cart', element: <Cart /> },
+      { path: '/favorites', element: <Favorites /> },
       { path: '/order', element: <OrderSearch /> },
       { path: '/order/history', element: <OrderHistory /> },
       {

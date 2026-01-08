@@ -17,6 +17,7 @@ function Header() {
   const navLinks = [
     { name: 'Home', to: '/' },
     { name: 'Menu', to: '/menu' },
+    { name: 'Favorites', to: '/favorites' },
     { name: 'Orders', to: '/order/history' },
   ];
 
