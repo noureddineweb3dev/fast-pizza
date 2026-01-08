@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Form, redirect, useActionData, useNavigation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { MapPin, Phone, User, Truck, Clock, FastForward, AlertCircle } from 'lucide-react';
+import { MapPin, Phone, User, Truck, Clock, FastForward, AlertCircle, Locate } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Button from '../../ui/Button';
 import { getCart, getTotalCartPrice } from '../../store/cartSlice';
 import { formatCurrency } from '../../utils/helpers';
@@ -15,6 +16,7 @@ import {
   calculateEstimatedDelivery,
   calculateTotalPrice,
 } from '../../utils/validation';
+import { getUserAddress } from '../../utils/geolocation';
 import EmptyCart from '../cart/EmptyCart';
 
 function CreateOrder() {
@@ -23,6 +25,7 @@ function CreateOrder() {
 
   const formErrors = useActionData();
 
+  // Get cart data from Redux
   const cart = useSelector(getCart);
   const orderPrice = useSelector(getTotalCartPrice);
 
@@ -30,8 +33,8 @@ function CreateOrder() {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [priority, setPriority] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
-  // Local state for real-time validation errors
   const [errors, setErrors] = useState({});
 
   // Track which fields have been touched
@@ -41,6 +44,7 @@ function CreateOrder() {
     address: false,
   });
 
+  // Calculate prices and delivery time
   const priorityFee = priority ? calculatePriorityFee(orderPrice) : 0;
   const totalPrice = calculateTotalPrice(orderPrice, priority);
   const estimatedDelivery = calculateEstimatedDelivery(priority);
@@ -70,14 +74,39 @@ function CreateOrder() {
     });
   };
 
+  // Clear error when user starts typing
   const handleChange = (fieldName, value, setter) => {
     setter(value);
 
+    // Clear error for this field if it was touched
     if (touched[fieldName] && errors[fieldName]) {
       setErrors({ ...errors, [fieldName]: null });
     }
   };
 
+  // Get user's location and fill address
+  const handleGetLocation = async () => {
+    setIsGettingLocation(true);
+
+    try {
+      const result = await getUserAddress();
+
+      if (result.success) {
+        setAddress(result.address);
+        setTouched({ ...touched, address: true });
+        setErrors({ ...errors, address: null });
+        toast.success('Location detected!', { id: 'location' });
+      } else {
+        toast.error(result.error, { id: 'location' });
+      }
+    } catch (error) {
+      toast.error('Failed to get location', { id: 'location' });
+    } finally {
+      setIsGettingLocation(false);
+    }
+  };
+
+  // If cart is empty, show empty cart page
   if (cart.length === 0) return <EmptyCart />;
 
   const displayErrors = formErrors || errors;
@@ -123,18 +152,52 @@ function CreateOrder() {
           />
 
           {/* Delivery Address */}
-          <Field
-            icon={<MapPin />}
-            label="Delivery address"
-            name="address"
-            inputType="text"
-            placeholderText="Street, city, apartment"
-            value={address}
-            onChange={(e) => handleChange('address', e.target.value, setAddress)}
-            onBlur={() => handleBlur('address')}
-            error={touched.address && displayErrors?.address}
-            required
-          />
+          <div className="space-y-2 w-[90%] text-neutral-800">
+            <label htmlFor="address" className="flex items-center gap-2 font-medium text-gray-900">
+              <span className="text-red-600">
+                <MapPin />
+              </span>
+              Delivery address
+              <span className="text-red-600">*</span>
+            </label>
+
+            <div className="flex gap-2">
+              <input
+                id="address"
+                name="address"
+                type="text"
+                placeholder="Street, city, apartment"
+                value={address}
+                onChange={(e) => handleChange('address', e.target.value, setAddress)}
+                onBlur={() => handleBlur('address')}
+                required
+                className={`flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 transition ${
+                  touched.address && displayErrors?.address
+                    ? 'border-red-500 focus:ring-red-600 error'
+                    : 'border-gray-300 focus:ring-red-600'
+                }`}
+              />
+
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleGetLocation}
+                disabled={isGettingLocation}
+                className="!px-3"
+                title="Use my location"
+              >
+                <Locate className={`w-5 h-5 ${isGettingLocation ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
+
+            {/* Error message */}
+            {touched.address && displayErrors?.address && (
+              <div className="flex items-center gap-2 text-sm text-red-600 animate-shake">
+                <AlertCircle className="w-4 h-4" />
+                <span>{displayErrors.address}</span>
+              </div>
+            )}
+          </div>
 
           {/* Priority Delivery Checkbox */}
           <div className="space-y-2 w-[90%]">
@@ -285,7 +348,7 @@ function Field({
   );
 }
 
-// FORM ACTION (handles form submission)
+// FORM ACTION
 
 export async function action({ request }) {
   const formData = await request.formData();
@@ -304,6 +367,7 @@ export async function action({ request }) {
 
   const cart = JSON.parse(data.cart);
 
+  // Create order object for API
   const order = {
     customer: data.customer,
     phone: data.phone,
@@ -317,7 +381,6 @@ export async function action({ request }) {
 
     return redirect(`/order/${newOrder.id}`);
   } catch (error) {
-    // If API call fails, return error
     return {
       general: 'Failed to create order. Please try again.',
     };
