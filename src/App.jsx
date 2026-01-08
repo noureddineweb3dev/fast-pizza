@@ -42,6 +42,9 @@ const router = createBrowserRouter([
         loader: orderLoader,
         errorElement: <OrderError />,
       },
+      // Admin routes
+      { path: '/admin/login', element: <AdminLogin /> },
+      { path: '/admin/dashboard', element: <AdminDashboard /> },
     ],
   },
 ]);
