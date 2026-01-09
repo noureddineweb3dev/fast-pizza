@@ -3,6 +3,7 @@ import cartReducer from './cartSlice';
 import userReducer from './userSlice';
 import orderHistoryReducer from './orderHistorySlice';
 import ratingReducer from './ratingSlice';
+import globalRatingsReducer from './globalRatingsSlice';
 import favoritesReducer from './favoritesSlice';
 import adminReducer from './adminSlice';
 
@@ -12,6 +13,7 @@ const store = configureStore({
     user: userReducer,
     orderHistory: orderHistoryReducer,
     rating: ratingReducer,
+    globalRatings: globalRatingsReducer,
     favorites: favoritesReducer,
     admin: adminReducer,
   },

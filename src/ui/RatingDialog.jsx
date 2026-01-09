@@ -6,6 +6,17 @@ import toast from 'react-hot-toast';
 import RatingStars from './RatingStars';
 import Button from './Button';
 import { addRating, getPizzaRating } from '../store/ratingSlice';
+import { submitGlobalRating } from '../store/globalRatingsSlice';
+
+// Generate a simple user ID
+function getUserId() {
+  let userId = localStorage.getItem('userId');
+  if (!userId) {
+    userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('userId', userId);
+  }
+  return userId;
+}
 
 function RatingDialog({ isOpen, onClose, pizza }) {
   const dispatch = useDispatch();
@@ -33,11 +44,24 @@ function RatingDialog({ isOpen, onClose, pizza }) {
       return;
     }
 
+    const userId = getUserId();
+
+    // Save to personal ratings
     dispatch(
       addRating({
         pizzaId: pizza.id,
         rating,
         review,
+      })
+    );
+
+    // Submit to global ratings system
+    dispatch(
+      submitGlobalRating({
+        pizzaId: pizza.id,
+        rating,
+        review,
+        userId,
       })
     );
 
