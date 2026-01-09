@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
-import { Heart, Star } from 'lucide-react';
+import { Heart, Star, Users } from 'lucide-react';
 import { formatCurrency } from '../../utils/helpers';
 import Button from '../../ui/Button';
 import RatingStars from '../../ui/RatingStars';
@@ -10,6 +10,7 @@ import RatingDialog from '../../ui/RatingDialog';
 import { addItem, getCurrentQuantityById } from '../../store/cartSlice';
 import { toggleFavorite, isFavorite } from '../../store/favoritesSlice';
 import { getPizzaRating } from '../../store/ratingSlice';
+import { getPizzaAverageRating, getPizzaRatingCount } from '../../store/globalRatingsSlice';
 
 function MenuItem({ pizza }) {
   const dispatch = useDispatch();
@@ -17,12 +18,19 @@ function MenuItem({ pizza }) {
 
   const [showRatingDialog, setShowRatingDialog] = useState(false);
 
+  // Get current quantity of this pizza in cart
   const currentQuantity = useSelector(getCurrentQuantityById(id));
   const isInCart = currentQuantity > 0;
 
+  // Check if pizza is favorited
   const isFavorited = useSelector(isFavorite(id));
 
+  // Get user's rating for this pizza
   const userRating = useSelector(getPizzaRating(id));
+
+  // Get global average rating and count
+  const averageRating = useSelector(getPizzaAverageRating(id));
+  const ratingCount = useSelector(getPizzaRatingCount(id));
 
   function handleAddToCart() {
     const newItem = {
@@ -38,7 +46,7 @@ function MenuItem({ pizza }) {
   }
 
   function handleToggleFavorite(e) {
-    e.stopPropagation(); // Prevent card hover effects
+    e.stopPropagation();
     dispatch(toggleFavorite(pizza));
     toast.success(isFavorited ? 'Removed from favorites' : 'Added to favorites', {
       id: `fav-${id}`,
@@ -127,18 +135,33 @@ function MenuItem({ pizza }) {
           <div>
             <h3 className="text-xl font-bold">{name}</h3>
 
-            {/* User Rating Display */}
+            {/* Average Rating Display (Always visible if rated) */}
+            {ratingCount > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-2 flex items-center gap-2"
+              >
+                <RatingStars rating={averageRating} size="sm" interactive={false} />
+                <span className="text-xs text-white/90 flex items-center gap-1">
+                  <Users className="w-3 h-3" />
+                  {ratingCount} {ratingCount === 1 ? 'review' : 'reviews'}
+                </span>
+              </motion.div>
+            )}
+
+            {/* User's Personal Rating (Show if different from average) */}
             {userRating && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-2"
+                className="mt-1 text-xs text-yellow-300"
               >
-                <RatingStars rating={userRating.rating} size="sm" interactive={false} />
+                Your rating: {userRating.rating.toFixed(1)} ⭐
               </motion.div>
             )}
 
-            {/* Ingredients (hover only) */}
+            {/* Ingredients */}
             <motion.p
               variants={{
                 rest: { opacity: 0, y: 10 },
