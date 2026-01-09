@@ -4,15 +4,17 @@ import { useDispatch } from 'react-redux';
 import { getOrder } from '../../services/apiRestaurant';
 import { clearCart } from '../../store/cartSlice';
 import { addOrderToHistory } from '../../store/orderHistorySlice';
+import { addOrderToAdmin } from '../../store/adminSlice';
 import { formatCurrency } from '../../utils/helpers';
 
 function Order() {
   const order = useLoaderData();
   const dispatch = useDispatch();
 
-  const { id, status, priority, priorityPrice, orderPrice, estimatedDelivery, cart } = order;
+  const { id, status, priority, priorityPrice, orderPrice, estimatedDelivery, cart, customer } =
+    order;
 
-  // Clear cart and save order to history when order is successfully loaded
+  // Clear cart, save to history, and send to admin when order is successfully loaded
   useEffect(() => {
     dispatch(clearCart());
 
@@ -20,12 +22,26 @@ function Order() {
     dispatch(
       addOrderToHistory({
         id,
-        customer: order.customer || 'Guest',
+        customer: customer || 'Guest',
         status,
         totalPrice: orderPrice + priorityPrice,
         items: cart,
         priority,
         estimatedDelivery,
+      })
+    );
+
+    // Also send to admin dashboard
+    dispatch(
+      addOrderToAdmin({
+        id,
+        customer: customer || 'Guest',
+        status,
+        totalPrice: orderPrice + priorityPrice,
+        items: cart,
+        priority,
+        estimatedDelivery,
+        createdAt: new Date().toISOString(),
       })
     );
   }, [
@@ -37,7 +53,7 @@ function Order() {
     cart,
     priority,
     estimatedDelivery,
-    order.customer,
+    customer,
   ]);
 
   return (
