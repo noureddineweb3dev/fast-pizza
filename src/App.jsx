@@ -14,6 +14,8 @@ import OrderSearch from './features/order/OrderSearch';
 import { loader as orderLoader } from './features/order/Order';
 import OrderError from './features/order/OrderError';
 import Favorites from './features/favorites/Favorites';
+import AdminLogin from './features/admin/AdminLogin';
+import AdminDashboard from './features/admin/AdminDashboard';
 
 const router = createBrowserRouter([
   {
