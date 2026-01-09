@@ -135,7 +135,7 @@ function MenuItem({ pizza }) {
           <div>
             <h3 className="text-xl font-bold">{name}</h3>
 
-            {/* Average Rating Display (Always visible if rated) */}
+            {/* Average Rating Display  */}
             {ratingCount > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -150,7 +150,7 @@ function MenuItem({ pizza }) {
               </motion.div>
             )}
 
-            {/* User's Personal Rating (Show if different from average) */}
+            {/* User's Personal Rating */}
             {userRating && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -161,7 +161,7 @@ function MenuItem({ pizza }) {
               </motion.div>
             )}
 
-            {/* Ingredients */}
+            {/* Ingredients (hover only) */}
             <motion.p
               variants={{
                 rest: { opacity: 0, y: 10 },
