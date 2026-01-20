@@ -171,26 +171,57 @@ function Home() {
       </section>
 
       {/* ================= SPEED SECTION ================= */}
-      <section>
-        <Container>
-          <div className="grid md:grid-cols-3 gap-10 text-center">
-            <Feature
-              icon={<Zap className="w-10 h-10" />}
+      <section className="relative py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 rounded-3xl" />
+        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')]" />
+
+        <Container className="relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl font-black text-white mb-4 tracking-tight">
+              The Samurai Way
+            </h2>
+            <p className="text-gray-400 text-xl max-w-2xl mx-auto">
+              Three principles that define our legendary service
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <EnhancedFeature
+              icon={<Zap className="w-12 h-12" />}
               title="Lightning Fast"
               text="From oven to door in record time."
+              metric="15-30 min"
+              delay={0.1}
+              accentColor="from-yellow-500 to-orange-500"
             />
-            <Feature
-              icon={<Flame className="w-10 h-10" />}
+            <EnhancedFeature
+              icon={<Flame className="w-12 h-12" />}
               title="Perfectly Fired"
               text="High-heat ovens for flawless crust."
+              metric="450°C+"
+              delay={0.2}
+              accentColor="from-red-500 to-pink-500"
             />
-            <Feature
-              icon={<ShoppingBag className="w-10 h-10" />}
+            <EnhancedFeature
+              icon={<ShoppingBag className="w-12 h-12" />}
               title="Zero Guessing"
               text="Track your order every step."
+              metric="Live GPS"
+              delay={0.3}
+              accentColor="from-blue-500 to-cyan-500"
             />
           </div>
         </Container>
+
+        {/* Decorative elements */}
+        <div className="absolute top-10 left-10 w-32 h-32 bg-red-600/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-10 w-40 h-40 bg-yellow-500/10 rounded-full blur-3xl" />
       </section>
 
       {/* ================= FEATURED MENU ================= */}
@@ -352,15 +383,42 @@ function Home() {
 
 /* ================= SMALL COMPONENTS ================= */
 
-function Feature({ icon, title, text }) {
+function EnhancedFeature({ icon, title, text, metric, delay, accentColor }) {
   return (
-    <div className="space-y-4">
-      <div className="mx-auto w-24 h-24 flex items-center justify-center bg-red-100 text-red-600 rounded-full">
-        {icon}
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      className="relative group"
+    >
+      <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 border border-gray-700 hover:border-gray-600 transition-all duration-300 overflow-hidden">
+        {/* Animated gradient accent */}
+        <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${accentColor} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500`} />
+
+        {/* Icon with glow */}
+        <div className="relative mb-6">
+          <div className={`absolute inset-0 bg-gradient-to-r ${accentColor} opacity-20 blur-xl rounded-full scale-150`} />
+          <div className={`relative w-20 h-20 flex items-center justify-center rounded-xl bg-gradient-to-br ${accentColor} text-white shadow-lg`}>
+            {icon}
+          </div>
+        </div>
+
+        {/* Content */}
+        <h3 className="text-2xl font-bold text-white mb-3">{title}</h3>
+        <p className="text-gray-400 mb-4 leading-relaxed">{text}</p>
+
+        {/* Metric badge */}
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-full border border-white/10">
+          <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${accentColor} animate-pulse`} />
+          <span className="text-white font-bold text-sm">{metric}</span>
+        </div>
+
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
-      <h3 className="text-xl font-semibold text-sp-black">{title}</h3>
-      <p className="text-gray-600">{text}</p>
-    </div>
+    </motion.div>
   );
 }
 
