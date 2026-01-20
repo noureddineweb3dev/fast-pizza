@@ -5,48 +5,168 @@ import { ShoppingBag, Search, Zap, Flame, ChevronDown, ChevronUp, HelpCircle } f
 import Container from './Container';
 import RatingStars from '../ui/RatingStars';
 
+const EMBERS_DATA = [...Array(15)].map((_, i) => ({
+  id: i,
+  y: [0, -200 - Math.random() * 300],
+  x: [0, (Math.random() - 0.5) * 150],
+  duration: 3 + Math.random() * 5,
+  delay: Math.random() * 10,
+  left: `${Math.random() * 100}%`,
+}));
+
 function Home() {
   return (
     <div className="space-y-24">
       {/* ================= HERO ================= */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-red-800 to-black text-white rounded-xl">
-        <Container className="min-h-[80vh] flex flex-col justify-center gap-10 py-12">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-extrabold leading-tight"
-          >
-            Pizza delivered <br />
-            <span className="text-red-400">with Samurai speed</span>
-          </motion.h1>
+      <section className="relative overflow-hidden bg-black text-white rounded-[2.5rem] shadow-2xl mx-4 mt-4 group">
+        {/* Animated Background Layers */}
+        <div className="absolute inset-0 bg-gradient-to-br from-red-950 via-sp-black to-black" />
+        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] mix-blend-overlay" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(153,27,27,0.6),transparent_60%)]" />
 
-          <p className="max-w-xl text-lg text-gray-200">
-            Precision-crafted pizzas. Lightning-fast delivery. One blade. One slice. No delays.
-          </p>
+        {/* Ember Particles */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {EMBERS_DATA.map((ember) => (
+            <motion.div
+              key={ember.id}
+              animate={{
+                y: ember.y,
+                x: ember.x,
+                opacity: [0, 1, 0],
+                scale: [0, 2, 0],
+              }}
+              transition={{
+                duration: ember.duration,
+                repeat: Infinity,
+                delay: ember.delay,
+                ease: 'easeOut',
+              }}
+              className="absolute w-1 h-1 bg-gradient-to-t from-orange-500 to-yellow-300 rounded-full blur-[0.5px] shadow-[0_0_15px_rgba(251,146,60,0.9)]"
+              style={{
+                left: ember.left,
+                bottom: '-20px',
+              }}
+            />
+          ))}
+        </div>
 
-          {/* Primary actions */}
-          <div className="flex flex-wrap gap-4">
-            <Link
-              to="/menu"
-              className="bg-red-600 hover:bg-red-700 px-6 py-4 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+        <Container className="min-h-[95vh] grid md:grid-cols-2 items-center gap-16 py-20 relative z-10">
+          <div className="space-y-10 text-left">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="inline-flex items-center gap-3 bg-red-600/10 backdrop-blur-2xl px-5 py-2 rounded-full border border-red-500/30 shadow-inner shadow-red-500/10"
             >
-              <ShoppingBag />
-              Order Now
-            </Link>
+              <Zap className="w-4 h-4 text-red-500 animate-pulse" />
+              <span className="text-xs font-black tracking-[0.25em] uppercase text-red-400">
+                FORGED IN FIRE & SPEED
+              </span>
+            </motion.div>
 
-            <Link
-              to="/order"
-              className="border border-white/30 hover:bg-white/10 px-6 py-4 rounded-lg flex items-center gap-2 transition-colors"
+            <div className="relative">
+              <motion.h1
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: 'spring', damping: 15 }}
+                className="text-7xl md:text-[10rem] font-black leading-[0.85] tracking-tighter italic select-none"
+              >
+                SLICE <br />
+                <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 filter drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
+                  WITHOUT
+                  <motion.div
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: 0.8, duration: 0.5, ease: 'circOut' }}
+                    className="absolute -right-8 top-1/2 w-[110%] h-3 bg-white/30 -rotate-3 origin-left blur-[2px] shadow-[0_0_15px_rgba(255,255,255,0.4)]"
+                  />
+                </span>{' '}
+                <br />
+                MERCY
+              </motion.h1>
+            </div>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="max-w-md text-xl text-gray-400 leading-relaxed font-medium border-l-2 border-red-900/50 pl-6"
             >
-              <Search />
-              Track Order
-            </Link>
+              Precision-cut recipes delivered with the unwavering discipline of a master. The
+              ultimate pizza mission begins at your command.
+            </motion.p>
+
+            {/* Primary actions */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex flex-wrap gap-6"
+            >
+              <Link
+                to="/menu"
+                className="group relative flex items-center gap-4 bg-red-600 hover:bg-red-700 px-10 py-5 rounded-2xl font-black text-lg transition-all hover:scale-105 active:scale-95 shadow-[0_20px_50px_rgba(220,38,38,0.3)]"
+              >
+                <ShoppingBag className="w-6 h-6 transition-transform group-hover:scale-125" />
+                <span>COMMENCE ORDER</span>
+              </Link>
+
+              <Link
+                to="/order"
+                className="group flex items-center gap-3 border-2 border-white/10 hover:border-white/30 backdrop-blur-md px-10 py-5 rounded-2xl font-bold transition-all hover:bg-white/5 shadow-xl"
+              >
+                <Search className="w-5 h-5 text-gray-400 group-hover:text-white" />
+                <span>TRACK MISSION</span>
+              </Link>
+            </motion.div>
           </div>
+
+          {/* Hero Image / Animation */}
+          <motion.div
+            initial={{ opacity: 0, x: 100, rotate: 15 }}
+            animate={{ opacity: 1, x: 0, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 40, damping: 12, delay: 0.2 }}
+            className="relative"
+          >
+            {/* Background Glow */}
+            <div className="absolute inset-0 bg-red-600/30 blur-[150px] rounded-full scale-150 animate-pulse" />
+
+            <motion.img
+              whileHover={{ rotate: 5, scale: 1.05 }}
+              src="/images/pizzas/shogun-inferno.png"
+              alt="Shogun Inferno Pizza"
+              className="relative z-10 w-full max-w-xl mx-auto drop-shadow-[0_45px_65px_rgba(0,0,0,0.8)]"
+            />
+
+            {/* Floating Floating Badges */}
+            <motion.div
+              animate={{ y: [0, -25, 0] }}
+              transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut' }}
+              className="absolute -top-12 right-0 bg-gradient-to-br from-gray-900 to-black backdrop-blur-2xl p-6 rounded-3xl border border-white/10 shadow-3xl z-20 flex flex-col items-center"
+            >
+              <span className="text-yellow-500 font-black text-3xl">⭐ 5.0</span>
+              <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">
+                Elite Rating
+              </span>
+            </motion.div>
+
+            <motion.div
+              animate={{ y: [0, 25, 0] }}
+              transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut', delay: 1 }}
+              className="absolute -bottom-10 left-10 bg-red-600 p-5 rounded-2xl shadow-2xl z-20"
+            >
+              <Flame className="w-8 h-8 text-white" />
+            </motion.div>
+          </motion.div>
         </Container>
 
-        {/* Decorative blade */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-20 text-[400px] pointer-events-none">
-          🥷
+        {/* Slash Accent Overlay */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <motion.div
+            initial={{ x: '-100%', y: '100%' }}
+            animate={{ x: '100%', y: '-100%' }}
+            transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1], delay: 1 }}
+            className="w-[300%] h-[2px] bg-gradient-to-r from-transparent via-white/40 to-transparent blur-[1px] rotate-[35deg] absolute top-1/2 left-0 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+          />
         </div>
       </section>
 
