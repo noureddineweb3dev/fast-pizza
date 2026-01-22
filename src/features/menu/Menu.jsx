@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getMenu } from '../../services/apiRestaurant';
 import { getAllGlobalRatings } from '../../store/globalRatingsSlice';
 import MenuItem from './MenuItem';
@@ -35,11 +36,16 @@ function Menu() {
 
       {/* Menu Grid */}
       <section className="py-8 min-h-[50vh]">
-        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {sortedMenu.map((pizza) => (
-            <MenuItem pizza={pizza} key={pizza.id} />
-          ))}
-        </ul>
+        <motion.ul
+          layout
+          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          <AnimatePresence mode="popLayout">
+            {sortedMenu.map((pizza) => (
+              <MenuItem pizza={pizza} key={pizza.id} />
+            ))}
+          </AnimatePresence>
+        </motion.ul>
 
         {sortedMenu.length === 0 && (
           <div className="text-center py-20 text-gray-500">
