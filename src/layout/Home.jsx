@@ -41,7 +41,7 @@ function Home() {
       />
 
       {/* ================= HERO ================= */}
-      <section className="relative overflow-hidden bg-black text-white rounded-[2.5rem] shadow-2xl mx-4 mt-4 group">
+      <section className="relative overflow-hidden bg-black text-white rounded-[2.5rem] shadow-[0_0_50px_rgba(220,38,38,0.2)] border border-white/10 mx-4 group">
         {/* Animated Background Layers */}
         <div className="absolute inset-0 bg-gradient-to-br from-red-950 via-sp-black to-black" />
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] mix-blend-overlay" />
@@ -194,8 +194,8 @@ function Home() {
       </section>
 
       {/* ================= SPEED SECTION ================= */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 rounded-3xl" />
+      <section className="relative py-24 overflow-hidden rounded-[2.5rem] mx-4 shadow-xl border border-white/5">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900" />
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')]" />
 
         <Container className="relative z-10">
@@ -248,22 +248,34 @@ function Home() {
       </section>
 
       {/* ================= FEATURED MENU ================= */}
-      <SamuraiChoice />
+      <div className="mx-4 overflow-hidden rounded-[2.5rem] shadow-xl border border-white/5">
+        <SamuraiChoice />
+      </div>
 
       {/* ================= BRAND STORY ================= */}
-      <BrandStory />
+      <div className="mx-4 overflow-hidden rounded-[2.5rem] shadow-xl border border-white/5">
+        <BrandStory />
+      </div>
 
       {/* ================= DAILY SPECIALS ================= */}
-      <DailySpecials />
+      <div className="mx-4 overflow-hidden rounded-[2.5rem] shadow-xl border border-white/5">
+        <DailySpecials />
+      </div>
 
       {/* ================= REVIEWS ================= */}
-      <Reviews />
+      <div className="mx-4 overflow-hidden rounded-[2.5rem] shadow-xl border border-white/5">
+        <Reviews />
+      </div>
 
       {/* ================= FAQ ================= */}
-      <FAQ />
+      <div className="mx-4 overflow-hidden rounded-[2.5rem] shadow-xl border border-white/5">
+        <FAQ />
+      </div>
 
       {/* ================= CTA ================= */}
-      <JoinTheRanks />
+      <div className="mx-4 overflow-hidden rounded-[2.5rem] shadow-xl border border-white/5">
+        <JoinTheRanks />
+      </div>
     </div>
   );
 }

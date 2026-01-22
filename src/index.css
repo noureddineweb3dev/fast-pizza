@@ -13,7 +13,7 @@
 
 /* Global styles */
 body {
-  background-color: var(--color-sp-gold);
+  background-color: var(--color-sp-black);
   color: var(--color-sp-white);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

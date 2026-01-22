@@ -13,7 +13,7 @@ function AppLayout() {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 py-6">
+      <main className="flex-1 pt-32 pb-12">
         <Container>{isLoading ? <PageSkeleton /> : <AnimatedOutlet />}</Container>
       </main>
 
