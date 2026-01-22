@@ -18,8 +18,10 @@ async function fetchJSON(url, options = {}) {
   return data.data;
 }
 
-export function getMenu() {
-  return fetchJSON(`${API_URL}/menu`);
+export async function getMenu() {
+  const menu = await fetchJSON(`${API_URL}/menu`);
+  // Map 'price' from API to 'unitPrice' used by app
+  return menu.map(item => ({ ...item, unitPrice: item.price }));
 }
 
 export function getOrder(id) {
