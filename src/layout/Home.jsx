@@ -5,6 +5,8 @@ import { ShoppingBag, Search, Zap, Flame, ChevronDown, ChevronUp, HelpCircle } f
 import Container from './Container';
 import RatingStars from '../ui/RatingStars';
 import SamuraiChoice from './SamuraiChoice';
+import BrandStory from './BrandStory';
+import DailySpecials from './DailySpecials';
 
 const EMBERS_DATA = [...Array(15)].map((_, i) => ({
   id: i,
@@ -12,7 +14,7 @@ const EMBERS_DATA = [...Array(15)].map((_, i) => ({
   x: [0, (Math.random() - 0.5) * 150],
   duration: 3 + Math.random() * 5,
   delay: Math.random() * 10,
-  left: `${Math.random() * 100}%`,
+  left: `${Math.random() * 100}% `,
 }));
 
 function Home() {
@@ -229,57 +231,10 @@ function Home() {
       <SamuraiChoice />
 
       {/* ================= BRAND STORY ================= */}
-      <section>
-        <Container className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="text-sp-black">
-            <h2 className="text-4xl font-bold mb-4">Why Pizza Samurai?</h2>
-            <p className="text-gray-600 leading-relaxed">
-              We believe pizza should be delivered with discipline, precision, and honor. Every
-              order is treated like a mission. No shortcuts. No delays.
-            </p>
-          </div>
-
-          <div className="bg-black text-white rounded-xl p-8 shadow-xl">
-            <p className="italic text-lg">"A samurai arrives exactly when the pizza is ready."</p>
-            <p className="mt-4 text-sm opacity-70">— Ancient Delivery Scrolls</p>
-          </div>
-        </Container>
-      </section>
+      <BrandStory />
 
       {/* ================= DAILY SPECIALS ================= */}
-      <section className="bg-red-50 py-20 rounded-xl border-2 border-red-200">
-        <Container className="text-center space-y-8">
-          <h2 className="text-sp-black text-4xl font-bold">⚔️ Daily Blade Specials ⚔️</h2>
-
-          <p className="text-gray-600 max-w-xl mx-auto">
-            Limited-time offers sharper than a katana. Get them before they vanish!
-          </p>
-
-          <div className="grid md:grid-cols-2 gap-8 text-left">
-            <SpecialCard
-              title="Family Combo Deal"
-              image="/images/combos/shogun-family.png"
-              description="Large pizza + 2 sides + drinks"
-              originalPrice="$45.99"
-              specialPrice="$34.99"
-            />
-            <SpecialCard
-              title="Solo Warrior Special"
-              image="/images/combos/solo-ronin.png"
-              description="Medium pizza + drink + free delivery"
-              originalPrice="$28.99"
-              specialPrice="$22.99"
-            />
-          </div>
-
-          <Link
-            to="/menu"
-            className="inline-block mt-8 bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-transform hover:scale-105 active:scale-95 transition-all"
-          >
-            See all specials →
-          </Link>
-        </Container>
-      </section>
+      <DailySpecials />
 
       {/* ================= TESTIMONIALS ================= */}
       <section className="bg-gray-50 py-20 rounded-xl">
@@ -366,12 +321,12 @@ function EnhancedFeature({ icon, title, text, metric, delay, accentColor }) {
     >
       <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 border border-gray-700 hover:border-gray-600 transition-all duration-300 overflow-hidden">
         {/* Animated gradient accent */}
-        <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${accentColor} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500`} />
+        <div className={`absolute top - 0 left - 0 right - 0 h - 1 bg - gradient - to - r ${accentColor} transform origin - left scale - x - 0 group - hover: scale - x - 100 transition - transform duration - 500`} />
 
         {/* Icon with glow */}
         <div className="relative mb-6">
-          <div className={`absolute inset-0 bg-gradient-to-r ${accentColor} opacity-20 blur-xl rounded-full scale-150`} />
-          <div className={`relative w-20 h-20 flex items-center justify-center rounded-xl bg-gradient-to-br ${accentColor} text-white shadow-lg`}>
+          <div className={`absolute inset - 0 bg - gradient - to - r ${accentColor} opacity - 20 blur - xl rounded - full scale - 150`} />
+          <div className={`relative w - 20 h - 20 flex items - center justify - center rounded - xl bg - gradient - to - br ${accentColor} text - white shadow - lg`}>
             {icon}
           </div>
         </div>
@@ -382,7 +337,7 @@ function EnhancedFeature({ icon, title, text, metric, delay, accentColor }) {
 
         {/* Metric badge */}
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-full border border-white/10">
-          <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${accentColor} animate-pulse`} />
+          <div className={`w - 2 h - 2 rounded - full bg - gradient - to - r ${accentColor} animate - pulse`} />
           <span className="text-white font-bold text-sm">{metric}</span>
         </div>
 
@@ -406,28 +361,6 @@ function Testimonial({ name, rating, text }) {
   );
 }
 
-function SpecialCard({ title, image, description, originalPrice, specialPrice }) {
-  return (
-    <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row items-center border border-red-100 hover:border-red-300 transition-colors">
-      <div className="w-full md:w-1/2 h-48 md:h-full bg-gray-100">
-        <img src={image} alt={title} className="w-full h-full object-cover" />
-      </div>
-      <div className="p-6 w-full md:w-1/2 text-left flex flex-col justify-between h-full">
-        <div>
-          <div className="inline-block px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold mb-2 uppercase tracking-wider">
-            Limited Time
-          </div>
-          <h3 className="text-xl font-bold text-sp-black mb-2">{title}</h3>
-          <p className="text-gray-600 text-sm mb-4">{description}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-gray-400 line-through text-lg">{originalPrice}</span>
-          <span className="text-red-600 font-bold text-2xl">{specialPrice}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function FAQItem({ question, answer }) {
   const [isOpen, setIsOpen] = useState(false);
