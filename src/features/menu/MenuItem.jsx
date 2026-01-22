@@ -7,7 +7,7 @@ import { formatCurrency } from '../../utils/helpers';
 import Button from '../../ui/Button';
 import RatingStars from '../../ui/RatingStars';
 import RatingDialog from '../../ui/RatingDialog';
-import { addItem, getCurrentQuantityById } from '../../store/cartSlice';
+import { addItem, getCurrentQuantityById, increaseItemQuantity, decreaseItemQuantity } from '../../store/cartSlice';
 import { toggleFavorite, isFavorite } from '../../store/favoritesSlice';
 import { getPizzaRating } from '../../store/ratingSlice';
 import { getPizzaAverageRating, getPizzaRatingCount } from '../../store/globalRatingsSlice';
@@ -44,6 +44,14 @@ function MenuItem({ pizza }) {
 
     dispatch(addItem(newItem));
     toast.success(`${name} added to cart`, { id: name });
+  }
+
+  function handleIncreaseQuantity() {
+    dispatch(increaseItemQuantity(id));
+  }
+
+  function handleDecreaseQuantity() {
+    dispatch(decreaseItemQuantity(id));
   }
 
   function handleToggleFavorite(e) {
@@ -173,8 +181,22 @@ function MenuItem({ pizza }) {
           <div className="mt-auto">
             <div className="flex items-center justify-between gap-4">
               {isInCart ? (
-                <div className="flex items-center gap-3 bg-red-600/20 px-4 py-2 rounded-xl border border-red-600/30 text-red-400 font-bold text-sm w-full justify-center">
-                  <span>{currentQuantity} in cart</span>
+                <div className="flex items-center justify-between w-full bg-zinc-800/50 rounded-xl border border-white/10 overflow-hidden">
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleDecreaseQuantity}
+                    className="px-4 py-3 text-red-400 hover:bg-red-600/20 transition-colors font-bold text-lg"
+                  >
+                    −
+                  </motion.button>
+                  <span className="text-white font-black text-lg">{currentQuantity}</span>
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleIncreaseQuantity}
+                    className="px-4 py-3 text-green-400 hover:bg-green-600/20 transition-colors font-bold text-lg"
+                  >
+                    +
+                  </motion.button>
                 </div>
               ) : (
                 <Button
