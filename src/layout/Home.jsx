@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingBag, Search, Zap, Flame, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 import Container from './Container';
 import RatingStars from '../ui/RatingStars';
+import SamuraiChoice from './SamuraiChoice';
 
 const EMBERS_DATA = [...Array(15)].map((_, i) => ({
   id: i,
@@ -225,37 +226,7 @@ function Home() {
       </section>
 
       {/* ================= FEATURED MENU ================= */}
-      <section className="bg-gray-50 py-20 rounded-xl">
-        <Container className="text-center space-y-8">
-          <h2 className="text-sp-black text-4xl font-bold">Samurai's Choice 🍕</h2>
-
-          <p className="text-gray-600 max-w-xl mx-auto">
-            Our most legendary pizzas, chosen by masters.
-          </p>
-
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 text-left">
-            <MenuPreview
-              title="Ronin Pepperoni"
-              sourceURL="/images/pizzas/ronin-pepperoni.png"
-              rating={4.9}
-            />
-            <MenuPreview
-              title="Katana Margherita"
-              sourceURL="/images/pizzas/katana-margherita.png"
-              rating={4.8}
-            />
-            <MenuPreview
-              title="Shogun Fire"
-              sourceURL="/images/pizzas/shogun-inferno.png"
-              rating={5.0}
-            />
-          </div>
-
-          <Link to="/menu" className="inline-block mt-8 text-red-600 font-semibold hover:underline">
-            View full menu →
-          </Link>
-        </Container>
-      </section>
+      <SamuraiChoice />
 
       {/* ================= BRAND STORY ================= */}
       <section>
@@ -422,26 +393,6 @@ function EnhancedFeature({ icon, title, text, metric, delay, accentColor }) {
   );
 }
 
-function MenuPreview({ title, sourceURL, rating }) {
-  return (
-    <div className="bg-white text-gray-600 rounded-xl shadow p-6 hover:shadow-lg transition-shadow flex flex-col h-full">
-      <img src={sourceURL} alt={title} className="w-full h-48 object-cover rounded-lg mb-4" />
-      <div className="flex justify-between items-start mb-2">
-        <h3 className="font-semibold text-lg text-sp-black">{title}</h3>
-        <div className="flex items-center gap-1 bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-sm font-bold">
-          ⭐ {rating.toFixed(1)}
-        </div>
-      </div>
-      <p className="text-sm text-gray-500 mb-4">A masterclass in flavor and precision.</p>
-      <Link
-        to="/menu"
-        className="mt-auto text-red-600 font-semibold text-sm hover:text-red-700 transition-colors"
-      >
-        Order Now →
-      </Link>
-    </div>
-  );
-}
 
 function Testimonial({ name, rating, text }) {
   return (
