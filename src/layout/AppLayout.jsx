@@ -5,6 +5,8 @@ import Container from './Container';
 import AnimatedOutlet from '../ui/AnimatedOutlet';
 import PageSkeleton from '../ui/PageSkeleton';
 
+import BackToTop from '../ui/BackToTop';
+
 function AppLayout() {
   const navigation = useNavigation();
   const isLoading = navigation.state === 'loading';
@@ -17,6 +19,7 @@ function AppLayout() {
         <Container>{isLoading ? <PageSkeleton /> : <AnimatedOutlet />}</Container>
       </main>
 
+      <BackToTop />
       <Footer />
     </div>
   );
