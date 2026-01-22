@@ -3,16 +3,17 @@ import { useLoaderData } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { ArrowUpDown, Star, TrendingUp, DollarSign } from 'lucide-react';
 import { getMenu } from '../../services/apiRestaurant';
-import { getPizzaAverageRating } from '../../store/globalRatingsSlice';
+import { getAllGlobalRatings } from '../../store/globalRatingsSlice';
 import MenuItem from './MenuItem';
 import MenuHero from './MenuHero';
 
 function Menu() {
   const menu = useLoaderData();
   const [sortBy, setSortBy] = useState('default');
+  const globalRatings = useSelector(getAllGlobalRatings);
 
   // Get sorted menu based on selection
-  const sortedMenu = getSortedMenu(menu, sortBy, useSelector);
+  const sortedMenu = getSortedMenu(menu, sortBy, globalRatings);
 
   return (
     <>
@@ -85,9 +86,8 @@ function SortButton({ active, onClick, icon, label }) {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-        active ? 'bg-red-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-      }`}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${active ? 'bg-red-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+        }`}
     >
       {icon}
       <span className="text-sm">{label}</span>
@@ -97,15 +97,17 @@ function SortButton({ active, onClick, icon, label }) {
 
 // SORTING LOGIC
 
-function getSortedMenu(menu, sortBy, useSelector) {
+function getSortedMenu(menu, sortBy, ratings) {
   let sorted = [...menu];
+
+  const getRating = (id) => ratings[id]?.average || 0;
 
   switch (sortBy) {
     case 'rating-high':
       // Sort by average rating (highest first)
       sorted.sort((a, b) => {
-        const ratingA = useSelector(getPizzaAverageRating(a.id));
-        const ratingB = useSelector(getPizzaAverageRating(b.id));
+        const ratingA = getRating(a.id);
+        const ratingB = getRating(b.id);
 
         // Pizzas with no ratings go to end
         if (ratingA === 0) return 1;
@@ -118,8 +120,8 @@ function getSortedMenu(menu, sortBy, useSelector) {
     case 'rating-low':
       // Sort by average rating (lowest first)
       sorted.sort((a, b) => {
-        const ratingA = useSelector(getPizzaAverageRating(a.id));
-        const ratingB = useSelector(getPizzaAverageRating(b.id));
+        const ratingA = getRating(a.id);
+        const ratingB = getRating(b.id);
 
         // Pizzas with no ratings go to end
         if (ratingA === 0) return 1;
