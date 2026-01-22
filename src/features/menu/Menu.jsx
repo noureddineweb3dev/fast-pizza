@@ -1,99 +1,63 @@
 import { useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { ArrowUpDown, Star, TrendingUp, DollarSign } from 'lucide-react';
 import { getMenu } from '../../services/apiRestaurant';
 import { getAllGlobalRatings } from '../../store/globalRatingsSlice';
 import MenuItem from './MenuItem';
 import MenuHero from './MenuHero';
+import MenuControls from './MenuControls';
 
 function Menu() {
   const menu = useLoaderData();
   const [sortBy, setSortBy] = useState('default');
+  const [activeCategory, setActiveCategory] = useState('all');
   const globalRatings = useSelector(getAllGlobalRatings);
 
-  // Get sorted menu based on selection
-  const sortedMenu = getSortedMenu(menu, sortBy, globalRatings);
+  // 1. Filter Menu by Category
+  const filteredMenu =
+    activeCategory === 'all'
+      ? menu
+      : menu.filter((item) => item.category === activeCategory);
+
+  // 2. Sort the Filtered Menu
+  const sortedMenu = getSortedMenu(filteredMenu, sortBy, globalRatings);
 
   return (
     <>
       <MenuHero />
 
-      {/* Sort Controls */}
-      <section className="mb-6">
-        <div className="bg-white rounded-xl shadow-md p-4">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-2 text-gray-700">
-              <ArrowUpDown className="w-5 h-5" />
-              <span className="font-semibold">Sort by:</span>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <SortButton
-                active={sortBy === 'default'}
-                onClick={() => setSortBy('default')}
-                icon={<Star className="w-4 h-4" />}
-                label="Default"
-              />
-
-              <SortButton
-                active={sortBy === 'rating-high'}
-                onClick={() => setSortBy('rating-high')}
-                icon={<TrendingUp className="w-4 h-4" />}
-                label="Top Rated"
-              />
-
-              <SortButton
-                active={sortBy === 'rating-low'}
-                onClick={() => setSortBy('rating-low')}
-                icon={<TrendingUp className="w-4 h-4 rotate-180" />}
-                label="Lowest Rated"
-              />
-
-              <SortButton
-                active={sortBy === 'price-low'}
-                onClick={() => setSortBy('price-low')}
-                icon={<DollarSign className="w-4 h-4" />}
-                label="Price: Low to High"
-              />
-
-              <SortButton
-                active={sortBy === 'price-high'}
-                onClick={() => setSortBy('price-high')}
-                icon={<DollarSign className="w-4 h-4" />}
-                label="Price: High to Low"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+      <MenuControls
+        activeCategory={activeCategory}
+        onCategoryChange={setActiveCategory}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+      />
 
       {/* Menu Grid */}
-      <section className="py-8">
+      <section className="py-8 min-h-[50vh]">
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {sortedMenu.map((pizza) => (
             <MenuItem pizza={pizza} key={pizza.id} />
           ))}
         </ul>
+
+        {sortedMenu.length === 0 && (
+          <div className="text-center py-20 text-gray-500">
+            <p className="text-xl">No items found in this category.</p>
+            <button
+              onClick={() => setActiveCategory('all')}
+              className="mt-4 text-red-500 hover:underline"
+            >
+              View all items
+            </button>
+          </div>
+        )}
       </section>
     </>
   );
 }
 
-// SORT BUTTON COMPONENT
-
-function SortButton({ active, onClick, icon, label }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${active ? 'bg-red-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-        }`}
-    >
-      {icon}
-      <span className="text-sm">{label}</span>
-    </button>
-  );
-}
+// REMOVED OLD LOCAL SORT BUTTON COMPONENT (Moved to MenuControls)
 
 // SORTING LOGIC
 
