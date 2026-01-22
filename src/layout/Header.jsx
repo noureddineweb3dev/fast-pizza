@@ -39,118 +39,130 @@ function Header() {
 
   return (
     <>
-      <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || isMobileMenuOpen
-          ? 'bg-black/95 backdrop-blur-md border-b border-red-900/20 py-2'
-          : 'bg-gradient-to-b from-black/90 to-transparent py-4'
-          }`}
-      >
-        <Container className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <PizzaLogo className="w-48 h-18" />
-          </Link>
-
-          {/* Desktop Links */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) =>
-                  `relative text-sm font-bold uppercase tracking-widest transition-all duration-300 ${isActive ? 'text-red-500 scale-110' : 'text-gray-300 hover:text-white hover:scale-105'
-                  }`
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    {link.name}
-                    {isActive && (
-                      <motion.div
-                        layoutId="navbar-indicator"
-                        className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-orange-500 shadow-[0_0_12px_rgba(220,38,38,0.8)]"
-                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                      />
-                    )}
-                  </>
-                )}
-              </NavLink>
-            ))}
-
-            <div className="h-6 w-px bg-white/10 mx-2" />
-
-            {/* Cart Button */}
-            <CartButton totalCartQuantity={totalCartQuantity} onClick={() => setIsCartOpen(true)} />
-
-            <Link to="/admin/login" className="text-xs font-bold text-gray-600 hover:text-red-900 uppercase tracking-widest px-3 py-1 border border-transparent hover:border-red-900/30 rounded-full transition-all">
-              Owner
+      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4">
+        <motion.nav
+          initial={{ y: -100, opacity: 0 }}
+          animate={{
+            y: 0,
+            opacity: 1,
+            width: scrolled ? '90%' : '100%',
+            maxWidth: scrolled ? '1200px' : '100%',
+            borderRadius: scrolled ? '50px' : '0px',
+            y: scrolled ? 10 : 0
+          }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className={`
+            transition-all duration-500
+            ${scrolled
+              ? 'bg-black/80 backdrop-blur-xl border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.5)]'
+              : 'bg-transparent'
+            }
+          `}
+        >
+          <div className={`px-6 md:px-12 h-20 flex items-center justify-between`}>
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2 group">
+              <PizzaLogo className="w-40 h-16" />
             </Link>
+
+            {/* Desktop Links */}
+            <div className="hidden md:flex items-center space-x-8">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={({ isActive }) =>
+                    `relative text-sm font-black uppercase tracking-widest transition-all duration-300 ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'}`
+                  }
+                >
+                  {({ isActive }) => (
+                    <span className="relative z-10 py-2">
+                      {link.name}
+                      {isActive && (
+                        <motion.div
+                          layoutId="navbar-indicator"
+                          className="absolute bottom-0 left-0 right-0 h-1 bg-red-600 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.8)]"
+                          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        />
+                      )}
+                    </span>
+                  )}
+                </NavLink>
+              ))}
+
+              <div className="h-8 w-px bg-white/10 mx-4" />
+
+              {/* Cart Button */}
+              <CartButton totalCartQuantity={totalCartQuantity} onClick={() => setIsCartOpen(true)} />
+
+              <Link to="/admin/login" className="ml-4 text-[10px] font-black text-gray-500 hover:text-red-500 uppercase tracking-widest px-4 py-2 border border-white/5 hover:border-red-500/50 rounded-full transition-all bg-white/5 hover:bg-red-500/10">
+                Owner
+              </Link>
+            </div>
+
+            {/* Mobile Hamburger */}
+            <div className="md:hidden flex items-center gap-4">
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 text-gray-300"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {totalCartQuantity > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border border-black">
+                    {totalCartQuantity}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 text-white hover:bg-white/10 rounded-full transition-colors"
+              >
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
 
-          {/* Mobile Hamburger */}
-          <div className="md:hidden flex items-center gap-4">
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-2 text-gray-300"
-            >
-              <ShoppingCart className="w-6 h-6" />
-              {totalCartQuantity > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border border-black">
-                  {totalCartQuantity}
-                </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 text-white hover:bg-white/10 rounded-full transition-colors"
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </Container>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="md:hidden border-t border-white/10 bg-black/95 backdrop-blur-xl"
-            >
-              <Container className="flex flex-col py-6 space-y-2">
-                {navLinks.map((link) => (
-                  <NavLink
-                    key={link.to}
-                    to={link.to}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold transition-all ${isActive
-                        ? 'bg-red-600/10 text-red-500 pl-6'
-                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                      }`
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        {isActive && <Sword className="w-5 h-5 fill-current" />}
-                        {link.name}
-                      </>
-                    )}
-                  </NavLink>
-                ))}
-                <div className="h-px bg-white/10 my-4" />
-                <Link to="/admin/login" className="px-4 py-3 text-sm font-bold text-gray-600 uppercase tracking-widest text-center">
-                  Owner Access
-                </Link>
-              </Container>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.nav>
+          {/* Mobile Menu */}
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="md:hidden border-t border-white/10 bg-black/95 backdrop-blur-xl overflow-hidden rounded-b-[50px]"
+              >
+                <div className="flex flex-col py-6 px-4 space-y-2">
+                  {navLinks.map((link) => (
+                    <NavLink
+                      key={link.to}
+                      to={link.to}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold transition-all ${isActive
+                          ? 'bg-red-600/10 text-red-500 pl-6'
+                          : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          {isActive && <Sword className="w-5 h-5 fill-current" />}
+                          {link.name}
+                        </>
+                      )}
+                    </NavLink>
+                  ))}
+                  <div className="h-px bg-white/10 my-4" />
+                  <Link to="/admin/login" className="px-4 py-3 text-sm font-bold text-gray-600 uppercase tracking-widest text-center">
+                    Owner Access
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.nav>
+      </div>
 
       {/* Cart Popup */}
       <CartPopup isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
