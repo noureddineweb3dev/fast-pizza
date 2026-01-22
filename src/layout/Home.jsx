@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Search, Zap, Flame, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 import Container from './Container';
@@ -7,6 +7,9 @@ import RatingStars from '../ui/RatingStars';
 import SamuraiChoice from './SamuraiChoice';
 import BrandStory from './BrandStory';
 import DailySpecials from './DailySpecials';
+import Reviews from './Reviews';
+import FAQ from './FAQ';
+import JoinTheRanks from './JoinTheRanks';
 
 const EMBERS_DATA = [...Array(15)].map((_, i) => ({
   id: i,
@@ -18,8 +21,25 @@ const EMBERS_DATA = [...Array(15)].map((_, i) => ({
 }));
 
 function Home() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  useEffect(() => {
+    document.title = "Samurai Pizza | Forged in Fire";
+  }, []);
+
   return (
     <div className="space-y-24">
+      {/* Global Scroll Progress Bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 origin-left z-[100]"
+        style={{ scaleX }}
+      />
+
       {/* ================= HERO ================= */}
       <section className="relative overflow-hidden bg-black text-white rounded-[2.5rem] shadow-2xl mx-4 mt-4 group">
         {/* Animated Background Layers */}
@@ -236,73 +256,14 @@ function Home() {
       {/* ================= DAILY SPECIALS ================= */}
       <DailySpecials />
 
-      {/* ================= TESTIMONIALS ================= */}
-      <section className="bg-gray-50 py-20 rounded-xl">
-        <Container className="text-center space-y-8">
-          <h2 className="text-sp-black text-4xl font-bold">What Our Customers Say</h2>
-
-          <p className="text-gray-600 max-w-xl mx-auto">
-            Hear from warriors who have tasted our blades.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <Testimonial
-              name="Akira Tanaka"
-              rating={5}
-              text="The fastest delivery I've ever experienced! My pizza arrived hot and perfect."
-            />
-            <Testimonial
-              name="Yuki Sato"
-              rating={5}
-              text="Amazing crust and toppings. The Shogun Inferno is my new favorite!"
-            />
-            <Testimonial
-              name="Kenji Nakamura"
-              rating={4.5}
-              text="Great service and delicious food. Will definitely order again."
-            />
-          </div>
-        </Container>
-      </section>
+      {/* ================= REVIEWS ================= */}
+      <Reviews />
 
       {/* ================= FAQ ================= */}
-      <section>
-        <Container className="max-w-3xl">
-          <h2 className="text-sp-black text-4xl font-bold text-center mb-12">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-2">
-            <FAQItem
-              question="How fast is 'Samurai Speed'?"
-              answer="We aim to deliver every pizza within 30 minutes. Our couriers are trained in the art of efficient navigation to ensure your pizza arrives hot and fresh."
-            />
-            <FAQItem
-              question="Do you offer gluten-free crust?"
-              answer="Yes! We offer a specialized gluten-free crust for most of our pizzas. Just select the option when customizing your order in the menu."
-            />
-            <FAQItem
-              question="Can I track my order in real-time?"
-              answer="Absolutely. Once your order is placed, you can use our 'Track Order' feature to see exactly where your pizza is, from the oven to your doorstep."
-            />
-            <FAQItem
-              question="What is the 'Shogun Inferno'?"
-              answer="It's our spiciest pizza, featuring habanero-infused sauce, spicy pepperoni, and jalapeños. It's only for the bravest warriors!"
-            />
-          </div>
-        </Container>
-      </section>
+      <FAQ />
 
       {/* ================= CTA ================= */}
-      <section className="py-24 bg-red-700 text-white text-center rounded-xl">
-        <h2 className="text-4xl font-bold mb-6">Ready to slice the hunger?</h2>
-
-        <Link
-          to="/menu"
-          className="inline-block bg-white text-red-700 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors"
-        >
-          Order Your Pizza
-        </Link>
-      </section>
+      <JoinTheRanks />
     </div>
   );
 }
@@ -349,52 +310,5 @@ function EnhancedFeature({ icon, title, text, metric, delay, accentColor }) {
 }
 
 
-function Testimonial({ name, rating, text }) {
-  return (
-    <div className="bg-white rounded-xl shadow p-6 hover:shadow-lg transition-shadow border border-gray-100">
-      <div className="flex items-center justify-center mb-4">
-        <RatingStars rating={rating} size="sm" interactive={false} showValue />
-      </div>
-      <p className="text-gray-600 mb-4 italic">"{text}"</p>
-      <p className="font-semibold text-sp-black">— {name}</p>
-    </div>
-  );
-}
-
-
-function FAQItem({ question, answer }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="border-b border-gray-200 py-4">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between text-left focus:outline-none"
-      >
-        <span className="text-lg font-semibold text-sp-black flex items-center gap-3">
-          <HelpCircle className="text-red-500 w-5 h-5" />
-          {question}
-        </span>
-        {isOpen ? (
-          <ChevronUp className="text-gray-400" />
-        ) : (
-          <ChevronDown className="text-gray-400" />
-        )}
-      </button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            <p className="py-4 text-gray-600 leading-relaxed">{answer}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 export default Home;
