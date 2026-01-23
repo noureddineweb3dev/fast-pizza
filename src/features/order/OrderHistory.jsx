@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Clock, Package, CheckCircle, Trash2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Clock, Package, CheckCircle, Trash2, History, Zap, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getAllOrders, clearOrderHistory } from '../../store/orderHistorySlice';
 import { formatCurrency } from '../../utils/helpers';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import Container from '../../layout/Container';
 
 function OrderHistory() {
   const dispatch = useDispatch();
@@ -20,152 +21,108 @@ function OrderHistory() {
   if (orders.length === 0) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
-        <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-          <Package className="w-16 h-16 text-gray-400" />
-        </div>
-
-        <h2 className="text-3xl font-bold text-sp-black mb-3">No Order History</h2>
-
-        <p className="text-gray-600 mb-8 max-w-md">
-          You haven't placed any orders yet. Start exploring our menu!
-        </p>
-
-        <Link to="/menu">
-          <Button variant="primary" size="lg">
-            Browse Menu
-          </Button>
-        </Link>
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="w-32 h-32 bg-red-600/20 rounded-full flex items-center justify-center mb-6 border border-red-500/30"
+        >
+          <History className="w-16 h-16 text-red-500" />
+        </motion.div>
+        <h2 className="text-3xl font-black text-white mb-3">No Order History</h2>
+        <p className="text-gray-400 mb-8 max-w-md">You haven't placed any orders yet. Start exploring our menu!</p>
+        <Link to="/menu"><Button variant="primary" size="lg">Browse Menu</Button></Link>
       </div>
     );
   }
 
   return (
     <>
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-sp-black">Order History</h1>
-            <p className="text-gray-600 mt-1">{orders.length} total orders</p>
+      {/* Hero */}
+      <section className="relative overflow-hidden rounded-[2.5rem] bg-black mb-12 border border-white/10 shadow-2xl">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(220,38,38,0.15),transparent_50%)]" />
+        <Container className="relative z-10 py-16 md:py-20">
+          <div className="flex items-center justify-between flex-wrap gap-6">
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4">
+              <div className="p-3 bg-red-600/20 rounded-2xl border border-red-500/30">
+                <History className="w-8 h-8 text-red-500" />
+              </div>
+              <div>
+                <h1 className="text-4xl md:text-5xl font-black text-white">Order History</h1>
+                <p className="text-gray-400 mt-1">{orders.length} total orders</p>
+              </div>
+            </motion.div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+              <Button variant="ghost" onClick={() => setShowConfirm(true)} className="flex items-center gap-2 text-red-400 hover:text-red-300 border border-red-500/30 hover:bg-red-600/10">
+                <Trash2 className="w-4 h-4" /> Clear History
+              </Button>
+            </motion.div>
           </div>
+        </Container>
+      </section>
 
-          <Button
-            variant="ghost"
-            onClick={() => setShowConfirm(true)}
-            className="flex items-center gap-2 text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="w-4 h-4" />
-            Clear history
-          </Button>
-        </div>
-
-        {/* Orders List */}
-        <div className="space-y-4">
+      {/* Orders */}
+      <motion.div layout className="space-y-4">
+        <AnimatePresence mode="popLayout">
           {orders.map((order, index) => (
             <OrderHistoryCard key={order.id} order={order} index={index} />
           ))}
-        </div>
-      </div>
+        </AnimatePresence>
+      </motion.div>
 
-      {/* Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={showConfirm}
-        onClose={() => setShowConfirm(false)}
-        onConfirm={handleClearHistory}
-        title="Clear order history?"
-        message="This will permanently delete all your order history. This action cannot be undone."
-        confirmText="Yes, clear history"
-        cancelText="Keep history"
-        variant="danger"
-      />
+      <ConfirmDialog isOpen={showConfirm} onClose={() => setShowConfirm(false)} onConfirm={handleClearHistory} title="Clear order history?" message="This will permanently delete all your order history. This action cannot be undone." confirmText="Yes, clear history" cancelText="Keep history" variant="danger" />
     </>
   );
 }
 
-// ORDER HISTORY CARD COMPONENT
-
 function OrderHistoryCard({ order, index }) {
-  const { id, customer, date, status, totalPrice, items, priority } = order;
-
-  // Format date
+  const { id, date, status, totalPrice, items, priority } = order;
   const orderDate = new Date(date);
-  const formattedDate = orderDate.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-  const formattedTime = orderDate.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const formattedDate = orderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const formattedTime = orderDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-  // Status icon and color
   const statusConfig = {
     preparing: { icon: Clock, color: 'yellow', label: 'Preparing' },
     delivering: { icon: Package, color: 'blue', label: 'Delivering' },
     delivered: { icon: CheckCircle, color: 'green', label: 'Delivered' },
   };
-
   const StatusIcon = statusConfig[status]?.icon || Clock;
-  const statusColor = statusConfig[status]?.color || 'gray';
   const statusLabel = statusConfig[status]?.label || status;
+  const statusColors = {
+    preparing: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+    delivering: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    delivered: 'bg-green-500/20 text-green-400 border-green-500/30',
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden"
-    >
-      <div className="p-6">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-xl font-bold text-sp-black">Order #{id}</h3>
-              {priority && (
-                <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
-                  ⚡ Priority
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-gray-600">
-              {formattedDate} at {formattedTime}
-            </p>
+    <motion.div layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: index * 0.05 }} className="bg-zinc-900/50 rounded-[2rem] border border-white/10 p-6 backdrop-blur-sm hover:border-white/20 transition-colors">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
+            <h3 className="text-xl font-black text-white">Order #{id}</h3>
+            {priority && (
+              <span className="flex items-center gap-1 px-2 py-1 bg-orange-500/20 text-orange-400 text-xs font-bold rounded-full border border-orange-500/30">
+                <Zap className="w-3 h-3" /> Priority
+              </span>
+            )}
+            <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${statusColors[status] || 'bg-gray-500/20 text-gray-400'}`}>
+              <StatusIcon className="w-3 h-3" /> {statusLabel}
+            </span>
           </div>
-
-          <div
-            className={`flex items-center gap-2 px-3 py-1 rounded-full bg-${statusColor}-100 text-${statusColor}-800`}
-          >
-            <StatusIcon className="w-4 h-4" />
-            <span className="text-sm font-semibold">{statusLabel}</span>
-          </div>
-        </div>
-
-        {/* Items Summary */}
-        <div className="mb-4">
-          <p className="text-gray-700 font-medium mb-2">Items:</p>
+          <p className="text-sm text-gray-400 mb-3">{formattedDate} at {formattedTime}</p>
           <div className="flex flex-wrap gap-2">
             {items.slice(0, 3).map((item, idx) => (
-              <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
+              <span key={idx} className="px-3 py-1 bg-zinc-800/50 text-gray-300 text-sm rounded-full border border-white/5">
                 {item.quantity}× {item.name}
               </span>
             ))}
-            {items.length > 3 && (
-              <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
-                +{items.length - 3} more
-              </span>
-            )}
+            {items.length > 3 && <span className="px-3 py-1 bg-zinc-800/50 text-gray-400 text-sm rounded-full border border-white/5">+{items.length - 3} more</span>}
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-          <div className="text-xl font-bold text-sp-black">{formatCurrency(totalPrice)}</div>
-
+        <div className="flex items-center gap-4">
+          <p className="text-2xl font-black text-red-500">{formatCurrency(totalPrice)}</p>
           <Link to={`/order/${id}`}>
-            <Button variant="secondary" size="sm">
-              View Details
+            <Button variant="secondary" size="sm" className="!bg-zinc-800 !border-white/10 !text-white hover:!bg-zinc-700 flex items-center gap-2">
+              View <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
         </div>
