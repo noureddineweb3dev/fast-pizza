@@ -390,9 +390,17 @@ function EditItemModal({ item, onClose, onSave }) {
           <div className="flex flex-wrap gap-4">
             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="available" checked={formData.available} onChange={handleChange} className="accent-red-600" /><span className="text-gray-300">Available</span></label>
             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="bestseller" checked={formData.bestseller || false} onChange={handleChange} className="accent-yellow-500" /><span className="text-gray-300">Bestseller</span></label>
+            <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="featured" checked={formData.featured || false} onChange={handleChange} className="accent-blue-500" /><span className="text-gray-300">Featured (Samurai Choice)</span></label>
+            <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="isDailySpecial" checked={formData.isDailySpecial || false} onChange={handleChange} className="accent-rose-500" /><span className="text-gray-300">Daily Special</span></label>
             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="spicy" checked={formData.spicy || false} onChange={handleChange} className="accent-orange-500" /><span className="text-gray-300">Spicy</span></label>
             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="vegetarian" checked={formData.vegetarian || false} onChange={handleChange} className="accent-green-500" /><span className="text-gray-300">Vegetarian</span></label>
           </div>
+          {formData.isDailySpecial && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+              <label className="text-sm font-bold text-gray-400 block mb-1">Discount Percentage (%)</label>
+              <input name="discount" type="number" min="0" max="100" value={formData.discount || ''} onChange={handleChange} placeholder="e.g. 20" className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white" />
+            </motion.div>
+          )}
         </div>
         <div className="flex gap-3 p-6 border-t border-white/10">
           <Button variant="secondary" onClick={onClose} className="flex-1 !bg-zinc-800 !border-white/10">Cancel</Button>
@@ -404,7 +412,7 @@ function EditItemModal({ item, onClose, onSave }) {
 }
 
 function AddItemModal({ onClose, onAdd }) {
-  const [formData, setFormData] = useState({ name: '', description: '', price: '', category: 'pizza', available: true, bestseller: false, spicy: false, vegetarian: false, image: '' });
+  const [formData, setFormData] = useState({ name: '', description: '', price: '', category: 'pizza', available: true, bestseller: false, featured: false, isDailySpecial: false, discount: 0, spicy: false, vegetarian: false, image: '' });
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
   const handleSubmit = () => {
     if (!formData.name || !formData.price) { toast.error('Name and price required'); return; }
@@ -431,9 +439,17 @@ function AddItemModal({ onClose, onAdd }) {
           <div><label className="text-sm font-bold text-gray-400 block mb-1">Image URL</label><input name="image" value={formData.image} onChange={handleChange} placeholder="/images/pizzas/new-pizza.png" className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500" /></div>
           <div className="flex flex-wrap gap-4">
             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="bestseller" checked={formData.bestseller} onChange={handleChange} className="accent-yellow-500" /><span className="text-gray-300">Bestseller</span></label>
+            <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="featured" checked={formData.featured} onChange={handleChange} className="accent-blue-500" /><span className="text-gray-300">Featured</span></label>
+            <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="isDailySpecial" checked={formData.isDailySpecial} onChange={handleChange} className="accent-rose-500" /><span className="text-gray-300">Daily Special</span></label>
             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="spicy" checked={formData.spicy} onChange={handleChange} className="accent-orange-500" /><span className="text-gray-300">Spicy</span></label>
             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="vegetarian" checked={formData.vegetarian} onChange={handleChange} className="accent-green-500" /><span className="text-gray-300">Vegetarian</span></label>
           </div>
+          {formData.isDailySpecial && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+              <label className="text-sm font-bold text-gray-400 block mb-1">Discount Percentage (%)</label>
+              <input name="discount" type="number" min="0" max="100" value={formData.discount || ''} onChange={handleChange} placeholder="e.g. 20" className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500" />
+            </motion.div>
+          )}
         </div>
         <div className="flex gap-3 p-6 border-t border-white/10">
           <Button variant="secondary" onClick={onClose} className="flex-1 !bg-zinc-800 !border-white/10">Cancel</Button>

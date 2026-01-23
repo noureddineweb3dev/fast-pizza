@@ -76,7 +76,10 @@ function SpecialCard({ special, index }) {
                     <div className="flex items-end justify-between border-t border-white/10 pt-6">
                         <div className="flex flex-col">
                             <span className="text-gray-500 line-through text-sm font-medium">
-                                €{(special.unitPrice * 1.25).toFixed(2)}
+                                €{special.discount
+                                    ? (special.unitPrice / (1 - special.discount / 100)).toFixed(2)
+                                    : (special.unitPrice * 1.25).toFixed(2)
+                                }
                             </span>
                             <span className="text-3xl font-black text-white">
                                 €{special.unitPrice.toFixed(2)}
@@ -100,21 +103,31 @@ export default function DailySpecials() {
         async function loadSpecials() {
             try {
                 const menu = await getMenu();
-                // Find Ronin Combo and Shogun Family Feast
-                const ronin = menu.find(item => item.id === 'solo-ronin-combo') || menu.find(item => item.name.includes('Ronin'));
-                const shogun = menu.find(item => item.id === 'shogun-family-combo') || menu.find(item => item.name.includes('Shogun'));
+                // Priority: 1. Items marked as isDailySpecial by admin
+                let results = menu
+                    .filter(item => item.isDailySpecial && item.available !== false)
+                    .map(item => ({
+                        ...item,
+                        tag: item.discount ? `Save ${item.discount}%` : (item.category === 'combo' ? 'Clan Feast' : 'Warrior Deal'),
+                        accent: item.category === 'combo' ? 'from-blue-600 to-indigo-600' : 'from-red-600 to-orange-600'
+                    }));
 
-                const results = [];
-                if (ronin) results.push({ ...ronin, tag: 'Solo Power', accent: 'from-red-600 to-orange-600' });
-                if (shogun) results.push({ ...shogun, tag: 'Clan Feast', accent: 'from-blue-600 to-indigo-600' });
+                // Fallback: If no daily specials set, look for Ronin and Shogun combos
+                if (results.length === 0) {
+                    const ronin = menu.find(item => item.id === 'solo-ronin-combo') || menu.find(item => item.name.includes('Ronin'));
+                    const shogun = menu.find(item => item.id === 'shogun-family-combo') || menu.find(item => item.name.includes('Shogun'));
 
-                // If not found, just take first two items
+                    if (ronin) results.push({ ...ronin, tag: 'Solo Power', accent: 'from-red-600 to-orange-600' });
+                    if (shogun) results.push({ ...shogun, tag: 'Clan Feast', accent: 'from-blue-600 to-indigo-600' });
+                }
+
+                // Fill with first two items if still not enough
                 if (results.length < 2) {
                     const others = menu.filter(item => !results.find(r => r.id === item.id)).slice(0, 2 - results.length);
                     results.push(...others.map(o => ({ ...o, tag: 'Special', accent: 'from-purple-600 to-pink-600' })));
                 }
 
-                setSpecials(results);
+                setSpecials(results.slice(0, 2));
             } catch (err) {
                 console.error('Failed to load specials:', err);
             } finally {

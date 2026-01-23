@@ -102,10 +102,12 @@ export default function SamuraiChoice() {
     async function loadFeatured() {
       try {
         const menu = await getMenu();
-        // Get bestsellers first, then fill with available pizzas
-        const bestsellers = menu.filter(item => item.bestseller && item.available !== false);
-        const pizzas = menu.filter(item => item.category === 'pizza' && item.available !== false && !item.bestseller);
-        const featured = [...bestsellers, ...pizzas].slice(0, 3);
+        // Priority: 1. Explicitly featured, 2. Bestsellers, 3. Regular pizzas
+        const featuredItems = menu.filter(item => item.featured && item.available !== false);
+        const bestsellers = menu.filter(item => item.bestseller && item.available !== false && !item.featured);
+        const pizzas = menu.filter(item => item.category === 'pizza' && item.available !== false && !item.featured && !item.bestseller);
+
+        const featured = [...featuredItems, ...bestsellers, ...pizzas].slice(0, 3);
         setFeaturedItems(featured);
       } catch (err) {
         console.error('Failed to load featured items:', err);
