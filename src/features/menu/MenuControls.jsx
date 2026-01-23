@@ -25,8 +25,8 @@ function MenuControls({ activeCategory, onCategoryChange, sortBy, onSortChange }
     const activeSortLabel = SORT_OPTIONS.find(opt => opt.id === sortBy)?.label;
 
     return (
-        <div className="sticky top-24 z-30 mb-8">
-            <div className="bg-black/80 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="relative z-10 mb-12 px-4">
+            <div className="bg-zinc-900/50 backdrop-blur-sm border border-white/10 p-4 rounded-[2rem] shadow-xl flex flex-col md:flex-row gap-6 items-center justify-between">
 
                 {/* Category Filter (Horizontal Scroll) */}
                 <div className="w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
@@ -36,8 +36,8 @@ function MenuControls({ activeCategory, onCategoryChange, sortBy, onSortChange }
                                 key={cat.id}
                                 onClick={() => onCategoryChange(cat.id)}
                                 className={`relative px-5 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all duration-300 ${activeCategory === cat.id
-                                        ? 'text-white shadow-lg shadow-red-900/20'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    ? 'text-white shadow-lg shadow-red-900/20'
+                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 {activeCategory === cat.id && (
