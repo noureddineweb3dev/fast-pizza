@@ -14,7 +14,10 @@ import { getPizzaAverageRating, getPizzaRatingCount } from '../../store/globalRa
 
 function MenuItem({ pizza }) {
   const dispatch = useDispatch();
-  const { id, name, ingredients, image, unitPrice, soldOut, spicy, vegetarian, bestseller } = pizza;
+  const { id, name, ingredients, image, unitPrice, soldOut, available, spicy, vegetarian, bestseller } = pizza;
+
+  // Item is unavailable if soldOut OR available is false
+  const isUnavailable = soldOut || available === false;
 
   const [showRatingDialog, setShowRatingDialog] = useState(false);
 
@@ -79,7 +82,7 @@ function MenuItem({ pizza }) {
           hover: { y: -8 },
         }}
         transition={{ type: 'spring', duration: 0.4 }}
-        className={`relative group h-full flex flex-col overflow-hidden rounded-[2rem] bg-zinc-900/50 border border-white/5 shadow-xl backdrop-blur-sm ${soldOut ? 'grayscale opacity-70' : ''
+        className={`relative group h-full flex flex-col overflow-hidden rounded-[2rem] bg-zinc-900/50 border border-white/5 shadow-xl backdrop-blur-sm ${isUnavailable ? 'grayscale opacity-70' : ''
           }`}
       >
         {/* Image Container */}
@@ -202,10 +205,10 @@ function MenuItem({ pizza }) {
                 <Button
                   variant="primary"
                   onClick={handleAddToCart}
-                  disabled={soldOut}
+                  disabled={isUnavailable}
                   className="w-full !rounded-xl !py-3 !text-sm shadow-red-900/20"
                 >
-                  {soldOut ? 'Sold Out' : 'Add to Order'}
+                  {isUnavailable ? 'Out of Stock' : 'Add to Order'}
                 </Button>
               )}
             </div>
