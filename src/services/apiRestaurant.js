@@ -41,3 +41,30 @@ export function updateOrder(id, updateObj) {
     body: JSON.stringify(updateObj),
   });
 }
+
+// ============ ADMIN FUNCTIONS ============
+
+export async function getAllOrders() {
+  return fetchJSON(`${API_URL}/orders`);
+}
+
+export async function updateMenuItem(id, updateObj) {
+  return fetchJSON(`${API_URL}/menu/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(updateObj),
+  });
+}
+
+export async function createMenuItem(newItem) {
+  return fetchJSON(`${API_URL}/menu`, {
+    method: 'POST',
+    body: JSON.stringify(newItem),
+  });
+}
+
+export async function deleteMenuItem(id) {
+  return fetchJSON(`${API_URL}/menu/${id}`, {
+    method: 'DELETE',
+  });
+}
+
