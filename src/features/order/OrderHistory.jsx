@@ -5,6 +5,7 @@ import { Clock, Package, CheckCircle, Trash2, History, Zap, ArrowRight } from 'l
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllOrders, clearOrderHistory } from '../../store/orderHistorySlice';
 import { formatCurrency } from '../../utils/helpers';
+import { getStatusById } from '../../utils/orderStatuses';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Container from '../../layout/Container';
@@ -76,21 +77,20 @@ function OrderHistory() {
 
 function OrderHistoryCard({ order, index }) {
   const { id, date, status, totalPrice, items, priority } = order;
+  const statusInfo = getStatusById(status);
   const orderDate = new Date(date);
   const formattedDate = orderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   const formattedTime = orderDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-  const statusConfig = {
-    preparing: { icon: Clock, color: 'yellow', label: 'Preparing' },
-    delivering: { icon: Package, color: 'blue', label: 'Delivering' },
-    delivered: { icon: CheckCircle, color: 'green', label: 'Delivered' },
-  };
-  const StatusIcon = statusConfig[status]?.icon || Clock;
-  const statusLabel = statusConfig[status]?.label || status;
   const statusColors = {
-    preparing: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-    delivering: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    delivered: 'bg-green-500/20 text-green-400 border-green-500/30',
+    blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    green: 'bg-green-500/20 text-green-400 border-green-500/30',
+    yellow: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+    orange: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    red: 'bg-red-500/20 text-red-400 border-red-500/30',
+    emerald: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+    zinc: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30'
   };
 
   return (
@@ -104,8 +104,8 @@ function OrderHistoryCard({ order, index }) {
                 <Zap className="w-3 h-3" /> Priority
               </span>
             )}
-            <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${statusColors[status] || 'bg-gray-500/20 text-gray-400'}`}>
-              <StatusIcon className="w-3 h-3" /> {statusLabel}
+            <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${statusColors[statusInfo.color] || 'bg-gray-500/20 text-gray-400'}`}>
+              <span className="text-sm">{statusInfo.emoji}</span> {statusInfo.label}
             </span>
           </div>
           <p className="text-sm text-gray-400 mb-3">{formattedDate} at {formattedTime}</p>

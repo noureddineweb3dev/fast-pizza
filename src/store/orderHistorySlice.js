@@ -37,18 +37,31 @@ const orderHistorySlice = createSlice({
   initialState,
 
   reducers: {
-    // Add a new order to history
+    // Add or update an order in history
     addOrderToHistory(state, action) {
-      const newOrder = {
-        ...action.payload,
-        date: new Date().toISOString(),
-      };
+      const orderData = action.payload;
+      const index = state.orders.findIndex(o => o.id === orderData.id);
 
-      state.orders.unshift(newOrder);
+      if (index !== -1) {
+        // Update existing order (sync status, etc.)
+        state.orders[index] = {
+          ...state.orders[index],
+          ...orderData,
+          // Keep the original date if possible
+          date: state.orders[index].date || orderData.createdAt || new Date().toISOString()
+        };
+      } else {
+        // Add new order
+        const newOrder = {
+          ...orderData,
+          date: orderData.createdAt || new Date().toISOString(),
+        };
+        state.orders.unshift(newOrder);
+      }
 
-      // Keep only last 20 orders
-      if (state.orders.length > 20) {
-        state.orders = state.orders.slice(0, 20);
+      // Keep only last 30 orders
+      if (state.orders.length > 30) {
+        state.orders = state.orders.slice(0, 30);
       }
 
       saveOrdersToStorage(state.orders);

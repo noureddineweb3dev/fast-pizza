@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { ACTIVE_STATUS_IDS, COMPLETED_STATUS_IDS } from '../utils/orderStatuses';
 
 // LOCALSTORAGE HELPERS
 
@@ -75,9 +76,9 @@ const adminSlice = createSlice({
         state.stats.totalOrders++;
         state.stats.totalRevenue += order.totalPrice;
 
-        if (order.status === 'preparing' || order.status === 'delivering') {
+        if (ACTIVE_STATUS_IDS.includes(order.status)) {
           state.stats.activeOrders++;
-        } else if (order.status === 'delivered') {
+        } else if (COMPLETED_STATUS_IDS.includes(order.status)) {
           state.stats.completedOrders++;
         }
 
@@ -96,14 +97,16 @@ const adminSlice = createSlice({
         order.lastUpdated = new Date().toISOString();
 
         // Update stats
-        if (oldStatus === 'preparing' || oldStatus === 'delivering') {
+        if (ACTIVE_STATUS_IDS.includes(oldStatus)) {
           state.stats.activeOrders--;
+        } else if (COMPLETED_STATUS_IDS.includes(oldStatus)) {
+          state.stats.completedOrders--;
         }
-        if (status === 'delivered') {
-          state.stats.completedOrders++;
-        }
-        if (status === 'preparing' || status === 'delivering') {
+
+        if (ACTIVE_STATUS_IDS.includes(status)) {
           state.stats.activeOrders++;
+        } else if (COMPLETED_STATUS_IDS.includes(status)) {
+          state.stats.completedOrders++;
         }
 
         saveAdminDataToStorage(state);
@@ -121,9 +124,9 @@ const adminSlice = createSlice({
         state.stats.totalOrders--;
         state.stats.totalRevenue -= order.totalPrice;
 
-        if (order.status === 'preparing' || order.status === 'delivering') {
+        if (ACTIVE_STATUS_IDS.includes(order.status)) {
           state.stats.activeOrders--;
-        } else if (order.status === 'delivered') {
+        } else if (COMPLETED_STATUS_IDS.includes(order.status)) {
           state.stats.completedOrders--;
         }
 
@@ -156,8 +159,6 @@ export const getAdminStats = (state) => state.admin.stats;
 export const getOrdersByStatus = (status) => (state) =>
   state.admin.orders.filter((order) => order.status === status);
 
-// Get active orders (preparing + delivering)
+// Get active orders (all active statuses)
 export const getActiveOrders = (state) =>
-  state.admin.orders.filter(
-    (order) => order.status === 'preparing' || order.status === 'delivering'
-  );
+  state.admin.orders.filter((order) => ACTIVE_STATUS_IDS.includes(order.status));

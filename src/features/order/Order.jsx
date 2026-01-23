@@ -8,6 +8,7 @@ import { clearCart } from '../../store/cartSlice';
 import { addOrderToHistory } from '../../store/orderHistorySlice';
 import { addOrderToAdmin } from '../../store/adminSlice';
 import { formatCurrency } from '../../utils/helpers';
+import { getStatusById } from '../../utils/orderStatuses';
 import Container from '../../layout/Container';
 import Button from '../../ui/Button';
 
@@ -16,12 +17,23 @@ function Order() {
   const dispatch = useDispatch();
 
   const { id, status, priority, priorityPrice, orderPrice, estimatedDelivery, cart, customer } = order;
+  const statusInfo = getStatusById(status);
 
   useEffect(() => {
     dispatch(clearCart());
-    dispatch(addOrderToHistory({ id, customer: customer || 'Guest', status, totalPrice: orderPrice + priorityPrice, items: cart, priority, estimatedDelivery }));
-    dispatch(addOrderToAdmin({ id, customer: customer || 'Guest', status, totalPrice: orderPrice + priorityPrice, items: cart, priority, estimatedDelivery, createdAt: new Date().toISOString() }));
-  }, [dispatch, id, status, orderPrice, priorityPrice, cart, priority, estimatedDelivery, customer]);
+    const historyPayload = {
+      id,
+      customer: customer || 'Guest',
+      status,
+      totalPrice: orderPrice + priorityPrice,
+      items: cart,
+      priority,
+      estimatedDelivery,
+      createdAt: order.createdAt // Ensure actual date is passed
+    };
+    dispatch(addOrderToHistory(historyPayload));
+    dispatch(addOrderToAdmin({ ...historyPayload, createdAt: order.createdAt || new Date().toISOString() }));
+  }, [dispatch, id, status, orderPrice, priorityPrice, cart, priority, estimatedDelivery, customer, order.createdAt]);
 
   const isPreparing = status === 'preparing';
 
@@ -37,15 +49,23 @@ function Order() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between flex-wrap gap-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-green-600/20 rounded-2xl border border-green-500/30">
-                <CheckCircle className="w-8 h-8 text-green-500" />
+                <span className="text-3xl">{statusInfo.emoji}</span>
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-black text-white">Order Confirmed!</h1>
+                <h1 className="text-3xl md:text-4xl font-black text-white">{statusInfo.label}</h1>
                 <p className="text-gray-400 mt-1">Order #{id}</p>
               </div>
             </div>
-            <span className={`px-5 py-2 rounded-full text-sm font-black uppercase tracking-wider ${isPreparing ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}`}>
-              {status}
+            <span className={`px-5 py-2 rounded-full text-sm font-black uppercase tracking-wider ${statusInfo.color === 'yellow' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+              statusInfo.color === 'orange' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
+                statusInfo.color === 'blue' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                  statusInfo.color === 'red' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                    statusInfo.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                      statusInfo.color === 'green' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                        statusInfo.color === 'purple' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
+                          'bg-zinc-500/20 text-zinc-400 border border-zinc-500/30'
+              }`}>
+              {statusInfo.category}
             </span>
           </motion.div>
         </Container>

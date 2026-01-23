@@ -12,6 +12,7 @@ import {
   getIsAuthenticated, getAdminOrders, getAdminStats, adminLogout,
   updateOrderStatusAdmin, deleteOrderAdmin
 } from '../../store/adminSlice';
+import { ORDER_STATUSES, STATUS_CATEGORIES, getStatusById } from '../../utils/orderStatuses';
 import { formatCurrency } from '../../utils/helpers';
 import { getMenu, updateMenuItem, createMenuItem, deleteMenuItem, getAllOrders, updateOrder } from '../../services/apiRestaurant';
 import Button from '../../ui/Button';
@@ -186,10 +187,18 @@ function AdminDashboard() {
               <div className="relative">
                 <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full bg-zinc-800 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 appearance-none cursor-pointer">
-                  <option value="all">All Status</option>
-                  <option value="preparing">Preparing</option>
-                  <option value="delivering">Delivering</option>
-                  <option value="delivered">Delivered</option>
+                  <option value="all">All Statuses</option>
+                  {STATUS_CATEGORIES.map(category => (
+                    <optgroup key={category} label={category} className="bg-zinc-900 text-gray-400 font-bold uppercase text-[10px]">
+                      {Object.values(ORDER_STATUSES)
+                        .filter(s => s.category === category)
+                        .map(s => (
+                          <option key={s.id} value={s.id} className="bg-zinc-900 text-white font-medium normal-case text-sm">
+                            {s.emoji} {s.label}
+                          </option>
+                        ))}
+                    </optgroup>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
               </div>
@@ -312,7 +321,19 @@ function StatCard({ icon, title, value, color }) {
 }
 
 function OrderRow({ order, onStatusChange, onDelete }) {
-  const statusColors = { preparing: 'bg-yellow-500/20 text-yellow-400', delivering: 'bg-blue-500/20 text-blue-400', delivered: 'bg-green-500/20 text-green-400' };
+  const statusInfo = getStatusById(order.status);
+
+  const statusColors = {
+    blue: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+    green: 'bg-green-500/20 text-green-400 border border-green-500/30',
+    yellow: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
+    orange: 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
+    red: 'bg-red-500/20 text-red-400 border border-red-500/30',
+    emerald: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
+    purple: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
+    zinc: 'bg-zinc-500/20 text-zinc-400 border border-zinc-500/30'
+  };
+
   return (
     <motion.tr layout className="hover:bg-white/5 transition-colors">
       <td className="px-6 py-4"><span className="font-bold text-white">#{order.id}</span></td>
@@ -321,10 +342,22 @@ function OrderRow({ order, onStatusChange, onDelete }) {
       <td className="px-6 py-4"><span className="font-bold text-red-500">{formatCurrency(order.totalPrice)}</span></td>
       <td className="px-6 py-4">{order.priority ? <span className="flex items-center gap-1 text-orange-400 text-xs font-bold"><Zap className="w-3 h-3" /> Yes</span> : <span className="text-gray-500 text-xs">No</span>}</td>
       <td className="px-6 py-4">
-        <select value={order.status} onChange={(e) => onStatusChange(order.id, e.target.value)} className={`text-xs font-bold px-3 py-1.5 rounded-lg border-0 cursor-pointer ${statusColors[order.status]} bg-transparent focus:outline-none focus:ring-2 focus:ring-red-600`}>
-          <option value="preparing" className="bg-zinc-900">Preparing</option>
-          <option value="delivering" className="bg-zinc-900">Delivering</option>
-          <option value="delivered" className="bg-zinc-900">Delivered</option>
+        <select
+          value={order.status}
+          onChange={(e) => onStatusChange(order.id, e.target.value)}
+          className={`text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-lg cursor-pointer ${statusColors[statusInfo.color]} focus:outline-none focus:ring-2 focus:ring-red-600 transition-all`}
+        >
+          {STATUS_CATEGORIES.map(category => (
+            <optgroup key={category} label={category} className="bg-zinc-900 text-gray-500 font-black uppercase text-[10px] py-2">
+              {Object.values(ORDER_STATUSES)
+                .filter(s => s.category === category)
+                .map(s => (
+                  <option key={s.id} value={s.id} className="bg-zinc-900 text-white font-bold normal-case text-sm">
+                    {s.emoji} {s.label}
+                  </option>
+                ))}
+            </optgroup>
+          ))}
         </select>
       </td>
       <td className="px-6 py-4">
