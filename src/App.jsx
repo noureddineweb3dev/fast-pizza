@@ -17,6 +17,7 @@ import Favorites from './features/favorites/Favorites';
 import AdminLogin from './features/admin/AdminLogin';
 import AdminDashboard from './features/admin/AdminDashboard';
 import About from './features/about/About';
+import ScrollToTop from './ui/ScrollToTop';
 
 const router = createBrowserRouter([
   {

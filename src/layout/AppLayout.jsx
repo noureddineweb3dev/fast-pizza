@@ -6,6 +6,7 @@ import AnimatedOutlet from '../ui/AnimatedOutlet';
 import PageSkeleton from '../ui/PageSkeleton';
 
 import BackToTop from '../ui/BackToTop';
+import ScrollToTop from '../ui/ScrollToTop';
 
 function AppLayout() {
   const navigation = useNavigation();
@@ -13,6 +14,7 @@ function AppLayout() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <ScrollToTop />
       <Header />
 
       <main className="flex-1 pt-32 pb-12">
