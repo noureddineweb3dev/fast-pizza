@@ -3,29 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Timer, ArrowRight, Sword } from 'lucide-react';
 import Container from './Container';
-
-const SPECIALS = [
-    {
-        id: 1,
-        title: 'Bushido Family Feast',
-        image: '/images/combos/shogun-family.png',
-        description: '1 Large Pizza, 2 Sides, 4 Drinks. The ultimate clan gathering feast.',
-        originalPrice: '$45.99',
-        specialPrice: '$34.99',
-        tag: 'Save $11',
-        accent: 'from-blue-600 to-indigo-600'
-    },
-    {
-        id: 2,
-        title: 'Ronin Solo Strike',
-        image: '/images/combos/solo-ronin.png',
-        description: 'Medium Pizza, 1 Drink, Garlic Knots. Perfect for the lone warrior.',
-        originalPrice: '$28.99',
-        specialPrice: '$22.99',
-        tag: 'Best Value',
-        accent: 'from-red-600 to-orange-600'
-    }
-];
+import { getMenu } from '../services/apiRestaurant';
 
 function CountdownTimer() {
     const [timeLeft, setTimeLeft] = useState({ hours: 12, minutes: 0, seconds: 0 });
@@ -70,17 +48,15 @@ function SpecialCard({ special, index }) {
         >
             <div className="absolute inset-0 bg-gray-900 border border-white/10 transition-colors group-hover:border-red-500/50" />
 
-            {/* Background Glow */}
             <div className={`absolute -right-20 -top-20 w-64 h-64 bg-gradient-to-br ${special.accent} opacity-10 blur-[80px] group-hover:opacity-20 transition-opacity duration-500`} />
 
             <div className="relative grid md:grid-cols-2 h-full">
                 <div className="h-48 md:h-full overflow-hidden">
                     <img
                         src={special.image}
-                        alt={special.title}
+                        alt={special.name}
                         className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                     />
-                    {/* Overlay gradient */}
                     <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 md:from-transparent to-transparent md:bg-none" />
                 </div>
 
@@ -90,25 +66,25 @@ function SpecialCard({ special, index }) {
                             <Sword className="w-3 h-3" /> {special.tag}
                         </div>
                         <h3 className="text-2xl font-black text-white mb-2 leading-tight">
-                            {special.title}
+                            {special.name}
                         </h3>
-                        <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                            {special.description}
+                        <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2">
+                            {special.description || special.ingredients?.join(', ')}
                         </p>
                     </div>
 
                     <div className="flex items-end justify-between border-t border-white/10 pt-6">
                         <div className="flex flex-col">
                             <span className="text-gray-500 line-through text-sm font-medium">
-                                {special.originalPrice}
+                                €{(special.unitPrice * 1.25).toFixed(2)}
                             </span>
                             <span className="text-3xl font-black text-white">
-                                {special.specialPrice}
+                                €{special.unitPrice.toFixed(2)}
                             </span>
                         </div>
-                        <button className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
+                        <Link to="/menu" className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
                             <ArrowRight className="w-5 h-5" />
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>
@@ -117,9 +93,39 @@ function SpecialCard({ special, index }) {
 }
 
 export default function DailySpecials() {
+    const [specials, setSpecials] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function loadSpecials() {
+            try {
+                const menu = await getMenu();
+                // Find Ronin Combo and Shogun Family Feast
+                const ronin = menu.find(item => item.id === 'solo-ronin-combo') || menu.find(item => item.name.includes('Ronin'));
+                const shogun = menu.find(item => item.id === 'shogun-family-combo') || menu.find(item => item.name.includes('Shogun'));
+
+                const results = [];
+                if (ronin) results.push({ ...ronin, tag: 'Solo Power', accent: 'from-red-600 to-orange-600' });
+                if (shogun) results.push({ ...shogun, tag: 'Clan Feast', accent: 'from-blue-600 to-indigo-600' });
+
+                // If not found, just take first two items
+                if (results.length < 2) {
+                    const others = menu.filter(item => !results.find(r => r.id === item.id)).slice(0, 2 - results.length);
+                    results.push(...others.map(o => ({ ...o, tag: 'Special', accent: 'from-purple-600 to-pink-600' })));
+                }
+
+                setSpecials(results);
+            } catch (err) {
+                console.error('Failed to load specials:', err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadSpecials();
+    }, []);
+
     return (
         <section className="relative py-24 bg-black overflow-hidden">
-            {/* Background Texture */}
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] opacity-20" />
 
             <Container className="relative z-10">
@@ -139,11 +145,18 @@ export default function DailySpecials() {
                     </div>
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-8">
-                    {SPECIALS.map((special, index) => (
-                        <SpecialCard key={special.id} special={special} index={index} />
-                    ))}
-                </div>
+                {loading ? (
+                    <div className="grid lg:grid-cols-2 gap-8">
+                        <div className="h-64 bg-zinc-900/50 rounded-3xl animate-pulse" />
+                        <div className="h-64 bg-zinc-900/50 rounded-3xl animate-pulse" />
+                    </div>
+                ) : (
+                    <div className="grid lg:grid-cols-2 gap-8">
+                        {specials.map((special, index) => (
+                            <SpecialCard key={special.id} special={special} index={index} />
+                        ))}
+                    </div>
+                )}
 
                 <div className="mt-16 text-center">
                     <Link to="/menu" className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors border-b border-white/20 hover:border-white pb-1">
