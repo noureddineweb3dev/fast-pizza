@@ -16,6 +16,7 @@ import OrderError from './features/order/OrderError';
 import Favorites from './features/favorites/Favorites';
 import AdminLogin from './features/admin/AdminLogin';
 import AdminDashboard from './features/admin/AdminDashboard';
+import About from './features/about/About';
 
 const router = createBrowserRouter([
   {
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
       },
       { path: '/cart', element: <Cart /> },
       { path: '/favorites', element: <Favorites /> },
+      { path: '/about', element: <About /> },
       { path: '/order', element: <OrderSearch /> },
       { path: '/order/history', element: <OrderHistory /> },
       {
