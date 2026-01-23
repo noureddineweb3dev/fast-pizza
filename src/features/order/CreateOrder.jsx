@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Form, redirect, useActionData, useNavigation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { MapPin, Phone, User, Truck, Clock, FastForward, AlertCircle, Locate } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { MapPin, Phone, User, Truck, Clock, FastForward, AlertCircle, Locate, ShoppingBag, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../../ui/Button';
-import { getCart, getTotalCartPrice } from '../../store/cartSlice';
+import Container from '../../layout/Container';
+import { getCart, getTotalCartPrice, getTotalCartQuantity } from '../../store/cartSlice';
 import { formatCurrency } from '../../utils/helpers';
 import { createOrder } from '../../services/apiRestaurant';
 import {
@@ -22,75 +24,47 @@ import EmptyCart from '../cart/EmptyCart';
 function CreateOrder() {
   const navigation = useNavigation();
   const isSubmitting = navigation.state === 'submitting';
-
   const formErrors = useActionData();
 
-  // Get cart data from Redux
   const cart = useSelector(getCart);
   const orderPrice = useSelector(getTotalCartPrice);
+  const totalQuantity = useSelector(getTotalCartQuantity);
 
   const [customer, setCustomer] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [priority, setPriority] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-
   const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({ customer: false, phone: false, address: false });
 
-  // Track which fields have been touched
-  const [touched, setTouched] = useState({
-    customer: false,
-    phone: false,
-    address: false,
-  });
-
-  // Calculate prices and delivery time
   const priorityFee = priority ? calculatePriorityFee(orderPrice) : 0;
   const totalPrice = calculateTotalPrice(orderPrice, priority);
   const estimatedDelivery = calculateEstimatedDelivery(priority);
 
-  // Validate individual field on blur
   const handleBlur = (fieldName) => {
     setTouched({ ...touched, [fieldName]: true });
-
     let validation;
     switch (fieldName) {
-      case 'customer':
-        validation = isValidName(customer);
-        break;
-      case 'phone':
-        validation = isValidPhone(phone);
-        break;
-      case 'address':
-        validation = isValidAddress(address);
-        break;
-      default:
-        return;
+      case 'customer': validation = isValidName(customer); break;
+      case 'phone': validation = isValidPhone(phone); break;
+      case 'address': validation = isValidAddress(address); break;
+      default: return;
     }
-
-    setErrors({
-      ...errors,
-      [fieldName]: validation.valid ? null : validation.error,
-    });
+    setErrors({ ...errors, [fieldName]: validation.valid ? null : validation.error });
   };
 
-  // Clear error when user starts typing
   const handleChange = (fieldName, value, setter) => {
     setter(value);
-
-    // Clear error for this field if it was touched
     if (touched[fieldName] && errors[fieldName]) {
       setErrors({ ...errors, [fieldName]: null });
     }
   };
 
-  // Get user's location and fill address
   const handleGetLocation = async () => {
     setIsGettingLocation(true);
-
     try {
       const result = await getUserAddress();
-
       if (result.success) {
         setAddress(result.address);
         setTouched({ ...touched, address: true });
@@ -99,291 +73,148 @@ function CreateOrder() {
       } else {
         toast.error(result.error, { id: 'location' });
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to get location', { id: 'location' });
     } finally {
       setIsGettingLocation(false);
     }
   };
 
-  // If cart is empty, show empty cart page
   if (cart.length === 0) return <EmptyCart />;
 
   const displayErrors = formErrors || errors;
 
   return (
-    <div className="max-w-3xl mx-auto bg-white rounded-xl shadow overflow-hidden">
-      <Form method="POST" className="flex flex-col md:flex-row">
-        {/* ================= LEFT SIDE: FORM ================= */}
-        <div className="flex-1 p-8 space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create a New Order</h1>
-            <p className="text-gray-600 mt-2">
-              Payment on delivery. Fast, precise, Samurai-approved.
-            </p>
-          </div>
-
-          {/* Full Name */}
-          <Field
-            icon={<User />}
-            label="Full name"
-            name="customer"
-            inputType="text"
-            placeholderText="John Samurai"
-            value={customer}
-            onChange={(e) => handleChange('customer', e.target.value, setCustomer)}
-            onBlur={() => handleBlur('customer')}
-            error={touched.customer && displayErrors?.customer}
-            required
-          />
-
-          {/* Phone Number */}
-          <Field
-            icon={<Phone />}
-            label="Phone number"
-            name="phone"
-            inputType="tel"
-            placeholderText="+212 6xx xxx xxx"
-            value={phone}
-            onChange={(e) => handleChange('phone', e.target.value, setPhone)}
-            onBlur={() => handleBlur('phone')}
-            error={touched.phone && displayErrors?.phone}
-            required
-          />
-
-          {/* Delivery Address */}
-          <div className="space-y-2 w-[90%] text-neutral-800">
-            <label htmlFor="address" className="flex items-center gap-2 font-medium text-gray-900">
-              <span className="text-red-600">
-                <MapPin />
-              </span>
-              Delivery address
-              <span className="text-red-600">*</span>
-            </label>
-
-            <div className="flex gap-2">
-              <input
-                id="address"
-                name="address"
-                type="text"
-                placeholder="Street, city, apartment"
-                value={address}
-                onChange={(e) => handleChange('address', e.target.value, setAddress)}
-                onBlur={() => handleBlur('address')}
-                required
-                className={`flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 transition ${
-                  touched.address && displayErrors?.address
-                    ? 'border-red-500 focus:ring-red-600 error'
-                    : 'border-gray-300 focus:ring-red-600'
-                }`}
-              />
-
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleGetLocation}
-                disabled={isGettingLocation}
-                className="!px-3"
-                title="Use my location"
-              >
-                <Locate className={`w-5 h-5 ${isGettingLocation ? 'animate-spin' : ''}`} />
-              </Button>
+    <>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden rounded-[2.5rem] bg-black mb-12 border border-white/10 shadow-2xl">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.15),transparent_50%)]" />
+        <Container className="relative z-10 py-16 md:py-20">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4">
+            <div className="p-3 bg-red-600/20 rounded-2xl border border-red-500/30">
+              <CreditCard className="w-8 h-8 text-red-500" />
             </div>
-
-            {/* Error message */}
-            {touched.address && displayErrors?.address && (
-              <div className="flex items-center gap-2 text-sm text-red-600 animate-shake">
-                <AlertCircle className="w-4 h-4" />
-                <span>{displayErrors.address}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Priority Delivery Checkbox */}
-          <div className="space-y-2 w-[90%]">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="priority"
-                checked={priority}
-                onChange={(e) => setPriority(e.target.checked)}
-                className="w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-2 focus:ring-red-600"
-              />
-              <span className="flex items-center gap-2 font-medium text-gray-900">
-                <FastForward className="text-red-600 w-5 h-5" />
-                Priority delivery
-              </span>
-            </label>
-
-            {priority && (
-              <p className="text-sm text-gray-600 ml-8">
-                Get your order faster for an extra {formatCurrency(priorityFee)}
-              </p>
-            )}
-          </div>
-
-          {/* Estimated Delivery Time */}
-          <div className="flex w-[90%] justify-between items-center bg-gray-50 p-4 rounded-lg">
-            <div className="flex items-center gap-2 text-gray-900 font-medium">
-              <Clock className="text-red-600 w-5 h-5" />
-              Estimated Delivery
+            <div>
+              <h1 className="text-4xl md:text-5xl font-black text-white">Checkout</h1>
+              <p className="text-gray-400 mt-1">{totalQuantity} {totalQuantity === 1 ? 'item' : 'items'} • {formatCurrency(orderPrice)}</p>
             </div>
-            <div className="text-lg font-semibold text-red-700">{estimatedDelivery}</div>
-          </div>
+          </motion.div>
+        </Container>
+      </section>
 
-          {/* Payment Info */}
-          <div className="flex items-center gap-3 rounded-lg bg-red-50 p-4 text-red-700">
-            <Truck className="w-6 h-6 flex-shrink-0" />
-            <p className="text-sm font-medium">
-              Payment is made <strong>in cash upon delivery</strong>.
-            </p>
-          </div>
+      <Form method="POST">
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Left: Form */}
+          <div className="lg:col-span-2 space-y-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-zinc-900/50 rounded-[2rem] border border-white/10 p-8 backdrop-blur-sm space-y-6">
+              <h2 className="text-xl font-black text-white mb-4">Delivery Details</h2>
 
-          {/* Hidden input for cart data */}
-          <input type="hidden" name="cart" value={JSON.stringify(cart)} />
-        </div>
+              <Field icon={<User />} label="Full Name" name="customer" inputType="text" placeholder="John Samurai" value={customer} onChange={(e) => handleChange('customer', e.target.value, setCustomer)} onBlur={() => handleBlur('customer')} error={touched.customer && displayErrors?.customer} required />
 
-        {/* ================= VERTICAL SEPARATOR ================= */}
-        <div className="border-l border-gray-300 hidden md:block" />
+              <Field icon={<Phone />} label="Phone Number" name="phone" inputType="tel" placeholder="+212 6xx xxx xxx" value={phone} onChange={(e) => handleChange('phone', e.target.value, setPhone)} onBlur={() => handleBlur('phone')} error={touched.phone && displayErrors?.phone} required />
 
-        {/* ================= RIGHT SIDE: CART SUMMARY ================= */}
-        <div className="flex-1 p-8 bg-gray-50 flex flex-col justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Order Summary</h2>
-
-            {/* Cart Items */}
-            <ul className="divide-y divide-gray-200 mb-6">
-              {cart.map((item) => (
-                <li key={item.pizzaId} className="py-3 flex justify-between text-gray-800">
-                  <span className="font-medium">
-                    {item.name} × {item.quantity}
-                  </span>
-                  <span className="font-semibold">{formatCurrency(item.totalPrice)}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* Price Breakdown */}
-            <div className="space-y-2 text-gray-700">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>{formatCurrency(orderPrice)}</span>
-              </div>
-
-              {priority && (
-                <div className="flex justify-between text-red-700 font-medium">
-                  <span>Priority fee (20%)</span>
-                  <span>{formatCurrency(priorityFee)}</span>
+              <div className="space-y-2">
+                <label htmlFor="address" className="flex items-center gap-2 text-sm font-bold text-gray-300">
+                  <MapPin className="w-4 h-4 text-red-500" /> Delivery Address <span className="text-red-500">*</span>
+                </label>
+                <div className="flex gap-2">
+                  <input id="address" name="address" type="text" placeholder="Street, city, apartment" value={address} onChange={(e) => handleChange('address', e.target.value, setAddress)} onBlur={() => handleBlur('address')} required className={`flex-1 bg-zinc-800 border rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition ${touched.address && displayErrors?.address ? 'border-red-500 focus:ring-red-600' : 'border-white/10 focus:ring-red-600'}`} />
+                  <Button type="button" variant="secondary" onClick={handleGetLocation} disabled={isGettingLocation} className="!bg-zinc-800 !border-white/10 !px-4">
+                    <Locate className={`w-5 h-5 text-gray-400 ${isGettingLocation ? 'animate-spin' : ''}`} />
+                  </Button>
                 </div>
-              )}
-
-              <div className="pt-3 border-t border-gray-300 flex justify-between font-bold text-lg text-gray-900">
-                <span>Total</span>
-                <span>{formatCurrency(totalPrice)}</span>
+                {touched.address && displayErrors?.address && (
+                  <div className="flex items-center gap-2 text-sm text-red-500"><AlertCircle className="w-4 h-4" />{displayErrors.address}</div>
+                )}
               </div>
-            </div>
+
+              {/* Priority */}
+              <div className="p-4 bg-zinc-800/50 rounded-xl border border-white/10">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" name="priority" checked={priority} onChange={(e) => setPriority(e.target.checked)} className="w-5 h-5 accent-red-600 rounded" />
+                  <span className="flex items-center gap-2 font-bold text-white">
+                    <FastForward className="w-5 h-5 text-orange-500" /> Priority Delivery
+                  </span>
+                </label>
+                {priority && <p className="text-sm text-gray-400 ml-8 mt-2">Get your order faster for +{formatCurrency(priorityFee)}</p>}
+              </div>
+
+              {/* Delivery Estimate */}
+              <div className="flex justify-between items-center p-4 bg-zinc-800/50 rounded-xl border border-white/10">
+                <div className="flex items-center gap-2 text-gray-300"><Clock className="w-5 h-5 text-red-500" /> Estimated Delivery</div>
+                <div className="text-lg font-black text-white">{estimatedDelivery}</div>
+              </div>
+
+              {/* Payment Info */}
+              <div className="flex items-center gap-3 p-4 bg-green-900/20 rounded-xl border border-green-500/20">
+                <Truck className="w-6 h-6 text-green-500" />
+                <p className="text-sm text-green-400"><strong>Cash on Delivery</strong> — Pay when your order arrives.</p>
+              </div>
+            </motion.div>
+
+            <input type="hidden" name="cart" value={JSON.stringify(cart)} />
           </div>
 
-          {/* Submit Button */}
-          <div className="mt-6">
-            <Button
-              type="submit"
-              variant="primary"
-              className="w-full text-lg"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Placing order...' : `Order now for ${formatCurrency(totalPrice)}`}
-            </Button>
+          {/* Right: Summary */}
+          <div className="lg:col-span-1">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="sticky top-32 bg-zinc-900/50 rounded-[2rem] border border-white/10 p-6 backdrop-blur-sm">
+              <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2"><ShoppingBag className="w-5 h-5 text-red-500" /> Order Summary</h2>
+
+              <ul className="space-y-3 mb-6 max-h-64 overflow-y-auto">
+                {cart.map((item) => (
+                  <li key={item.pizzaId} className="flex items-center gap-3 p-2 bg-zinc-800/50 rounded-xl">
+                    {item.image && <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-white text-sm truncate">{item.name}</p>
+                      <p className="text-xs text-gray-400">{item.quantity} × {formatCurrency(item.unitPrice)}</p>
+                    </div>
+                    <p className="font-bold text-red-500 text-sm">{formatCurrency(item.totalPrice)}</p>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="space-y-3 border-t border-white/10 pt-4">
+                <div className="flex justify-between text-gray-400"><span>Subtotal</span><span className="text-white">{formatCurrency(orderPrice)}</span></div>
+                {priority && <div className="flex justify-between text-orange-400"><span>Priority Fee</span><span>{formatCurrency(priorityFee)}</span></div>}
+                <div className="flex justify-between text-gray-400"><span>Delivery</span><span className="text-green-400">FREE</span></div>
+                <div className="flex justify-between pt-3 border-t border-white/10"><span className="text-lg font-bold text-white">Total</span><span className="text-2xl font-black text-red-500">{formatCurrency(totalPrice)}</span></div>
+              </div>
+
+              <Button type="submit" variant="primary" size="lg" className="w-full !rounded-xl !py-4 mt-6 text-lg" disabled={isSubmitting}>
+                {isSubmitting ? 'Placing Order...' : `Pay ${formatCurrency(totalPrice)}`}
+              </Button>
+            </motion.div>
           </div>
         </div>
       </Form>
-    </div>
+    </>
   );
 }
 
-// FORM FIELD COMPONENT
-
-function Field({
-  icon,
-  label,
-  name,
-  inputType,
-  placeholderText,
-  value,
-  onChange,
-  onBlur,
-  error,
-  required = false,
-}) {
+function Field({ icon, label, name, inputType, placeholder, value, onChange, onBlur, error, required }) {
   return (
-    <div className="space-y-2 w-[90%] text-neutral-800">
-      <label htmlFor={name} className="flex items-center gap-2 font-medium text-gray-900">
-        <span className="text-red-600">{icon}</span>
-        {label}
-        {required && <span className="text-red-600">*</span>}
+    <div className="space-y-2">
+      <label htmlFor={name} className="flex items-center gap-2 text-sm font-bold text-gray-300">
+        <span className="text-red-500">{icon}</span> {label} {required && <span className="text-red-500">*</span>}
       </label>
-
-      <input
-        id={name}
-        name={name}
-        type={inputType}
-        placeholder={placeholderText}
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        required={required}
-        className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 transition ${
-          error ? 'border-red-500 focus:ring-red-600 error' : 'border-gray-300 focus:ring-red-600'
-        }`}
-      />
-
-      {/* Error message with animation */}
-      {error && (
-        <div className="flex items-center gap-2 text-sm text-red-600 animate-shake">
-          <AlertCircle className="w-4 h-4" />
-          <span>{error}</span>
-        </div>
-      )}
+      <input id={name} name={name} type={inputType} placeholder={placeholder} value={value} onChange={onChange} onBlur={onBlur} required={required} className={`w-full bg-zinc-800 border rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition ${error ? 'border-red-500 focus:ring-red-600' : 'border-white/10 focus:ring-red-600'}`} />
+      {error && <div className="flex items-center gap-2 text-sm text-red-500"><AlertCircle className="w-4 h-4" />{error}</div>}
     </div>
   );
 }
-
-// FORM ACTION
 
 export async function action({ request }) {
   const formData = await request.formData();
   const data = Object.fromEntries(formData);
-
-  // Validate form data
-  const validation = validateOrderForm({
-    customer: data.customer,
-    phone: data.phone,
-    address: data.address,
-  });
-
-  if (!validation.isValid) {
-    return validation.errors;
-  }
-
+  const validation = validateOrderForm({ customer: data.customer, phone: data.phone, address: data.address });
+  if (!validation.isValid) return validation.errors;
   const cart = JSON.parse(data.cart);
-
-  // Create order object for API
-  const order = {
-    customer: data.customer,
-    phone: data.phone,
-    address: data.address,
-    priority: data.priority === 'on',
-    cart,
-  };
-
+  const order = { customer: data.customer, phone: data.phone, address: data.address, priority: data.priority === 'on', cart };
   try {
     const newOrder = await createOrder(order);
-
     return redirect(`/order/${newOrder.id}`);
-  } catch (error) {
-    return {
-      general: 'Failed to create order. Please try again.',
-    };
+  } catch {
+    return { general: 'Failed to create order. Please try again.' };
   }
 }
 
