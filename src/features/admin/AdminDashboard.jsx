@@ -14,7 +14,7 @@ import {
 } from '../../store/adminSlice';
 import { ORDER_STATUSES, STATUS_CATEGORIES, getStatusById } from '../../utils/orderStatuses';
 import { formatCurrency } from '../../utils/helpers';
-import { getMenu, updateMenuItem, createMenuItem, deleteMenuItem, getAllOrders, updateOrder, deleteOrder } from '../../services/apiRestaurant';
+import { getMenu, updateMenuItem, createMenuItem, deleteMenuItem, getAllOrders, updateOrder, deleteOrder, createAdminUser } from '../../services/apiRestaurant';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Container from '../../layout/Container';
@@ -27,6 +27,9 @@ function AdminDashboard() {
     const isAuthenticated = useSelector(getIsAuthenticated);
     const orders = useSelector(getAdminOrders);
     const stats = useSelector(getAdminStats);
+
+    const user = useSelector(state => state.admin.user);
+    const role = user?.role || 'staff'; // Default to lowest privilege if undefined
 
     const [activeTab, setActiveTab] = useState('orders');
     const [searchQuery, setSearchQuery] = useState('');
@@ -43,6 +46,9 @@ function AdminDashboard() {
     const [menuSearch, setMenuSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [ordersLoading, setOrdersLoading] = useState(false);
+
+    // Team state
+    const [showAddMember, setShowAddMember] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -140,10 +146,7 @@ function AdminDashboard() {
 
     const handleSaveEdit = async (item, formData) => {
         try {
-            // Pass formData if it exists (contains file), otherwise pass the item object
             await updateMenuItem(item.id, formData || item);
-
-            // Optimistically update local state (image won't update instantly until refresh, but that's fine)
             setMenuItems(prev => prev.map(i => i.id === item.id ? { ...item } : i));
             setEditingItem(null);
             toast.success('Item updated');
@@ -173,6 +176,16 @@ function AdminDashboard() {
 
     if (!isAuthenticated) return null;
 
+    const canEditMenu = ['admin', 'manager'].includes(role);
+    const canManageTeam = role === 'admin';
+
+    // Tabs configuration
+    const tabs = [
+        { id: 'orders', icon: Package, label: 'Orders' },
+        { id: 'menu', icon: UtensilsCrossed, label: 'Menu' },
+        ...(canManageTeam ? [{ id: 'team', icon: Shield, label: 'Team' }] : [])
+    ];
+
     return (
         <>
             {/* Hero */}
@@ -186,7 +199,7 @@ function AdminDashboard() {
                             </div>
                             <div>
                                 <h1 className="text-3xl md:text-4xl font-black text-white">Admin Dashboard</h1>
-                                <p className="text-gray-400">Manage orders & menu</p>
+                                <p className="text-gray-400">Welcome back, {user?.fullName || 'Admin'} <span className="text-xs uppercase bg-zinc-800 px-2 py-0.5 rounded border border-white/10 ml-2">{role}</span></p>
                             </div>
                         </motion.div>
                         <Button variant="ghost" onClick={handleLogout} className="flex items-center gap-2 text-red-400 hover:text-red-300 border border-red-500/30 hover:bg-red-600/10">
@@ -195,9 +208,9 @@ function AdminDashboard() {
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex gap-2 mt-8">
-                        {[{ id: 'orders', icon: Package, label: 'Orders' }, { id: 'menu', icon: UtensilsCrossed, label: 'Menu' }].map(tab => (
-                            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all ${activeTab === tab.id ? 'bg-red-600 text-white' : 'bg-zinc-800/50 text-gray-400 hover:text-white hover:bg-zinc-700/50'}`}>
+                    <div className="flex gap-2 mt-8 overflow-x-auto pb-2">
+                        {tabs.map(tab => (
+                            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-red-600 text-white' : 'bg-zinc-800/50 text-gray-400 hover:text-white hover:bg-zinc-700/50'}`}>
                                 <tab.icon className="w-5 h-5" /> {tab.label}
                             </button>
                         ))}
@@ -261,7 +274,7 @@ function AdminDashboard() {
                             <table className="w-full">
                                 <thead className="bg-zinc-800/50 border-b border-white/10">
                                     <tr>
-                                        {['Order ID', 'Customer', 'Items', 'Total', 'Priority', 'Status', 'Actions'].map(h => (
+                                        {['Order ID', 'Customer', 'Items', 'Total', 'Priority', 'Status', canEditMenu && 'Actions'].filter(Boolean).map(h => (
                                             <th key={h} className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">{h}</th>
                                         ))}
                                     </tr>
@@ -271,7 +284,7 @@ function AdminDashboard() {
                                         <tr><td colSpan="7" className="px-6 py-12 text-center text-gray-500">No orders found</td></tr>
                                     ) : (
                                         filteredOrders.map(order => (
-                                            <OrderRow key={order.id} order={order} onStatusChange={handleStatusChange} onDelete={() => setOrderToDelete(order.id)} />
+                                            <OrderRow key={order.id} order={order} onStatusChange={handleStatusChange} onDelete={() => setOrderToDelete(order.id)} canEdit={canEditMenu} />
                                         ))
                                     )}
                                 </tbody>
@@ -302,9 +315,11 @@ function AdminDashboard() {
                             <Button variant="secondary" onClick={loadMenu} className="!bg-zinc-800 !border-white/10 flex items-center gap-2">
                                 <RefreshCw className={`w-4 h-4 ${menuLoading ? 'animate-spin' : ''}`} /> Refresh
                             </Button>
-                            <Button variant="primary" onClick={() => setShowAddForm(true)} className="flex items-center gap-2">
-                                <Plus className="w-4 h-4" /> Add Item
-                            </Button>
+                            {canEditMenu && (
+                                <Button variant="primary" onClick={() => setShowAddForm(true)} className="flex items-center gap-2">
+                                    <Plus className="w-4 h-4" /> Add Item
+                                </Button>
+                            )}
                         </div>
                     </div>
 
@@ -315,7 +330,14 @@ function AdminDashboard() {
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             <AnimatePresence mode="popLayout">
                                 {filteredMenu.map(item => (
-                                    <MenuItemCard key={item.id} item={item} onEdit={() => setEditingItem(item)} onToggle={() => handleToggleAvailability(item)} onDelete={() => setItemToDelete(item.id)} />
+                                    <MenuItemCard
+                                        key={item.id}
+                                        item={item}
+                                        onEdit={() => setEditingItem(item)}
+                                        onToggle={() => handleToggleAvailability(item)}
+                                        onDelete={() => setItemToDelete(item.id)}
+                                        canEdit={canEditMenu}
+                                    />
                                 ))}
                             </AnimatePresence>
                         </div>
@@ -323,11 +345,15 @@ function AdminDashboard() {
                 </>
             )}
 
+            {activeTab === 'team' && canManageTeam && (
+                <TeamManagement />
+            )}
+
             {/* Edit Modal */}
-            {editingItem && <EditItemModal item={editingItem} onClose={() => setEditingItem(null)} onSave={handleSaveEdit} />}
+            {editingItem && canEditMenu && <EditItemModal item={editingItem} onClose={() => setEditingItem(null)} onSave={handleSaveEdit} />}
 
             {/* Add Modal */}
-            {showAddForm && <AddItemModal onClose={() => setShowAddForm(false)} onAdd={handleAddItem} />}
+            {showAddForm && canEditMenu && <AddItemModal onClose={() => setShowAddForm(false)} onAdd={handleAddItem} />}
 
             {/* Delete Confirmations */}
             <ConfirmDialog isOpen={!!orderToDelete} onClose={() => setOrderToDelete(null)} onConfirm={handleDeleteOrder} title="Delete this order?" message="This action cannot be undone." confirmText="Delete" cancelText="Cancel" variant="danger" />
@@ -601,6 +627,126 @@ function AddItemModal({ onClose, onAdd }) {
                     <Button variant="secondary" onClick={onClose} className="flex-1 !bg-zinc-800 !border-white/10">Cancel</Button>
                     <Button variant="primary" onClick={handleSubmit} className="flex-1 flex items-center justify-center gap-2"><Plus className="w-4 h-4" /> Add Item</Button>
                 </div>
+            </motion.div>
+        </div>
+    );
+}
+
+
+function TeamManagement() {
+    const [showModal, setShowModal] = useState(false);
+
+    const handleCreateUser = async (formData) => {
+        try {
+            await createAdminUser(formData.fullName, formData.email, formData.password, formData.role);
+            toast.success(`User ${formData.fullName} created as ${formData.role.toUpperCase()}`);
+            setShowModal(false);
+        } catch (err) {
+            toast.error(err.message || 'Failed to create user');
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center bg-zinc-900/50 p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
+                <div>
+                    <h2 className="text-2xl font-black text-white">Team Management</h2>
+                    <p className="text-gray-400">Create and manage access for your staff.</p>
+                </div>
+                <Button variant="primary" onClick={() => setShowModal(true)} className="flex items-center gap-2">
+                    <Plus className="w-4 h-4" /> Add Member
+                </Button>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+                <div className="p-6 bg-zinc-900/50 rounded-2xl border border-white/10">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-red-500/20 rounded-lg"><Shield className="w-6 h-6 text-red-500" /></div>
+                        <h3 className="font-bold text-white">Admin</h3>
+                    </div>
+                    <p className="text-sm text-gray-400">Full access. Can manage menu, orders, and create other users.</p>
+                </div>
+                <div className="p-6 bg-zinc-900/50 rounded-2xl border border-white/10">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-500/20 rounded-lg"><Edit2 className="w-6 h-6 text-blue-500" /></div>
+                        <h3 className="font-bold text-white">Manager</h3>
+                    </div>
+                    <p className="text-sm text-gray-400">Can manage menu and orders. Cannot manage team members.</p>
+                </div>
+                <div className="p-6 bg-zinc-900/50 rounded-2xl border border-white/10">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-green-500/20 rounded-lg"><Package className="w-6 h-6 text-green-500" /></div>
+                        <h3 className="font-bold text-white">Staff</h3>
+                    </div>
+                    <p className="text-sm text-gray-400">Can view and update order status only. Read-only menu access.</p>
+                </div>
+            </div>
+
+            {showModal && <AddUserModal onClose={() => setShowModal(false)} onSave={handleCreateUser} />}
+        </div>
+    );
+}
+
+function AddUserModal({ onClose, onSave }) {
+    const [formData, setFormData] = useState({ fullName: '', email: '', password: '', role: 'staff' });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden">
+                <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                    <h3 className="text-xl font-bold text-white">Add Team Member</h3>
+                    <button onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-sm font-bold text-gray-400 mb-1">Role</label>
+                        <select
+                            value={formData.role}
+                            onChange={e => setFormData({ ...formData, role: e.target.value })}
+                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                        >
+                            <option value="staff">Staff (Orders Only)</option>
+                            <option value="manager">Manager (Menu + Orders)</option>
+                            <option value="admin">Admin (Full Access)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-400 mb-1">Full Name</label>
+                        <input
+                            type="text"
+                            required
+                            value={formData.fullName}
+                            onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-400 mb-1">Email</label>
+                        <input
+                            type="email"
+                            required
+                            value={formData.email}
+                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-400 mb-1">Password</label>
+                        <input
+                            type="password"
+                            required
+                            value={formData.password}
+                            onChange={e => setFormData({ ...formData, password: e.target.value })}
+                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                        />
+                    </div>
+                    <Button type="submit" variant="primary" className="w-full mt-4">Create User</Button>
+                </form>
             </motion.div>
         </div>
     );

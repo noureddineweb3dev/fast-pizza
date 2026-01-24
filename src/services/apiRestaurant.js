@@ -3,7 +3,7 @@ const API_URL = import.meta.env.VITE_SAMURAI_PIZZA_API_URL;
 async function fetchJSON(url, options = {}) {
   const token = localStorage.getItem('token');
   const headers = {
-    'Content-Type': options.body instanceof FormData ? undefined : 'application/json',
+    'Content-Type': (options.body && options.body instanceof FormData) ? undefined : 'application/json',
     ...(token && { Authorization: `Bearer ${token}` }),
     ...options.headers,
   };
@@ -21,6 +21,11 @@ async function fetchJSON(url, options = {}) {
   const data = await res.json();
 
   if (!res.ok) {
+    if (res.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('adminData');
+      window.location.href = '/admin/login'; // Force redirect to login
+    }
     throw new Error(data.message || 'Something went wrong');
   }
   // console.log('API Response:', data);
@@ -50,6 +55,20 @@ export async function signup(fullName, email, password) {
   return data;
 }
 
+export async function createAdminUser(fullName, email, password, role) {
+  const res = await fetch(`${API_URL}/api/auth/create-admin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: JSON.stringify({ fullName, email, password, role }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to create user');
+  return data;
+}
+
 export async function getMenu() {
   const menu = await fetchJSON(`${API_URL}/api/menu`);
   // Map 'price' from API to 'unitPrice' used by app
@@ -57,18 +76,18 @@ export async function getMenu() {
 }
 
 export function getOrder(id) {
-  return fetchJSON(`${API_URL}/orders/${id}`);
+  return fetchJSON(`${API_URL}/api/orders/${id}`);
 }
 
 export function createOrder(newOrder) {
-  return fetchJSON(`${API_URL}/orders`, {
+  return fetchJSON(`${API_URL}/api/orders`, {
     method: 'POST',
     body: JSON.stringify(newOrder),
   });
 }
 
 export function updateOrder(id, updateObj) {
-  return fetchJSON(`${API_URL}/orders/${id}`, {
+  return fetchJSON(`${API_URL}/api/orders/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(updateObj),
   });
@@ -77,7 +96,7 @@ export function updateOrder(id, updateObj) {
 // ============ ADMIN FUNCTIONS ============
 
 export async function getAllOrders() {
-  return fetchJSON(`${API_URL}/orders`);
+  return fetchJSON(`${API_URL}/api/orders`);
 }
 
 export async function updateMenuItem(id, updateObj) {
@@ -103,7 +122,7 @@ export async function deleteMenuItem(id) {
 }
 
 export async function deleteOrder(id) {
-  return fetchJSON(`${API_URL}/orders/${id}`, {
+  return fetchJSON(`${API_URL}/api/orders/${id}`, {
     method: 'DELETE',
   });
 }

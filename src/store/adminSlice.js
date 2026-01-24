@@ -1,5 +1,27 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { ACTIVE_STATUS_IDS, COMPLETED_STATUS_IDS } from '../utils/orderStatuses';
+import { login, signup } from '../services/apiRestaurant';
+
+// ASYNC THUNKS
+export const loginAdmin = createAsyncThunk('admin/login', async ({ email, password }, { rejectWithValue }) => {
+  try {
+    const data = await login(email, password);
+    localStorage.setItem('token', data.token); // Store token for API calls
+    return data;
+  } catch (err) {
+    return rejectWithValue(err.message);
+  }
+});
+
+export const signupAdmin = createAsyncThunk('admin/signup', async ({ fullName, email, password }, { rejectWithValue }) => {
+  try {
+    const data = await signup(fullName, email, password);
+    localStorage.setItem('token', data.token);
+    return data;
+  } catch (err) {
+    return rejectWithValue(err.message);
+  }
+});
 
 // LOCALSTORAGE HELPERS
 
@@ -8,7 +30,8 @@ function loadAdminDataFromStorage() {
     const serializedData = localStorage.getItem('adminData');
     if (serializedData === null) {
       return {
-        isAuthenticated: false,
+        isAuthenticated: !!localStorage.getItem('token'), // Check for token existence
+        user: null, // Store user info (role, name)
         orders: [],
         stats: {
           totalOrders: 0,
@@ -16,22 +39,32 @@ function loadAdminDataFromStorage() {
           activeOrders: 0,
           completedOrders: 0,
         },
+        status: 'idle',
+        error: null,
       };
     }
-    return JSON.parse(serializedData);
+    const data = JSON.parse(serializedData);
+    data.isAuthenticated = !!localStorage.getItem('token'); // Always re-verify token presence
+    // If not authenticated, clear user data just in case
+    if (!data.isAuthenticated) data.user = null;
+    return data;
   } catch (err) {
     console.error('Error loading admin data from localStorage:', err);
     return {
       isAuthenticated: false,
+      user: null,
       orders: [],
       stats: { totalOrders: 0, totalRevenue: 0, activeOrders: 0, completedOrders: 0 },
+      status: 'idle',
+      error: null,
     };
   }
 }
 
 function saveAdminDataToStorage(data) {
   try {
-    const serializedData = JSON.stringify(data);
+    const { status, error, ...persistedData } = data; // Don't save transient UI state
+    const serializedData = JSON.stringify(persistedData);
     localStorage.setItem('adminData', serializedData);
   } catch (err) {
     console.error('Error saving admin data to localStorage:', err);
@@ -47,19 +80,12 @@ const adminSlice = createSlice({
   initialState,
 
   reducers: {
-    adminLogin(state, action) {
-      const { password } = action.payload;
-
-      if (password === 'admin123') {
-        state.isAuthenticated = true;
-        saveAdminDataToStorage(state);
-      }
-    },
-
     // Admin logout
     adminLogout(state) {
       state.isAuthenticated = false;
-      saveAdminDataToStorage(state);
+      state.orders = [];
+      localStorage.removeItem('token');
+      localStorage.removeItem('adminData');
     },
 
     // Add order to admin dashboard
@@ -150,12 +176,43 @@ const adminSlice = createSlice({
       saveAdminDataToStorage(state);
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loginAdmin.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(loginAdmin.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.isAuthenticated = true; // Token is stored in localStorage by thunk
+        state.user = action.payload.user; // Store user data
+        saveAdminDataToStorage(state);
+      })
+      .addCase(loginAdmin.rejected, (state, action) => {
+        state.status = 'error';
+        state.error = action.payload;
+        state.isAuthenticated = false;
+      })
+      .addCase(signupAdmin.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(signupAdmin.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.isAuthenticated = true;
+        saveAdminDataToStorage(state);
+      })
+      .addCase(signupAdmin.rejected, (state, action) => {
+        state.status = 'error';
+        state.error = action.payload;
+        state.isAuthenticated = false;
+      });
+  }
 });
 
 // EXPORTS
 
 export const {
-  adminLogin,
   adminLogout,
   addOrderToAdmin,
   updateOrderStatusAdmin,
@@ -168,6 +225,7 @@ export default adminSlice.reducer;
 // SELECTORS
 
 export const getIsAuthenticated = (state) => state.admin.isAuthenticated;
+export const getAdminUser = (state) => state.admin.user;
 export const getAdminOrders = (state) => state.admin.orders;
 export const getAdminStats = (state) => state.admin.stats;
 
