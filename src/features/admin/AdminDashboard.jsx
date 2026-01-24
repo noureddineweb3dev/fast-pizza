@@ -138,19 +138,24 @@ function AdminDashboard() {
         } catch { toast.error('Failed to update'); }
     };
 
-    const handleSaveEdit = async (item) => {
+    const handleSaveEdit = async (item, formData) => {
         try {
-            await updateMenuItem(item.id, item);
-            setMenuItems(prev => prev.map(i => i.id === item.id ? item : i));
+            // Pass formData if it exists (contains file), otherwise pass the item object
+            await updateMenuItem(item.id, formData || item);
+
+            // Optimistically update local state (image won't update instantly until refresh, but that's fine)
+            setMenuItems(prev => prev.map(i => i.id === item.id ? { ...item } : i));
             setEditingItem(null);
             toast.success('Item updated');
-        } catch { toast.error('Failed to save'); }
+        } catch {
+            toast.error('Failed to save');
+        }
     };
 
-    const handleAddItem = async (newItem) => {
+    const handleAddItem = async (newItemData) => {
         try {
-            const created = await createMenuItem(newItem);
-            setMenuItems(prev => [...prev, { ...created, unitPrice: created.price }]);
+            const created = await createMenuItem(newItemData);
+            setMenuItems(prev => [...prev, created]);
             setShowAddForm(false);
             toast.success('Item added');
         } catch { toast.error('Failed to add item'); }
@@ -435,8 +440,42 @@ function MenuItemCard({ item, onEdit, onToggle, onDelete }) {
 }
 
 function EditItemModal({ item, onClose, onSave }) {
-    const [formData, setFormData] = useState({ ...item });
-    const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
+    const [formData, setFormData] = useState({ ...item, imageFile: null });
+
+    const handleChange = (e) => {
+        if (e.target.name === 'image') {
+            setFormData({ ...formData, imageFile: e.target.files[0] });
+        } else {
+            setFormData({ ...formData, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
+        }
+    };
+
+    const handleSave = () => {
+        const data = new FormData();
+        data.append('name', formData.name);
+        data.append('description', formData.description || '');
+        data.append('price', parseFloat(formData.price));
+        data.append('category', formData.category);
+        data.append('available', formData.available);
+        data.append('bestseller', formData.bestseller || false);
+        data.append('featured', formData.featured || false);
+        data.append('isDailySpecial', formData.isDailySpecial || false);
+        data.append('discount', formData.discount || 0);
+        data.append('spicy', formData.spicy || false);
+        data.append('vegetarian', formData.vegetarian || false);
+
+        // Only append image if a new file was selected. 
+        // If not, the backend will keep the existing URL if we don't send anything, or we can send the URL as a backup.
+        // Current backend logic: checks req.file first, then req.body.imageUrl.
+        if (formData.imageFile) {
+            data.append('image', formData.imageFile);
+        } else {
+            data.append('imageUrl', formData.image || '');
+        }
+
+        onSave({ ...formData, id: item.id }, data); // Pass prepared FormData as second arg if needed, or just let onSave handle it
+    };
+
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-zinc-900 border border-white/10 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -455,6 +494,13 @@ function EditItemModal({ item, onClose, onSave }) {
                             </select>
                         </div>
                     </div>
+
+                    <div>
+                        <label className="text-sm font-bold text-gray-400 block mb-1">Image</label>
+                        <input type="file" name="image" onChange={handleChange} accept="image/*" className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 cursor-pointer" />
+                        {formData.image && !formData.imageFile && <p className="text-xs text-gray-500 mt-2">Current: {formData.image}</p>}
+                    </div>
+
                     <div className="flex flex-wrap gap-4">
                         <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="available" checked={formData.available} onChange={handleChange} className="accent-red-600" /><span className="text-gray-300">Available</span></label>
                         <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="bestseller" checked={formData.bestseller || false} onChange={handleChange} className="accent-yellow-500" /><span className="text-gray-300">Bestseller</span></label>
@@ -472,7 +518,7 @@ function EditItemModal({ item, onClose, onSave }) {
                 </div>
                 <div className="flex gap-3 p-6 border-t border-white/10">
                     <Button variant="secondary" onClick={onClose} className="flex-1 !bg-zinc-800 !border-white/10">Cancel</Button>
-                    <Button variant="primary" onClick={() => onSave({ ...formData, price: parseFloat(formData.price) })} className="flex-1 flex items-center justify-center gap-2"><Save className="w-4 h-4" /> Save</Button>
+                    <Button variant="primary" onClick={handleSave} className="flex-1 flex items-center justify-center gap-2"><Save className="w-4 h-4" /> Save</Button>
                 </div>
             </motion.div>
         </div>
@@ -480,12 +526,39 @@ function EditItemModal({ item, onClose, onSave }) {
 }
 
 function AddItemModal({ onClose, onAdd }) {
-    const [formData, setFormData] = useState({ name: '', description: '', price: '', category: 'pizza', available: true, bestseller: false, featured: false, isDailySpecial: false, discount: 0, spicy: false, vegetarian: false, image: '' });
-    const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
+    const [formData, setFormData] = useState({ name: '', description: '', price: '', category: 'pizza', available: true, bestseller: false, featured: false, isDailySpecial: false, discount: 0, spicy: false, vegetarian: false, imageFile: null });
+
+    const handleChange = (e) => {
+        if (e.target.name === 'image') {
+            setFormData({ ...formData, imageFile: e.target.files[0] });
+        } else {
+            setFormData({ ...formData, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
+        }
+    };
+
     const handleSubmit = () => {
         if (!formData.name || !formData.price) { toast.error('Name and price required'); return; }
-        onAdd({ ...formData, id: formData.name.toLowerCase().replace(/\s+/g, '-'), price: parseFloat(formData.price) });
+
+        const data = new FormData();
+        data.append('name', formData.name);
+        data.append('description', formData.description);
+        data.append('unitPrice', parseFloat(formData.price)); // Backend expects unitPrice
+        data.append('category', formData.category);
+        data.append('available', formData.available);
+        data.append('bestseller', formData.bestseller);
+        data.append('featured', formData.featured);
+        data.append('isDailySpecial', formData.isDailySpecial);
+        data.append('discount', formData.discount);
+        data.append('spicy', formData.spicy);
+        data.append('vegetarian', formData.vegetarian);
+
+        if (formData.imageFile) {
+            data.append('image', formData.imageFile);
+        }
+
+        onAdd(data);
     };
+
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-zinc-900 border border-white/10 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -504,7 +577,12 @@ function AddItemModal({ onClose, onAdd }) {
                             </select>
                         </div>
                     </div>
-                    <div><label className="text-sm font-bold text-gray-400 block mb-1">Image URL</label><input name="image" value={formData.image} onChange={handleChange} placeholder="/images/pizzas/new-pizza.png" className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500" /></div>
+
+                    <div>
+                        <label className="text-sm font-bold text-gray-400 block mb-1">Image</label>
+                        <input type="file" name="image" onChange={handleChange} accept="image/*" className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 cursor-pointer" />
+                    </div>
+
                     <div className="flex flex-wrap gap-4">
                         <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="bestseller" checked={formData.bestseller} onChange={handleChange} className="accent-yellow-500" /><span className="text-gray-300">Bestseller</span></label>
                         <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="featured" checked={formData.featured} onChange={handleChange} className="accent-blue-500" /><span className="text-gray-300">Featured</span></label>

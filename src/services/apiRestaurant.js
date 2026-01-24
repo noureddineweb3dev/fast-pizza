@@ -3,10 +3,15 @@ const API_URL = import.meta.env.VITE_SAMURAI_PIZZA_API_URL;
 async function fetchJSON(url, options = {}) {
   const token = localStorage.getItem('token');
   const headers = {
-    'Content-Type': 'application/json',
+    'Content-Type': options.body instanceof FormData ? undefined : 'application/json',
     ...(token && { Authorization: `Bearer ${token}` }),
     ...options.headers,
   };
+
+  // Remove Content-Type if undefined (fetch handles boundary for FormData)
+  if (headers['Content-Type'] === undefined) {
+    delete headers['Content-Type'];
+  }
 
   const res = await fetch(url, {
     ...options,
@@ -76,16 +81,18 @@ export async function getAllOrders() {
 }
 
 export async function updateMenuItem(id, updateObj) {
+  const isFormData = updateObj instanceof FormData;
   return fetchJSON(`${API_URL}/api/menu/${id}`, {
     method: 'PATCH',
-    body: JSON.stringify(updateObj),
+    body: isFormData ? updateObj : JSON.stringify(updateObj),
   });
 }
 
 export async function createMenuItem(newItem) {
+  const isFormData = newItem instanceof FormData;
   return fetchJSON(`${API_URL}/api/menu`, {
     method: 'POST',
-    body: JSON.stringify(newItem),
+    body: isFormData ? newItem : JSON.stringify(newItem),
   });
 }
 
