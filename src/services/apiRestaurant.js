@@ -71,8 +71,15 @@ export async function createAdminUser(fullName, email, password, role) {
 
 export async function getMenu() {
   const menu = await fetchJSON(`${API_URL}/api/menu`);
-  // Map 'price' from API to 'unitPrice' used by app
-  return menu.map(item => ({ ...item, unitPrice: item.price }));
+  // Map database snake_case fields to frontend camelCase
+  return menu.map(item => ({
+    ...item,
+    unitPrice: item.unit_price, // Database has unit_price, not price
+    image: item.image_url,      // Database has image_url
+    soldOut: item.sold_out,     // Database has sold_out
+    // Ensure ingredients is an array if it comes as a JSON string
+    ingredients: typeof item.ingredients === 'string' ? JSON.parse(item.ingredients) : item.ingredients
+  }));
 }
 
 export function getOrder(id) {

@@ -77,12 +77,12 @@ function SpecialCard({ special, index }) {
                         <div className="flex flex-col">
                             <span className="text-gray-500 line-through text-sm font-medium">
                                 €{special.discount
-                                    ? (special.unitPrice / (1 - special.discount / 100)).toFixed(2)
-                                    : (special.unitPrice * 1.25).toFixed(2)
+                                    ? ((special.unitPrice || 0) / (1 - special.discount / 100)).toFixed(2)
+                                    : ((special.unitPrice || 0) * 1.25).toFixed(2)
                                 }
                             </span>
                             <span className="text-3xl font-black text-white">
-                                €{special.unitPrice.toFixed(2)}
+                                €{(special.unitPrice || 0).toFixed(2)}
                             </span>
                         </div>
                         <Link to="/menu" className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
@@ -105,7 +105,7 @@ export default function DailySpecials() {
                 const menu = await getMenu();
                 // Priority: 1. Items marked as isDailySpecial by admin
                 let results = menu
-                    .filter(item => item.isDailySpecial && item.available !== false)
+                    .filter(item => item.isDailySpecial && item.available !== false && item.unitPrice > 0)
                     .map(item => ({
                         ...item,
                         tag: item.discount ? `Save ${item.discount}%` : (item.category === 'combo' ? 'Clan Feast' : 'Warrior Deal'),
@@ -114,8 +114,8 @@ export default function DailySpecials() {
 
                 // Fallback: If no daily specials set, look for Ronin and Shogun combos
                 if (results.length === 0) {
-                    const ronin = menu.find(item => item.id === 'solo-ronin-combo') || menu.find(item => item.name.includes('Ronin'));
-                    const shogun = menu.find(item => item.id === 'shogun-family-combo') || menu.find(item => item.name.includes('Shogun'));
+                    const ronin = menu.find(item => (item.id === 'solo-ronin-combo' || item.name.includes('Ronin')) && item.unitPrice > 0);
+                    const shogun = menu.find(item => (item.id === 'shogun-family-combo' || item.name.includes('Shogun')) && item.unitPrice > 0);
 
                     if (ronin) results.push({ ...ronin, tag: 'Solo Power', accent: 'from-red-600 to-orange-600' });
                     if (shogun) results.push({ ...shogun, tag: 'Clan Feast', accent: 'from-blue-600 to-indigo-600' });
@@ -123,7 +123,9 @@ export default function DailySpecials() {
 
                 // Fill with first two items if still not enough
                 if (results.length < 2) {
-                    const others = menu.filter(item => !results.find(r => r.id === item.id)).slice(0, 2 - results.length);
+                    const others = menu
+                        .filter(item => !results.find(r => r.id === item.id) && item.unitPrice > 0)
+                        .slice(0, 2 - results.length);
                     results.push(...others.map(o => ({ ...o, tag: 'Special', accent: 'from-purple-600 to-pink-600' })));
                 }
 
