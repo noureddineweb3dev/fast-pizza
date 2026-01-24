@@ -134,6 +134,21 @@ const adminSlice = createSlice({
         saveAdminDataToStorage(state);
       }
     },
+    // Sync all orders from backend
+    setOrdersAdmin(state, action) {
+      const orders = action.payload;
+      state.orders = orders;
+
+      // Recalculate stats
+      state.stats = {
+        totalOrders: orders.length,
+        totalRevenue: orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0),
+        activeOrders: orders.filter((o) => ACTIVE_STATUS_IDS.includes(o.status)).length,
+        completedOrders: orders.filter((o) => COMPLETED_STATUS_IDS.includes(o.status)).length,
+      };
+
+      saveAdminDataToStorage(state);
+    },
   },
 });
 
@@ -145,6 +160,7 @@ export const {
   addOrderToAdmin,
   updateOrderStatusAdmin,
   deleteOrderAdmin,
+  setOrdersAdmin,
 } = adminSlice.actions;
 
 export default adminSlice.reducer;

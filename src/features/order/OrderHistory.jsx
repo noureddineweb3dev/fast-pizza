@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Clock, Package, CheckCircle, Trash2, History, Zap, ArrowRight } from 'lucide-react';
+import { Clock, Package, CheckCircle, Trash2, History, Zap, ArrowRight, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAllOrders, clearOrderHistory } from '../../store/orderHistorySlice';
+import { getAllOrders, clearOrderHistory, addOrderToHistory } from '../../store/orderHistorySlice';
 import { formatCurrency } from '../../utils/helpers';
 import { getStatusById } from '../../utils/orderStatuses';
+import { getOrder } from '../../services/apiRestaurant';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Container from '../../layout/Container';
@@ -14,6 +15,32 @@ function OrderHistory() {
   const dispatch = useDispatch();
   const orders = useSelector(getAllOrders);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Background sync on mount
+  useEffect(() => {
+    async function syncOrders() {
+      if (orders.length === 0) return;
+      setIsSyncing(true);
+      try {
+        // Fetch updates for all orders in history
+        const syncPromises = orders.map(order => getOrder(order.id));
+        const updatedOrders = await Promise.all(syncPromises);
+
+        updatedOrders.forEach(updatedOrder => {
+          if (updatedOrder) {
+            dispatch(addOrderToHistory(updatedOrder));
+          }
+        });
+      } catch (err) {
+        console.error('Failed to sync history:', err);
+      } finally {
+        setIsSyncing(false);
+      }
+    }
+
+    syncOrders();
+  }, [dispatch, orders.length]); // Only triggers if length changes or on mount
 
   const handleClearHistory = () => {
     dispatch(clearOrderHistory());
@@ -76,7 +103,7 @@ function OrderHistory() {
 }
 
 function OrderHistoryCard({ order, index }) {
-  const { id, date, status, totalPrice, items, priority } = order;
+  const { id, date, status, totalPrice, items, priority, orderPrice, priorityPrice } = order;
   const statusInfo = getStatusById(status);
   const orderDate = new Date(date);
   const formattedDate = orderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -119,7 +146,9 @@ function OrderHistoryCard({ order, index }) {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <p className="text-2xl font-black text-red-500">{formatCurrency(totalPrice)}</p>
+          <p className="text-2xl font-black text-red-500">
+            {formatCurrency(totalPrice || (orderPrice + priorityPrice))}
+          </p>
           <Link to={`/order/${id}`}>
             <Button variant="secondary" size="sm" className="!bg-zinc-800 !border-white/10 !text-white hover:!bg-zinc-700 flex items-center gap-2">
               View <ArrowRight className="w-4 h-4" />

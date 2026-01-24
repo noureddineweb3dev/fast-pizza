@@ -18,6 +18,8 @@ import AdminLogin from './features/admin/AdminLogin';
 import AdminDashboard from './features/admin/AdminDashboard';
 import About from './features/about/About';
 import ScrollToTop from './ui/ScrollToTop';
+import Login from './features/user/Login';
+import Signup from './features/user/Signup';
 
 const router = createBrowserRouter([
   {
@@ -47,6 +49,9 @@ const router = createBrowserRouter([
         loader: orderLoader,
         errorElement: <OrderError />,
       },
+      // Auth routes
+      { path: '/login', element: <Login /> },
+      { path: '/signup', element: <Signup /> },
       // Admin routes
       { path: '/admin/login', element: <AdminLogin /> },
       { path: '/admin/dashboard', element: <AdminDashboard /> },

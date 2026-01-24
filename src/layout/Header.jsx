@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingCart, Sword } from 'lucide-react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import Container from './Container';
 import Button from '../ui/Button';
 import PizzaLogo from '../ui/PizzaLogo';
 import CartPopup from '../features/cart/CartPopup';
 import { getTotalCartQuantity } from '../store/cartSlice';
+import { logout } from '../store/userSlice';
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -95,9 +96,8 @@ function Header() {
               {/* Cart Button */}
               <CartButton totalCartQuantity={totalCartQuantity} onClick={() => setIsCartOpen(true)} />
 
-              <Link to="/admin/login" className="ml-4 text-[10px] font-black text-gray-500 hover:text-red-500 uppercase tracking-widest px-4 py-2 border border-white/5 hover:border-red-500/50 rounded-full transition-all bg-white/5 hover:bg-red-500/10">
-                Owner
-              </Link>
+              {/* Auth Controls */}
+              <AuthControls />
             </div>
 
             {/* Mobile Hamburger */}
@@ -167,6 +167,40 @@ function Header() {
       {/* Cart Popup */}
       <CartPopup isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
+  );
+}
+
+
+function AuthControls() {
+  const { user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
+  if (user) {
+    return (
+      <div className="flex items-center gap-3 ml-4">
+        <div className="hidden lg:block text-right">
+          <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Samurai</p>
+          <p className="text-sm text-white font-bold">{user.full_name.split(' ')[0]}</p>
+        </div>
+        <button
+          onClick={() => dispatch(logout())}
+          className="text-xs font-bold text-red-500 hover:text-white border border-red-500/30 hover:bg-red-600 hover:border-red-600 px-3 py-1.5 rounded-lg transition-all"
+        >
+          Logout
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-3 ml-4">
+      <Link to="/login" className="text-sm font-bold text-gray-400 hover:text-white transition-colors">
+        Login
+      </Link>
+      <Link to="/signup" className="text-sm font-bold text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl transition-all shadow-[0_4px_14px_0_rgba(220,38,38,0.39)] hover:shadow-[0_6px_20px_rgba(220,38,38,0.23)] hover:-translate-y-0.5">
+        Join
+      </Link>
+    </div>
   );
 }
 
