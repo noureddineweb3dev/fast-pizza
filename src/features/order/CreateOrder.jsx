@@ -209,7 +209,22 @@ export async function action({ request }) {
   const validation = validateOrderForm({ customer: data.customer, phone: data.phone, address: data.address });
   if (!validation.isValid) return validation.errors;
   const cart = JSON.parse(data.cart);
-  const order = { customer: data.customer, phone: data.phone, address: data.address, priority: data.priority === 'on', cart };
+  const orderPrice = cart.reduce((sum, item) => sum + item.totalPrice, 0);
+  const priority = data.priority === 'on';
+  const priorityPrice = priority ? Math.round(orderPrice * 0.2) : 0; // Standard 20% priority fee
+
+  const order = {
+    customer: data.customer,
+    phone: data.phone,
+    address: data.address,
+    priority,
+    cart,
+    orderPrice,
+    priorityPrice,
+    totalPrice: orderPrice + priorityPrice,
+    estimatedDelivery: new Date(Date.now() + (priority ? 30 : 60) * 60000).toISOString()
+  };
+
   try {
     const newOrder = await createOrder(order);
     return redirect(`/order/${newOrder.id}`);
