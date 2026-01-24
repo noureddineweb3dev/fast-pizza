@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Clock, Package, CheckCircle, Trash2, History, Zap, ArrowRight, RefreshCw } from 'lucide-react';
+import { Clock, Package, CheckCircle, Trash2, History, Zap, ArrowRight, RefreshCw, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAllOrders, clearOrderHistory, addOrderToHistory } from '../../store/orderHistorySlice';
+import { getAllOrders, clearOrderHistory, fetchOrderHistory, getOrderHistoryStatus, getOrderHistoryError } from '../../store/orderHistorySlice';
 import { formatCurrency } from '../../utils/helpers';
 import { getStatusById } from '../../utils/orderStatuses';
-import { getOrder } from '../../services/apiRestaurant';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Container from '../../layout/Container';
@@ -14,37 +13,40 @@ import Container from '../../layout/Container';
 function OrderHistory() {
   const dispatch = useDispatch();
   const orders = useSelector(getAllOrders);
+  const status = useSelector(getOrderHistoryStatus);
+  const error = useSelector(getOrderHistoryError);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
 
-  // Background sync on mount
   useEffect(() => {
-    async function syncOrders() {
-      if (orders.length === 0) return;
-      setIsSyncing(true);
-      try {
-        // Fetch updates for all orders in history
-        const syncPromises = orders.map(order => getOrder(order.id));
-        const updatedOrders = await Promise.all(syncPromises);
-
-        updatedOrders.forEach(updatedOrder => {
-          if (updatedOrder) {
-            dispatch(addOrderToHistory(updatedOrder));
-          }
-        });
-      } catch (err) {
-        console.error('Failed to sync history:', err);
-      } finally {
-        setIsSyncing(false);
-      }
-    }
-
-    syncOrders();
-  }, [dispatch, orders.length]); // Only triggers if length changes or on mount
+    dispatch(fetchOrderHistory());
+  }, [dispatch]);
 
   const handleClearHistory = () => {
+    // Ideally this would likely be an API call to "hide" or "archive" orders,
+    // but for now we'll just clear the local view or dispatch an action if desired.
     dispatch(clearOrderHistory());
   };
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-red-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (status === 'failed') {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
+        <div className="w-20 h-20 bg-red-600/20 rounded-full flex items-center justify-center mb-6 border border-red-500/30">
+          <Zap className="w-10 h-10 text-red-500" />
+        </div>
+        <h2 className="text-3xl font-black text-white mb-3">Failed to load history</h2>
+        <p className="text-gray-400 mb-8 max-w-md">{error || "Something went wrong"}</p>
+        <Button onClick={() => dispatch(fetchOrderHistory())} variant="primary">Try Again</Button>
+      </div>
+    )
+  }
 
   if (orders.length === 0) {
     return (

@@ -86,6 +86,10 @@ export function getOrder(id) {
   return fetchJSON(`${API_URL}/api/orders/${id}`);
 }
 
+export function getMyOrders() {
+  return fetchJSON(`${API_URL}/api/orders/my-orders`);
+}
+
 export function createOrder(newOrder) {
   return fetchJSON(`${API_URL}/api/orders`, {
     method: 'POST',
