@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Package, DollarSign, Clock, CheckCircle, LogOut, Search, Filter, Trash2,
     TrendingUp, Zap, ChevronDown, LayoutDashboard, UtensilsCrossed, Edit2,
-    Plus, X, Save, Eye, EyeOff, Flame, Leaf, Award, RefreshCw, Shield, Loader2
+    Plus, X, Save, Eye, EyeOff, Flame, Leaf, Award, RefreshCw, Shield, Loader2, User
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -204,7 +204,8 @@ function AdminDashboard() {
     const tabs = [
         { id: 'orders', icon: Package, label: 'Live Orders' },
         { id: 'menu', icon: UtensilsCrossed, label: 'Menu Management' },
-        ...(canManageTeam ? [{ id: 'team', icon: Shield, label: 'Team Access' }] : [])
+        ...(canManageTeam ? [{ id: 'team', icon: Shield, label: 'Team Access' }] : []),
+        { id: 'profile', icon: User, label: 'My Profile' }
     ];
 
     return (
@@ -396,6 +397,10 @@ function AdminDashboard() {
 
                 {activeTab === 'team' && canManageTeam && (
                     <TeamManagement />
+                )}
+
+                {activeTab === 'profile' && (
+                    <ProfileSection />
                 )}
 
                 {/* Edit Modal */}
@@ -689,6 +694,150 @@ function AddItemModal({ onClose, onAdd }) {
 }
 
 
+function ProfileSection() {
+    const currentUser = useSelector(state => state.admin.user);
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({
+        fullName: currentUser?.fullName || currentUser?.full_name || '',
+        password: '',
+        confirmPassword: ''
+    });
+    const [showPassword, setShowPassword] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSave = async () => {
+        if (formData.password && formData.password !== formData.confirmPassword) {
+            toast.error('Passwords do not match');
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const updateData = { fullName: formData.fullName };
+            if (formData.password) {
+                updateData.password = formData.password;
+            }
+            await updateAdminUser(currentUser.id, updateData);
+            toast.success('Profile updated successfully');
+            setIsEditing(false);
+            setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
+        } catch (err) {
+            toast.error(err.message || 'Failed to update profile');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-zinc-900/50 p-8 rounded-2xl border border-white/10 backdrop-blur-sm">
+                <div className="flex items-center gap-6 mb-8">
+                    <div className="w-20 h-20 bg-gradient-to-br from-red-600 to-red-800 rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-xl">
+                        {(currentUser?.fullName || currentUser?.full_name || 'U').charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-black text-white">{currentUser?.fullName || currentUser?.full_name}</h2>
+                        <p className="text-gray-400">@{currentUser?.username}</p>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold capitalize mt-2 ${currentUser?.role === 'admin' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                currentUser?.role === 'manager' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                                    'bg-green-500/10 text-green-400 border border-green-500/20'
+                            }`}>
+                            {currentUser?.role}
+                        </span>
+                    </div>
+                </div>
+
+                {!isEditing ? (
+                    <div className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="bg-zinc-800/50 p-4 rounded-xl border border-white/5">
+                                <p className="text-xs text-gray-500 uppercase font-bold mb-1">Full Name</p>
+                                <p className="text-white font-medium">{currentUser?.fullName || currentUser?.full_name}</p>
+                            </div>
+                            <div className="bg-zinc-800/50 p-4 rounded-xl border border-white/5">
+                                <p className="text-xs text-gray-500 uppercase font-bold mb-1">Username</p>
+                                <p className="text-white font-medium">{currentUser?.username}</p>
+                            </div>
+                            <div className="bg-zinc-800/50 p-4 rounded-xl border border-white/5">
+                                <p className="text-xs text-gray-500 uppercase font-bold mb-1">Role</p>
+                                <p className="text-white font-medium capitalize">{currentUser?.role}</p>
+                            </div>
+                            <div className="bg-zinc-800/50 p-4 rounded-xl border border-white/5">
+                                <p className="text-xs text-gray-500 uppercase font-bold mb-1">Password</p>
+                                <p className="text-gray-400">••••••••</p>
+                            </div>
+                        </div>
+                        <Button variant="primary" onClick={() => setIsEditing(true)} className="mt-4 flex items-center gap-2">
+                            <Edit2 className="w-4 h-4" /> Edit Profile
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-bold text-gray-400 mb-1">Full Name</label>
+                            <input
+                                type="text"
+                                value={formData.fullName}
+                                onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+                                className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-400 mb-1">Username</label>
+                            <input
+                                type="text"
+                                value={currentUser?.username}
+                                disabled
+                                className="w-full bg-zinc-800/50 border border-white/5 rounded-xl px-4 py-3 text-gray-500 cursor-not-allowed"
+                            />
+                            <p className="text-xs text-gray-600 mt-1">Username cannot be changed</p>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-400 mb-1">New Password (Optional)</label>
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={formData.password}
+                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                    placeholder="Leave blank to keep unchanged"
+                                    className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                                >
+                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
+                        </div>
+                        {formData.password && (
+                            <div>
+                                <label className="block text-sm font-bold text-gray-400 mb-1">Confirm Password</label>
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={formData.confirmPassword}
+                                    onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                    className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                                />
+                            </div>
+                        )}
+                        <div className="flex gap-3 pt-4">
+                            <Button variant="secondary" onClick={() => setIsEditing(false)} className="flex-1 !bg-zinc-800 !border-white/10">
+                                Cancel
+                            </Button>
+                            <Button variant="primary" onClick={handleSave} disabled={isSaving} className="flex-1">
+                                {isSaving ? 'Saving...' : 'Save Changes'}
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+
 function TeamManagement() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -914,14 +1063,17 @@ function EditUserModal({ user, currentUserId, onClose, onSave, onDelete }) {
                         <select
                             value={formData.role}
                             onChange={e => setFormData({ ...formData, role: e.target.value })}
-                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                            disabled={isSelf}
+                            className={`w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 ${isSelf ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             <option value="staff">Staff — Orders only</option>
                             <option value="manager">Manager — Menu + Orders</option>
                             <option value="admin">Admin — Full access</option>
                             <option value="blocked">Blocked — No access</option>
                         </select>
-                        <p className="text-xs text-gray-500 mt-1">{ROLE_DESCRIPTIONS[formData.role]}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                            {isSelf ? "You cannot change your own role" : ROLE_DESCRIPTIONS[formData.role]}
+                        </p>
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-400 mb-1">Full Name</label>
