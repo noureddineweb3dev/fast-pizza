@@ -203,7 +203,7 @@ function AdminDashboard() {
     // Tabs configuration
     const tabs = [
         { id: 'orders', icon: Package, label: 'Live Orders' },
-        { id: 'menu', icon: UtensilsCrossed, label: 'Menu Management' },
+        { id: 'menu', icon: UtensilsCrossed, label: canEditMenu ? 'Menu Management' : 'Menu' },
         ...(canManageTeam ? [{ id: 'team', icon: Shield, label: 'Team Access' }] : []),
         { id: 'profile', icon: User, label: 'My Profile' }
     ];
@@ -221,8 +221,11 @@ function AdminDashboard() {
                             </Link>
                             <div className="h-6 w-px bg-white/10 hidden md:block" />
                             <div className="flex items-center gap-2">
-                                <span className="bg-red-600/10 text-red-500 border border-red-600/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(220,38,38,0.2)]">
-                                    Admin Console
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(220,38,38,0.2)] ${role === 'admin' ? 'bg-red-600/10 text-red-500 border border-red-600/20' :
+                                    role === 'manager' ? 'bg-blue-600/10 text-blue-500 border border-blue-600/20' :
+                                        'bg-green-600/10 text-green-500 border border-green-600/20'
+                                    }`}>
+                                    {role === 'admin' ? 'Admin Console' : role === 'manager' ? 'Manager Console' : 'Staff Console'}
                                 </span>
                             </div>
                         </div>
@@ -488,7 +491,7 @@ function OrderRow({ order, onStatusChange, onDelete }) {
     );
 }
 
-function MenuItemCard({ item, onEdit, onToggle, onDelete }) {
+function MenuItemCard({ item, onEdit, onToggle, onDelete, canEdit }) {
     return (
         <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className={`bg-zinc-900/50 rounded-2xl border border-white/10 overflow-hidden backdrop-blur-sm ${!item.available ? 'opacity-60' : ''}`}>
             <div className="relative h-32 bg-zinc-800">
@@ -508,13 +511,15 @@ function MenuItemCard({ item, onEdit, onToggle, onDelete }) {
                     <span className="text-red-500 font-bold">{formatCurrency(item.unitPrice || item.price)}</span>
                 </div>
                 <p className="text-gray-400 text-xs mb-3 line-clamp-2">{item.description}</p>
-                <div className="flex items-center gap-2">
-                    <button onClick={onToggle} className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${item.available ? 'bg-zinc-800 text-gray-400 hover:bg-zinc-700' : 'bg-green-600/20 text-green-400 hover:bg-green-600/30'}`}>
-                        {item.available ? <><EyeOff className="w-3 h-3" /> Hide</> : <><Eye className="w-3 h-3" /> Show</>}
-                    </button>
-                    <button onClick={onEdit} className="flex items-center justify-center gap-1 px-3 py-2 bg-zinc-800 text-gray-400 hover:bg-zinc-700 rounded-lg text-xs font-bold transition-colors"><Edit2 className="w-3 h-3" /> Edit</button>
-                    <button onClick={onDelete} className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-600/10 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
-                </div>
+                {canEdit && (
+                    <div className="flex items-center gap-2">
+                        <button onClick={onToggle} className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${item.available ? 'bg-zinc-800 text-gray-400 hover:bg-zinc-700' : 'bg-green-600/20 text-green-400 hover:bg-green-600/30'}`}>
+                            {item.available ? <><EyeOff className="w-3 h-3" /> Hide</> : <><Eye className="w-3 h-3" /> Show</>}
+                        </button>
+                        <button onClick={onEdit} className="flex items-center justify-center gap-1 px-3 py-2 bg-zinc-800 text-gray-400 hover:bg-zinc-700 rounded-lg text-xs font-bold transition-colors"><Edit2 className="w-3 h-3" /> Edit</button>
+                        <button onClick={onDelete} className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-600/10 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                )}
             </div>
         </motion.div>
     );
@@ -739,8 +744,8 @@ function ProfileSection() {
                         <h2 className="text-2xl font-black text-white">{currentUser?.fullName || currentUser?.full_name}</h2>
                         <p className="text-gray-400">@{currentUser?.username}</p>
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold capitalize mt-2 ${currentUser?.role === 'admin' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                currentUser?.role === 'manager' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                                    'bg-green-500/10 text-green-400 border border-green-500/20'
+                            currentUser?.role === 'manager' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                                'bg-green-500/10 text-green-400 border border-green-500/20'
                             }`}>
                             {currentUser?.role}
                         </span>
@@ -1133,10 +1138,13 @@ function EditUserModal({ user, currentUserId, onClose, onSave, onDelete }) {
 function AddUserModal({ onClose, onSave }) {
     const [formData, setFormData] = useState({ fullName: '', username: '', password: '', role: 'staff' });
     const [showPassword, setShowPassword] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSave(formData);
+        setIsSaving(true);
+        await onSave(formData);
+        setIsSaving(false);
     };
 
     return (
@@ -1144,7 +1152,7 @@ function AddUserModal({ onClose, onSave }) {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden">
                 <div className="p-6 border-b border-white/10 flex justify-between items-center">
                     <h3 className="text-xl font-bold text-white">Add Team Member</h3>
-                    <button onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
+                    <button onClick={onClose} disabled={isSaving}><X className="w-5 h-5 text-gray-400" /></button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4" autoComplete="off">
                     <div>
@@ -1152,6 +1160,7 @@ function AddUserModal({ onClose, onSave }) {
                         <select
                             value={formData.role}
                             onChange={e => setFormData({ ...formData, role: e.target.value })}
+                            disabled={isSaving}
                             className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
                         >
                             <option value="staff">Staff (Orders Only)</option>
@@ -1166,6 +1175,7 @@ function AddUserModal({ onClose, onSave }) {
                             required
                             value={formData.fullName}
                             onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+                            disabled={isSaving}
                             className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
                             autoComplete="off"
                         />
@@ -1177,6 +1187,7 @@ function AddUserModal({ onClose, onSave }) {
                             required
                             value={formData.username}
                             onChange={e => setFormData({ ...formData, username: e.target.value })}
+                            disabled={isSaving}
                             className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
                             placeholder="e.g. noureddine"
                             autoComplete="off"
@@ -1190,6 +1201,7 @@ function AddUserModal({ onClose, onSave }) {
                                 required
                                 value={formData.password}
                                 onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                disabled={isSaving}
                                 className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 pr-10"
                                 autoComplete="new-password"
                             />
@@ -1202,7 +1214,9 @@ function AddUserModal({ onClose, onSave }) {
                             </button>
                         </div>
                     </div>
-                    <Button type="submit" variant="primary" className="w-full mt-4">Create User</Button>
+                    <Button type="submit" variant="primary" className="w-full mt-4 flex items-center justify-center gap-2" disabled={isSaving}>
+                        {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating...</> : 'Create User'}
+                    </Button>
                 </form>
             </motion.div>
         </div>
