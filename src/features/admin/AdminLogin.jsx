@@ -27,8 +27,9 @@ function AdminLogin() {
       const result = await dispatch(loginAdmin({ username, password })).unwrap();
 
       // Role check (backend also checks but safe to check here too)
-      if (['admin', 'manager', 'staff'].includes(result?.user?.role)) {
-        toast.success(`Welcome ${result.user.fullName} (${result.user.role})!`);
+      const user = result?.data?.user;
+      if (['admin', 'manager', 'staff'].includes(user?.role)) {
+        toast.success(`Welcome ${user.fullName} (${user.role})!`);
         // Force full reload to ensure clean state and avoid transition issues
         window.location.replace('/admin/dashboard');
       } else {

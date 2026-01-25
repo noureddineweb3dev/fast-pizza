@@ -185,7 +185,8 @@ const adminSlice = createSlice({
       .addCase(loginAdmin.fulfilled, (state, action) => {
         state.status = 'idle';
         state.isAuthenticated = true; // Token is stored in localStorage by thunk
-        state.user = action.payload.user; // Store user data
+        state.isAuthenticated = true; // Token is stored in localStorage by thunk
+        state.user = action.payload.data?.user || action.payload.user; // Handle both structures for safety
         saveAdminDataToStorage(state);
       })
       .addCase(loginAdmin.rejected, (state, action) => {

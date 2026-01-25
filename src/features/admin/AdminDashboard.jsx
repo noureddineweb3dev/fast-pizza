@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Package, DollarSign, Clock, CheckCircle, LogOut, Search, Filter, Trash2,
     TrendingUp, Zap, ChevronDown, LayoutDashboard, UtensilsCrossed, Edit2,
-    Plus, X, Save, Eye, EyeOff, Flame, Leaf, Award, RefreshCw
+    Plus, X, Save, Eye, EyeOff, Flame, Leaf, Award, RefreshCw, Shield
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
