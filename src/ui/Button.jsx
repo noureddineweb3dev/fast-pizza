@@ -8,6 +8,7 @@ function Button({
   size = 'md',
   type = 'button',
   disabled = false,
+  ...rest
 }) {
   // Base styles
   const baseStyles =
@@ -37,6 +38,7 @@ function Button({
       className={`${baseStyles} ${sizes[size]} ${variants[variant]} ${className}`}
       whileHover={{ scale: disabled ? 1 : 1.03 }}
       whileTap={{ scale: disabled ? 1 : 0.95 }}
+      {...rest}
     >
       {children}
     </motion.button>

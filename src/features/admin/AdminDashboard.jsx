@@ -15,12 +15,20 @@ import {
 } from '../../store/adminSlice';
 import { ORDER_STATUSES, STATUS_CATEGORIES, getStatusById } from '../../utils/orderStatuses';
 import { formatCurrency } from '../../utils/helpers';
-import { getMenu, updateMenuItem, createMenuItem, deleteMenuItem, getAllOrders, updateOrder, deleteOrder, createAdminUser, getAdmins, updateAdminUser } from '../../services/apiRestaurant';
+import { getMenu, updateMenuItem, createMenuItem, deleteMenuItem, getAllOrders, updateOrder, deleteOrder, createAdminUser, getAdmins, updateAdminUser, deleteAdminUser } from '../../services/apiRestaurant';
 import Button from '../../ui/Button';
+import Tooltip from '../../ui/Tooltip';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Container from '../../layout/Container';
 
 const CATEGORIES = ['pizza', 'side', 'drink', 'dessert', 'combo'];
+
+const ROLE_DESCRIPTIONS = {
+    admin: 'Full access including team management',
+    manager: 'Can manage menu items and orders',
+    staff: 'Can view and update order status only',
+    blocked: 'Cannot login or access the system'
+};
 
 function AdminDashboard() {
     const dispatch = useDispatch();
@@ -728,6 +736,33 @@ function TeamManagement() {
         }
     };
 
+    const handleBlockToggle = async (user) => {
+        const isBlocked = user.role === 'blocked';
+        const newRole = isBlocked ? 'staff' : 'blocked'; // Default to staff on unblock
+        const action = isBlocked ? 'Unblocked' : 'Blocked';
+
+        if (!confirm(`Are you sure you want to ${action.toLowerCase()} ${user.full_name || user.fullName}?`)) return;
+
+        try {
+            await updateAdminUser(user.id, { role: newRole });
+            toast.success(`User ${action} successfully`);
+            loadUsers();
+        } catch (err) {
+            toast.error(`Failed to ${action.toLowerCase()} user`);
+        }
+    };
+
+    const handleDeleteUser = async (userId) => {
+        try {
+            await deleteAdminUser(userId);
+            toast.success('User deleted successfully');
+            setEditingUser(null);
+            loadUsers();
+        } catch (err) {
+            toast.error(err.message || 'Failed to delete user');
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center bg-zinc-900/50 p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
@@ -762,21 +797,41 @@ function TeamManagement() {
                                     <td className="px-6 py-4 text-white font-medium">{user.full_name || user.fullName}</td>
                                     <td className="px-6 py-4 text-gray-400">{user.username}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold capitalize ${user.role === 'admin' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                        <Tooltip text={ROLE_DESCRIPTIONS[user.role] || 'Unknown role'} position="top">
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold capitalize cursor-help ${user.role === 'admin' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
                                                 user.role === 'manager' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                                                    'bg-green-500/10 text-green-400 border border-green-500/20'
-                                            }`}>
-                                            {user.role}
-                                        </span>
+                                                    user.role === 'blocked' ? 'bg-gray-500/10 text-gray-400 border border-gray-500/20 line-through' :
+                                                        'bg-green-500/10 text-green-400 border border-green-500/20'
+                                                }`}>
+                                                {user.role}
+                                            </span>
+                                        </Tooltip>
                                     </td>
                                     <td className="px-6 py-4 text-gray-500 text-xs">
                                         {new Date(user.created_at || user.createdAt).toLocaleDateString()}
                                     </td>
                                     {canManage && (
-                                        <td className="px-6 py-4 text-right">
-                                            <Button variant="ghost" onClick={() => setEditingUser(user)} className="!p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg">
-                                                <Edit2 className="w-4 h-4" />
-                                            </Button>
+                                        <td className="px-6 py-4 text-right flex justify-end gap-2">
+                                            {/* Hide block/delete for the currently logged-in admin */}
+                                            {user.id !== currentUser?.id && (
+                                                <>
+                                                    <Tooltip text={user.role === 'blocked' ? 'Unblock User' : 'Block User'} position="top">
+                                                        <Button variant="ghost" onClick={() => handleBlockToggle(user)} className={`!p-2 rounded-lg ${user.role === 'blocked' ? 'text-green-500 hover:bg-green-500/10' : 'text-orange-500 hover:bg-orange-500/10'}`}>
+                                                            {user.role === 'blocked' ? <CheckCircle className="w-4 h-4" /> : <LogOut className="w-4 h-4" />}
+                                                        </Button>
+                                                    </Tooltip>
+                                                    <Tooltip text="Delete User" position="top">
+                                                        <Button variant="ghost" onClick={() => { if (confirm(`Delete ${user.full_name || user.fullName}?`)) handleDeleteUser(user.id); }} className="!p-2 text-red-500 hover:bg-red-500/10 rounded-lg">
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </Tooltip>
+                                                </>
+                                            )}
+                                            <Tooltip text="Edit User" position="top">
+                                                <Button variant="ghost" onClick={() => setEditingUser(user)} className="!p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg">
+                                                    <Edit2 className="w-4 h-4" />
+                                                </Button>
+                                            </Tooltip>
                                         </td>
                                     )}
                                 </tr>
@@ -787,12 +842,13 @@ function TeamManagement() {
             )}
 
             {showAddModal && <AddUserModal onClose={() => setShowAddModal(false)} onSave={handleCreateUser} />}
-            {editingUser && <EditUserModal user={editingUser} onClose={() => setEditingUser(null)} onSave={handleUpdateUser} />}
+            {editingUser && <EditUserModal user={editingUser} currentUserId={currentUser?.id} onClose={() => setEditingUser(null)} onSave={handleUpdateUser} onDelete={() => handleDeleteUser(editingUser.id)} />}
         </div>
     );
 }
 
-function EditUserModal({ user, onClose, onSave }) {
+function EditUserModal({ user, currentUserId, onClose, onSave, onDelete }) {
+    const isSelf = user.id === currentUserId;
     const [formData, setFormData] = useState({
         fullName: user.full_name || user.fullName,
         username: user.username,
@@ -825,10 +881,12 @@ function EditUserModal({ user, onClose, onSave }) {
                             onChange={e => setFormData({ ...formData, role: e.target.value })}
                             className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
                         >
-                            <option value="staff">Staff (Orders Only)</option>
-                            <option value="manager">Manager (Menu + Orders)</option>
-                            <option value="admin">Admin (Full Access)</option>
+                            <option value="staff">Staff — Orders only</option>
+                            <option value="manager">Manager — Menu + Orders</option>
+                            <option value="admin">Admin — Full access</option>
+                            <option value="blocked">Blocked — No access</option>
                         </select>
+                        <p className="text-xs text-gray-500 mt-1">{ROLE_DESCRIPTIONS[formData.role]}</p>
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-400 mb-1">Full Name</label>
@@ -845,12 +903,11 @@ function EditUserModal({ user, onClose, onSave }) {
                         <label className="block text-sm font-bold text-gray-400 mb-1">Username</label>
                         <input
                             type="text"
-                            required
                             value={formData.username}
-                            onChange={e => setFormData({ ...formData, username: e.target.value })}
-                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
-                            autoComplete="off"
+                            disabled
+                            className="w-full bg-zinc-800/50 border border-white/5 rounded-xl px-4 py-3 text-gray-500 cursor-not-allowed"
                         />
+                        <p className="text-xs text-gray-600 mt-1">Username cannot be changed</p>
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-400 mb-1">New Password (Optional)</label>
@@ -872,9 +929,14 @@ function EditUserModal({ user, onClose, onSave }) {
                             </button>
                         </div>
                     </div>
-                    <Button type="submit" variant="primary" className="w-full mt-4" disabled={isSaving}>
-                        {isSaving ? 'Saving...' : 'Save Changes'}
-                    </Button>
+                    <div className="flex gap-3 mt-6">
+                        {!isSelf && (
+                            <Button type="button" variant="ghost" onClick={() => { if (confirm('Delete this user?')) onDelete(); }} className="flex-1 text-red-500 hover:bg-red-500/10 hover:text-red-400">Delete User</Button>
+                        )}
+                        <Button type="submit" variant="primary" className={isSelf ? 'w-full' : 'flex-[2]'} disabled={isSaving}>
+                            {isSaving ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                    </div>
                 </form>
             </motion.div>
         </div>

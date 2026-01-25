@@ -124,6 +124,19 @@ export async function updateAdminUser(id, userData) {
   return data.data.user;
 }
 
+export async function deleteAdminUser(id) {
+  const res = await fetch(`${API_URL}/api/auth/admins/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.message || 'Failed to delete user');
+  }
+}
+
 export async function getMenu() {
   const menu = await fetchJSON(`${API_URL}/api/menu`);
   return menu.map(transformMenuItem);
