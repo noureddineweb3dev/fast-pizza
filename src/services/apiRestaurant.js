@@ -94,6 +94,7 @@ export async function getMenu() {
     unitPrice: item.unit_price, // Database has unit_price, not price
     image: item.image_url,      // Database has image_url
     soldOut: item.sold_out,     // Database has sold_out
+    available: !item.sold_out,  // Frontend uses available
     // Ensure ingredients is an array if it comes as a JSON string
     ingredients: typeof item.ingredients === 'string' ? JSON.parse(item.ingredients) : item.ingredients
   }));
@@ -128,18 +129,57 @@ export async function getAllOrders() {
 }
 
 export async function updateMenuItem(id, updateObj) {
+  let body;
   const isFormData = updateObj instanceof FormData;
+
+  if (isFormData) {
+    if (updateObj.has('available')) {
+      // Convert 'available' to 'soldOut'
+      // FormData values are strings, so "true" becomes soldOut=false
+      const isAvailable = updateObj.get('available') === 'true' || updateObj.get('available') === true;
+      updateObj.set('soldOut', !isAvailable);
+      updateObj.delete('available');
+    }
+    body = updateObj;
+  } else {
+    // JSON
+    const payload = { ...updateObj };
+    if (payload.available !== undefined) {
+      payload.soldOut = !payload.available;
+      delete payload.available;
+    }
+    body = JSON.stringify(payload);
+  }
+
   return fetchJSON(`${API_URL}/api/menu/${id}`, {
     method: 'PATCH',
-    body: isFormData ? updateObj : JSON.stringify(updateObj),
+    body,
   });
 }
 
 export async function createMenuItem(newItem) {
+  let body;
   const isFormData = newItem instanceof FormData;
+
+  if (isFormData) {
+    if (newItem.has('available')) {
+      const isAvailable = newItem.get('available') === 'true' || newItem.get('available') === true;
+      newItem.set('soldOut', !isAvailable);
+      newItem.delete('available');
+    }
+    body = newItem;
+  } else {
+    const payload = { ...newItem };
+    if (payload.available !== undefined) {
+      payload.soldOut = !payload.available;
+      delete payload.available;
+    }
+    body = JSON.stringify(payload);
+  }
+
   return fetchJSON(`${API_URL}/api/menu`, {
     method: 'POST',
-    body: isFormData ? newItem : JSON.stringify(newItem),
+    body,
   });
 }
 

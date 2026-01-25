@@ -522,7 +522,7 @@ function EditItemModal({ item, onClose, onSave }) {
         const data = new FormData();
         data.append('name', formData.name);
         data.append('description', formData.description || '');
-        data.append('price', parseFloat(formData.price));
+        data.append('unitPrice', parseFloat(formData.price)); // Backend expects unitPrice
         data.append('category', formData.category);
         data.append('available', formData.available);
         data.append('bestseller', formData.bestseller || false);
