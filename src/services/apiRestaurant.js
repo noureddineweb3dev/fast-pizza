@@ -72,14 +72,14 @@ export async function signup(fullName, email, password) {
   return data;
 }
 
-export async function createAdminUser(fullName, email, password, role) {
+export async function createAdminUser(fullName, username, password, role) {
   const res = await fetch(`${API_URL}/api/auth/create-admin`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
     },
-    body: JSON.stringify({ fullName, email, password, role }),
+    body: JSON.stringify({ fullName, username, password, role }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to create user');

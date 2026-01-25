@@ -680,7 +680,7 @@ function TeamManagement() {
 
     const handleCreateUser = async (formData) => {
         try {
-            await createAdminUser(formData.fullName, formData.email, formData.password, formData.role);
+            await createAdminUser(formData.fullName, formData.username, formData.password, formData.role);
             toast.success(`User ${formData.fullName} created as ${formData.role.toUpperCase()}`);
             setShowModal(false);
         } catch (err) {
@@ -730,7 +730,8 @@ function TeamManagement() {
 }
 
 function AddUserModal({ onClose, onSave }) {
-    const [formData, setFormData] = useState({ fullName: '', email: '', password: '', role: 'staff' });
+    const [formData, setFormData] = useState({ fullName: '', username: '', password: '', role: 'staff' });
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -768,24 +769,34 @@ function AddUserModal({ onClose, onSave }) {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-gray-400 mb-1">Email</label>
+                        <label className="block text-sm font-bold text-gray-400 mb-1">Username</label>
                         <input
-                            type="email"
+                            type="text"
                             required
-                            value={formData.email}
-                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                            value={formData.username}
+                            onChange={e => setFormData({ ...formData, username: e.target.value })}
                             className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                            placeholder="e.g. noureddine"
                         />
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-400 mb-1">Password</label>
-                        <input
-                            type="password"
-                            required
-                            value={formData.password}
-                            onChange={e => setFormData({ ...formData, password: e.target.value })}
-                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                required
+                                value={formData.password}
+                                onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 pr-10"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                            >
+                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                        </div>
                     </div>
                     <Button type="submit" variant="primary" className="w-full mt-4">Create User</Button>
                 </form>
