@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import PizzaLogo from '../../ui/PizzaLogo';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Package, DollarSign, Clock, CheckCircle, LogOut, Search, Filter, Trash2,
@@ -193,184 +194,213 @@ function AdminDashboard() {
 
     // Tabs configuration
     const tabs = [
-        { id: 'orders', icon: Package, label: 'Orders' },
-        { id: 'menu', icon: UtensilsCrossed, label: 'Menu' },
-        ...(canManageTeam ? [{ id: 'team', icon: Shield, label: 'Team' }] : [])
+        { id: 'orders', icon: Package, label: 'Live Orders' },
+        { id: 'menu', icon: UtensilsCrossed, label: 'Menu Management' },
+        ...(canManageTeam ? [{ id: 'team', icon: Shield, label: 'Team Access' }] : [])
     ];
 
     return (
-        <>
-            {/* Hero */}
-            <section className="relative overflow-hidden rounded-[2.5rem] bg-black mb-8 border border-white/10 shadow-2xl">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_100%,rgba(220,38,38,0.15),transparent_50%)]" />
-                <Container className="relative z-10 py-10 md:py-14">
-                    <div className="flex items-center justify-between flex-wrap gap-6">
-                        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4">
-                            <div className="p-3 bg-red-600/20 rounded-2xl border border-red-500/30">
-                                <LayoutDashboard className="w-8 h-8 text-red-500" />
+        <div className="min-h-screen bg-black pb-20">
+            {/* Header / Hero */}
+            <header className="relative overflow-hidden border-b border-white/10 bg-zinc-900/50 backdrop-blur-xl sticky top-0 z-40">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.15),transparent_70%)]" />
+                <Container className="relative z-10 py-4">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <Link to="/">
+                                <PizzaLogo className="h-10 w-auto" />
+                            </Link>
+                            <div className="h-6 w-px bg-white/10 hidden md:block" />
+                            <div className="flex items-center gap-2">
+                                <span className="bg-red-600/10 text-red-500 border border-red-600/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(220,38,38,0.2)]">
+                                    Admin Console
+                                </span>
                             </div>
-                            <div>
-                                <h1 className="text-3xl md:text-4xl font-black text-white">Admin Dashboard</h1>
-                                <p className="text-gray-400">Welcome back, {user?.fullName || 'Admin'} <span className="text-xs uppercase bg-zinc-800 px-2 py-0.5 rounded border border-white/10 ml-2">{role}</span></p>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <div className="text-right hidden md:block">
+                                <p className="text-sm font-bold text-white">{user?.fullName}</p>
+                                <p className="text-xs text-gray-400 capitalize">{role}</p>
                             </div>
-                        </motion.div>
-                        <Button variant="ghost" onClick={handleLogout} className="flex items-center gap-2 text-red-400 hover:text-red-300 border border-red-500/30 hover:bg-red-600/10">
-                            <LogOut className="w-4 h-4" /> Logout
-                        </Button>
+                            <Button variant="ghost" onClick={handleLogout} className="!p-2 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 rounded-full transition-all">
+                                <LogOut className="w-5 h-5" />
+                            </Button>
+                        </div>
                     </div>
 
-                    {/* Tabs */}
-                    <div className="flex gap-2 mt-8 overflow-x-auto pb-2">
+                    {/* Navigation Tabs (pills) */}
+                    <div className="flex items-center gap-1 mt-6 p-1 bg-white/5 rounded-xl border border-white/5 w-fit mx-auto md:mx-0 overflow-x-auto max-w-full">
                         {tabs.map(tab => (
-                            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-red-600 text-white' : 'bg-zinc-800/50 text-gray-400 hover:text-white hover:bg-zinc-700/50'}`}>
-                                <tab.icon className="w-5 h-5" /> {tab.label}
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`
+                                    relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap
+                                    ${activeTab === tab.id ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}
+                                `}
+                            >
+                                {activeTab === tab.id && (
+                                    <motion.div
+                                        layoutId="activeTab"
+                                        className="absolute inset-0 bg-red-600 rounded-lg shadow-lg shadow-red-900/50"
+                                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                    />
+                                )}
+                                <span className="relative z-10 flex items-center gap-2">
+                                    <tab.icon className="w-4 h-4" /> {tab.label}
+                                </span>
                             </button>
                         ))}
                     </div>
                 </Container>
-            </section>
+            </header>
 
-            {activeTab === 'orders' && (
-                <>
-                    {/* Stats */}
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 mb-8">
-                        <StatCard icon={<Package />} title="Total Orders" value={stats.totalOrders} color="blue" />
-                        <StatCard icon={<DollarSign />} title="Revenue" value={formatCurrency(stats.totalRevenue)} color="green" />
-                        <StatCard icon={<Clock />} title="Active" value={stats.activeOrders} color="yellow" />
-                        <StatCard icon={<CheckCircle />} title="Completed" value={stats.completedOrders} color="emerald" />
-                        <StatCard icon={<TrendingUp />} title="Avg. Order" value={formatCurrency(avgOrderValue)} color="purple" />
-                        <StatCard icon={<Zap />} title="Priority" value={priorityOrders} color="orange" />
-                    </div>
+            <Container className="pt-8">
 
-                    {/* Order Filters */}
-                    <motion.div className="bg-zinc-900/50 rounded-2xl border border-white/10 p-4 mb-6 backdrop-blur-sm">
-                        <div className="grid gap-4 md:grid-cols-3">
-                            <div className="relative">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search orders..." className="w-full bg-zinc-800 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600" />
-                            </div>
-                            <div className="relative">
-                                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full bg-zinc-800 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 appearance-none cursor-pointer">
-                                    <option value="all">All Statuses</option>
-                                    {STATUS_CATEGORIES.map(category => (
-                                        <optgroup key={category} label={category} className="bg-zinc-900 text-gray-400 font-bold uppercase text-[10px]">
-                                            {Object.values(ORDER_STATUSES)
-                                                .filter(s => s.category === category)
-                                                .map(s => (
-                                                    <option key={s.id} value={s.id} className="bg-zinc-900 text-white font-medium normal-case text-sm">
-                                                        {s.emoji} {s.label}
-                                                    </option>
-                                                ))}
-                                        </optgroup>
-                                    ))}
-                                </select>
-                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
-                            </div>
-                            <div className="relative">
-                                <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full bg-zinc-800 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 appearance-none cursor-pointer">
-                                    <option value="newest">Newest First</option>
-                                    <option value="oldest">Oldest First</option>
-                                    <option value="highest">Highest Value</option>
-                                    <option value="lowest">Lowest Value</option>
-                                </select>
-                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
-                            </div>
+
+                {activeTab === 'orders' && (
+                    <>
+                        {/* Stats */}
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 mb-8">
+                            <StatCard icon={<Package />} title="Total Orders" value={stats.totalOrders} color="blue" />
+                            <StatCard icon={<DollarSign />} title="Revenue" value={formatCurrency(stats.totalRevenue)} color="green" />
+                            <StatCard icon={<Clock />} title="Active" value={stats.activeOrders} color="yellow" />
+                            <StatCard icon={<CheckCircle />} title="Completed" value={stats.completedOrders} color="emerald" />
+                            <StatCard icon={<TrendingUp />} title="Avg. Order" value={formatCurrency(avgOrderValue)} color="purple" />
+                            <StatCard icon={<Zap />} title="Priority" value={priorityOrders} color="orange" />
                         </div>
-                    </motion.div>
 
-                    {/* Orders Table */}
-                    <motion.div className="bg-zinc-900/50 rounded-2xl border border-white/10 overflow-hidden backdrop-blur-sm">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-zinc-800/50 border-b border-white/10">
-                                    <tr>
-                                        {['Order ID', 'Customer', 'Items', 'Total', 'Priority', 'Status', canEditMenu && 'Actions'].filter(Boolean).map(h => (
-                                            <th key={h} className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">{h}</th>
+                        {/* Order Filters */}
+                        <motion.div className="bg-zinc-900/50 rounded-2xl border border-white/10 p-4 mb-6 backdrop-blur-sm">
+                            <div className="grid gap-4 md:grid-cols-3">
+                                <div className="relative">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                                    <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search orders..." className="w-full bg-zinc-800 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600" />
+                                </div>
+                                <div className="relative">
+                                    <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full bg-zinc-800 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 appearance-none cursor-pointer">
+                                        <option value="all">All Statuses</option>
+                                        {STATUS_CATEGORIES.map(category => (
+                                            <optgroup key={category} label={category} className="bg-zinc-900 text-gray-400 font-bold uppercase text-[10px]">
+                                                {Object.values(ORDER_STATUSES)
+                                                    .filter(s => s.category === category)
+                                                    .map(s => (
+                                                        <option key={s.id} value={s.id} className="bg-zinc-900 text-white font-medium normal-case text-sm">
+                                                            {s.emoji} {s.label}
+                                                        </option>
+                                                    ))}
+                                            </optgroup>
                                         ))}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/5">
-                                    {filteredOrders.length === 0 ? (
-                                        <tr><td colSpan="7" className="px-6 py-12 text-center text-gray-500">No orders found</td></tr>
-                                    ) : (
-                                        filteredOrders.map(order => (
-                                            <OrderRow key={order.id} order={order} onStatusChange={handleStatusChange} onDelete={() => setOrderToDelete(order.id)} canEdit={canEditMenu} />
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </motion.div>
-                </>
-            )}
+                                    </select>
+                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+                                </div>
+                                <div className="relative">
+                                    <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full bg-zinc-800 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 appearance-none cursor-pointer">
+                                        <option value="newest">Newest First</option>
+                                        <option value="oldest">Oldest First</option>
+                                        <option value="highest">Highest Value</option>
+                                        <option value="lowest">Lowest Value</option>
+                                    </select>
+                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+                                </div>
+                            </div>
+                        </motion.div>
 
-            {activeTab === 'menu' && (
-                <>
-                    {/* Menu Header */}
-                    <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-                        <div className="flex items-center gap-4 flex-1">
-                            <div className="relative flex-1 max-w-md">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                                <input type="text" value={menuSearch} onChange={(e) => setMenuSearch(e.target.value)} placeholder="Search menu..." className="w-full bg-zinc-800 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600" />
+                        {/* Orders Table */}
+                        <motion.div className="bg-zinc-900/50 rounded-2xl border border-white/10 overflow-hidden backdrop-blur-sm">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-zinc-800/50 border-b border-white/10">
+                                        <tr>
+                                            {['Order ID', 'Customer', 'Items', 'Total', 'Priority', 'Status', canEditMenu && 'Actions'].filter(Boolean).map(h => (
+                                                <th key={h} className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">{h}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {filteredOrders.length === 0 ? (
+                                            <tr><td colSpan="7" className="px-6 py-12 text-center text-gray-500">No orders found</td></tr>
+                                        ) : (
+                                            filteredOrders.map(order => (
+                                                <OrderRow key={order.id} order={order} onStatusChange={handleStatusChange} onDelete={() => setOrderToDelete(order.id)} canEdit={canEditMenu} />
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
-                            <div className="relative">
-                                <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 appearance-none cursor-pointer pr-10">
-                                    <option value="all">All Categories</option>
-                                    {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+                        </motion.div>
+                    </>
+                )}
+
+                {activeTab === 'menu' && (
+                    <>
+                        {/* Menu Header */}
+                        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+                            <div className="flex items-center gap-4 flex-1">
+                                <div className="relative flex-1 max-w-md">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                                    <input type="text" value={menuSearch} onChange={(e) => setMenuSearch(e.target.value)} placeholder="Search menu..." className="w-full bg-zinc-800 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600" />
+                                </div>
+                                <div className="relative">
+                                    <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 appearance-none cursor-pointer pr-10">
+                                        <option value="all">All Categories</option>
+                                        {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                                    </select>
+                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex gap-2">
-                            <Button variant="secondary" onClick={loadMenu} className="!bg-zinc-800 !border-white/10 flex items-center gap-2">
-                                <RefreshCw className={`w-4 h-4 ${menuLoading ? 'animate-spin' : ''}`} /> Refresh
-                            </Button>
-                            {canEditMenu && (
-                                <Button variant="primary" onClick={() => setShowAddForm(true)} className="flex items-center gap-2">
-                                    <Plus className="w-4 h-4" /> Add Item
+                            <div className="flex gap-2">
+                                <Button variant="secondary" onClick={loadMenu} className="!bg-zinc-800 !border-white/10 flex items-center gap-2">
+                                    <RefreshCw className={`w-4 h-4 ${menuLoading ? 'animate-spin' : ''}`} /> Refresh
                                 </Button>
-                            )}
+                                {canEditMenu && (
+                                    <Button variant="primary" onClick={() => setShowAddForm(true)} className="flex items-center gap-2">
+                                        <Plus className="w-4 h-4" /> Add Item
+                                    </Button>
+                                )}
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Menu Grid */}
-                    {menuLoading ? (
-                        <div className="text-center py-12 text-gray-500">Loading menu...</div>
-                    ) : (
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            <AnimatePresence mode="popLayout">
-                                {filteredMenu.map(item => (
-                                    <MenuItemCard
-                                        key={item.id}
-                                        item={item}
-                                        onEdit={() => setEditingItem(item)}
-                                        onToggle={() => handleToggleAvailability(item)}
-                                        onDelete={() => setItemToDelete(item.id)}
-                                        canEdit={canEditMenu}
-                                    />
-                                ))}
-                            </AnimatePresence>
-                        </div>
-                    )}
-                </>
-            )}
+                        {/* Menu Grid */}
+                        {menuLoading ? (
+                            <div className="text-center py-12 text-gray-500">Loading menu...</div>
+                        ) : (
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                <AnimatePresence mode="popLayout">
+                                    {filteredMenu.map(item => (
+                                        <MenuItemCard
+                                            key={item.id}
+                                            item={item}
+                                            onEdit={() => setEditingItem(item)}
+                                            onToggle={() => handleToggleAvailability(item)}
+                                            onDelete={() => setItemToDelete(item.id)}
+                                            canEdit={canEditMenu}
+                                        />
+                                    ))}
+                                </AnimatePresence>
+                            </div>
+                        )}
+                    </>
+                )}
 
-            {activeTab === 'team' && canManageTeam && (
-                <TeamManagement />
-            )}
+                {activeTab === 'team' && canManageTeam && (
+                    <TeamManagement />
+                )}
 
-            {/* Edit Modal */}
-            {editingItem && canEditMenu && <EditItemModal item={editingItem} onClose={() => setEditingItem(null)} onSave={handleSaveEdit} />}
+                {/* Edit Modal */}
+                {editingItem && canEditMenu && <EditItemModal item={editingItem} onClose={() => setEditingItem(null)} onSave={handleSaveEdit} />}
 
-            {/* Add Modal */}
-            {showAddForm && canEditMenu && <AddItemModal onClose={() => setShowAddForm(false)} onAdd={handleAddItem} />}
+                {/* Add Modal */}
+                {showAddForm && canEditMenu && <AddItemModal onClose={() => setShowAddForm(false)} onAdd={handleAddItem} />}
 
-            {/* Delete Confirmations */}
-            <ConfirmDialog isOpen={!!orderToDelete} onClose={() => setOrderToDelete(null)} onConfirm={handleDeleteOrder} title="Delete this order?" message="This action cannot be undone." confirmText="Delete" cancelText="Cancel" variant="danger" />
-            <ConfirmDialog isOpen={!!itemToDelete} onClose={() => setItemToDelete(null)} onConfirm={handleDeleteItem} title="Delete this menu item?" message="This will remove the item from your menu." confirmText="Delete" cancelText="Cancel" variant="danger" />
-        </>
+                {/* Delete Confirmations */}
+                <ConfirmDialog isOpen={!!orderToDelete} onClose={() => setOrderToDelete(null)} onConfirm={handleDeleteOrder} title="Delete this order?" message="This action cannot be undone." confirmText="Delete" cancelText="Cancel" variant="danger" />
+                <ConfirmDialog isOpen={!!itemToDelete} onClose={() => setItemToDelete(null)} onConfirm={handleDeleteItem} title="Delete this menu item?" message="This will remove the item from your menu." confirmText="Delete" cancelText="Cancel" variant="danger" />
+            </Container>
+        </div>
     );
 }
 
