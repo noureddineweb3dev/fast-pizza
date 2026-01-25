@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, LogIn, ArrowRight } from 'lucide-react';
+import { User, Mail, Lock, LogIn, ArrowRight, Phone, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../../ui/Button';
 import { signupUser, getAuthStatus, getAuthError } from '../../store/userSlice';
@@ -11,6 +11,8 @@ import Container from '../../layout/Container';
 function Signup() {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [address, setAddress] = useState('');
     const [password, setPassword] = useState('');
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -19,9 +21,11 @@ function Signup() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!fullName || !email || !password) return toast.error('Please fill in all fields');
+        if (!fullName || !password || (!email && !phone)) {
+            return toast.error('Please provide Name, Password, and either Email or Phone');
+        }
 
-        const result = await dispatch(signupUser({ fullName, email, password }));
+        const result = await dispatch(signupUser({ fullName, email, phone, password, address }));
         if (signupUser.fulfilled.match(result)) {
             toast.success('Account created!');
             navigate('/');
@@ -59,7 +63,7 @@ function Signup() {
 
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-300 flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-red-500" /> Email
+                            <Mail className="w-4 h-4 text-red-500" /> Email <span className="text-gray-500 text-xs">(Optional if Phone provided)</span>
                         </label>
                         <input
                             type="email"
@@ -67,7 +71,31 @@ function Signup() {
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
                             placeholder="you@example.com"
-                            required
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-300 flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-red-500" /> Phone <span className="text-gray-500 text-xs">(Optional if Email provided)</span>
+                        </label>
+                        <input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                            placeholder="+1 234 567 890"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-300 flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-red-500" /> Delivery Address <span className="text-gray-500 text-xs">(Optional)</span>
+                        </label>
+                        <textarea
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 min-h-[80px]"
+                            placeholder="123 Samurai St, Dojo City"
                         />
                     </div>
 

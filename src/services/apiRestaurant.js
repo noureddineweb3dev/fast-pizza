@@ -74,11 +74,11 @@ export async function loginAdmin(username, password) {
   return data;
 }
 
-export async function signup(fullName, email, password) {
+export async function signup(fullName, email, phone, password, address) {
   const res = await fetch(`${API_URL}/api/auth/signup`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fullName, email, password }),
+    body: JSON.stringify({ fullName, email, phone, password, address }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Signup failed');
