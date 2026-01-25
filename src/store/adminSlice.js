@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { ACTIVE_STATUS_IDS, COMPLETED_STATUS_IDS } from '../utils/orderStatuses';
-import { login, signup } from '../services/apiRestaurant';
+import { loginAdmin as apiLoginAdmin, signup } from '../services/apiRestaurant';
 
 // ASYNC THUNKS
-export const loginAdmin = createAsyncThunk('admin/login', async ({ email, password }, { rejectWithValue }) => {
+export const loginAdmin = createAsyncThunk('admin/login', async ({ username, password }, { rejectWithValue }) => {
   try {
-    const data = await login(email, password);
+    const data = await apiLoginAdmin(username, password);
     localStorage.setItem('token', data.token); // Store token for API calls
     return data;
   } catch (err) {

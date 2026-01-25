@@ -43,10 +43,21 @@ export async function login(email, password) {
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ identifier: email, password }), // Backend expects identifier
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Login failed');
+  return data;
+}
+
+export async function loginAdmin(username, password) {
+  const res = await fetch(`${API_URL}/api/auth/admin/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Admin login failed');
   return data;
 }
 

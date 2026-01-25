@@ -1,44 +1,47 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
-import { Lock, Shield, KeyRound, Mail, ArrowLeft, Loader2 } from 'lucide-react';
+import { User, Lock, Shield, KeyRound, ArrowLeft, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../../ui/Button';
 import { loginAdmin } from '../../store/adminSlice';
 import PizzaLogo from '../../ui/PizzaLogo';
-
 function AdminLogin() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    if (!username || !password) {
       toast.error('Please enter credentials', { id: 'admin-login' });
       return;
     }
 
     setIsLoading(true);
     try {
-      const result = await dispatch(loginAdmin({ email, password })).unwrap();
+      const result = await dispatch(loginAdmin({ username, password })).unwrap();
 
       // Role check (backend also checks but safe to check here too)
-      if (['admin', 'manager', 'staff'].includes(result.user.role)) {
+      if (['admin', 'manager', 'staff'].includes(result?.user?.role)) {
         toast.success(`Welcome ${result.user.fullName} (${result.user.role})!`);
-        navigate('/admin/dashboard');
+        // Force full reload to ensure clean state and avoid transition issues
+        window.location.replace('/admin/dashboard');
       } else {
         toast.error('Access Denied: You are not authorized');
+        setIsLoading(false); // Reset loading if access denied (only needed here if not redirecting)
       }
     } catch (err) {
-      toast.error(err || 'Login failed');
-    } finally {
+      console.error('Login error:', err);
+      toast.error(typeof err === 'string' ? err : 'Login failed');
       setIsLoading(false);
     }
+    // Note: finally block removed because if we redirect, we don't want to update state on unmounted component.
+    // We strictly handle setIsLoading(false) in error/rejection cases above.
   };
 
   return (
@@ -71,13 +74,13 @@ function AdminLogin() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
-              <Mail className="w-4 h-4 text-red-500" /> Email Address
+              <User className="w-4 h-4 text-red-500" /> Username
             </label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@samuraipizza.com"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="admin"
               className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all placeholder-gray-600"
               autoFocus
               disabled={isLoading}
