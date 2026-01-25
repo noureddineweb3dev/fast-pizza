@@ -694,6 +694,7 @@ function TeamManagement() {
     const [loading, setLoading] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
+    const [confirmAction, setConfirmAction] = useState(null); // { type: 'block'|'unblock'|'delete', user: {...} }
 
     const currentUser = useSelector(state => state.admin.user);
     const canManage = currentUser?.role === 'admin';
@@ -738,30 +739,53 @@ function TeamManagement() {
 
     const handleBlockToggle = async (user) => {
         const isBlocked = user.role === 'blocked';
-        const newRole = isBlocked ? 'staff' : 'blocked'; // Default to staff on unblock
-        const action = isBlocked ? 'Unblocked' : 'Blocked';
-
-        if (!confirm(`Are you sure you want to ${action.toLowerCase()} ${user.full_name || user.fullName}?`)) return;
-
-        try {
-            await updateAdminUser(user.id, { role: newRole });
-            toast.success(`User ${action} successfully`);
-            loadUsers();
-        } catch (err) {
-            toast.error(`Failed to ${action.toLowerCase()} user`);
-        }
+        setConfirmAction({
+            type: isBlocked ? 'unblock' : 'block',
+            user,
+            title: isBlocked ? 'Unblock User?' : 'Block User?',
+            message: isBlocked
+                ? `${user.full_name || user.fullName} will be able to login again.`
+                : `${user.full_name || user.fullName} will no longer be able to login.`,
+            confirmText: isBlocked ? 'Unblock' : 'Block',
+            variant: isBlocked ? 'info' : 'danger'
+        });
     };
 
-    const handleDeleteUser = async (userId) => {
+    const handleDeleteUser = async (user) => {
+        setConfirmAction({
+            type: 'delete',
+            user,
+            title: 'Delete User?',
+            message: `This will permanently remove ${user.full_name || user.fullName}'s account. This cannot be undone.`,
+            confirmText: 'Delete',
+            variant: 'danger'
+        });
+    };
+
+    const executeConfirmAction = async () => {
+        if (!confirmAction) return;
+        const { type, user } = confirmAction;
+
         try {
-            await deleteAdminUser(userId);
-            toast.success('User deleted successfully');
-            setEditingUser(null);
+            if (type === 'block') {
+                await updateAdminUser(user.id, { role: 'blocked' });
+                toast.success('User blocked successfully');
+            } else if (type === 'unblock') {
+                await updateAdminUser(user.id, { role: 'staff' });
+                toast.success('User unblocked successfully');
+            } else if (type === 'delete') {
+                await deleteAdminUser(user.id);
+                toast.success('User deleted successfully');
+                setEditingUser(null);
+            }
             loadUsers();
         } catch (err) {
-            toast.error(err.message || 'Failed to delete user');
+            toast.error(err.message || `Failed to ${type} user`);
         }
+        setConfirmAction(null);
     };
+
+
 
     return (
         <div className="space-y-6">
@@ -821,7 +845,7 @@ function TeamManagement() {
                                                         </Button>
                                                     </Tooltip>
                                                     <Tooltip text="Delete User" position="top">
-                                                        <Button variant="ghost" onClick={() => { if (confirm(`Delete ${user.full_name || user.fullName}?`)) handleDeleteUser(user.id); }} className="!p-2 text-red-500 hover:bg-red-500/10 rounded-lg">
+                                                        <Button variant="ghost" onClick={() => handleDeleteUser(user)} className="!p-2 text-red-500 hover:bg-red-500/10 rounded-lg">
                                                             <Trash2 className="w-4 h-4" />
                                                         </Button>
                                                     </Tooltip>
@@ -838,12 +862,23 @@ function TeamManagement() {
                             ))}
                         </tbody>
                     </table>
-                </div>
-            )}
+                </div >
+            )
+            }
 
             {showAddModal && <AddUserModal onClose={() => setShowAddModal(false)} onSave={handleCreateUser} />}
-            {editingUser && <EditUserModal user={editingUser} currentUserId={currentUser?.id} onClose={() => setEditingUser(null)} onSave={handleUpdateUser} onDelete={() => handleDeleteUser(editingUser.id)} />}
-        </div>
+            {editingUser && <EditUserModal user={editingUser} currentUserId={currentUser?.id} onClose={() => setEditingUser(null)} onSave={handleUpdateUser} onDelete={() => handleDeleteUser(editingUser)} />}
+
+            <ConfirmDialog
+                isOpen={!!confirmAction}
+                onClose={() => setConfirmAction(null)}
+                onConfirm={executeConfirmAction}
+                title={confirmAction?.title}
+                message={confirmAction?.message}
+                confirmText={confirmAction?.confirmText}
+                variant={confirmAction?.variant}
+            />
+        </div >
     );
 }
 
