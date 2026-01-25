@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Search, Zap, Flame, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
@@ -21,6 +22,7 @@ const EMBERS_DATA = [...Array(15)].map((_, i) => ({
 }));
 
 function Home() {
+  const { user } = useSelector((state) => state.user);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -133,12 +135,13 @@ function Home() {
                 <span>COMMENCE ORDER</span>
               </Link>
 
+
               <Link
-                to="/order"
+                to={user ? "/order/history" : "/order/track"}
                 className="group flex items-center gap-3 border-2 border-white/10 hover:border-white/30 backdrop-blur-md px-10 py-5 rounded-2xl font-bold transition-all hover:bg-white/5 shadow-xl"
               >
                 <Search className="w-5 h-5 text-gray-400 group-hover:text-white" />
-                <span>TRACK MISSION</span>
+                <span>{user ? "ORDER HISTORY" : "TRACK MISSION"}</span>
               </Link>
             </motion.div>
           </div>

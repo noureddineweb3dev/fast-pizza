@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { Clock, Package, CheckCircle, Trash2, History, Zap, ArrowRight, RefreshCw, Loader2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Clock, Package, CheckCircle, Trash2, History, Zap, ArrowRight, RefreshCw, Loader2, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllOrders, clearOrderHistory, fetchOrderHistory, getOrderHistoryStatus, getOrderHistoryError } from '../../store/orderHistorySlice';
+import { getIsAuthenticated } from '../../store/userSlice';
 import { formatCurrency } from '../../utils/helpers';
 import { getStatusById } from '../../utils/orderStatuses';
 import Button from '../../ui/Button';
@@ -12,21 +13,72 @@ import Container from '../../layout/Container';
 
 function OrderHistory() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const isAuthenticated = useSelector(getIsAuthenticated);
   const orders = useSelector(getAllOrders);
   const status = useSelector(getOrderHistoryStatus);
   const error = useSelector(getOrderHistoryError);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
-    dispatch(fetchOrderHistory());
-  }, [dispatch]);
+    if (isAuthenticated) {
+      dispatch(fetchOrderHistory());
+    }
+  }, [dispatch, isAuthenticated]);
 
   const handleClearHistory = () => {
-    // Ideally this would likely be an API call to "hide" or "archive" orders,
-    // but for now we'll just clear the local view or dispatch an action if desired.
     dispatch(clearOrderHistory());
   };
 
+  const handleTrackOrder = (e) => {
+    e.preventDefault();
+    if (!query) return;
+    navigate(`/order/${query}`);
+  };
+
+  // GUEST VIEW: Track Order
+  if (!isAuthenticated) {
+    return (
+      <Container className="py-20">
+        <div className="max-w-xl mx-auto text-center">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-zinc-900/80 p-8 rounded-3xl border border-white/10 backdrop-blur-md"
+          >
+            <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/30">
+              <Package className="w-8 h-8 text-red-500" />
+            </div>
+            <h2 className="text-3xl font-black text-white mb-4">Track Your Order</h2>
+            <p className="text-gray-400 mb-8">Enter your order ID to see the current status of your delivery.</p>
+
+            <form onSubmit={handleTrackOrder} className="flex gap-2">
+              <input
+                type="text"
+                placeholder="e.g. 50efdd95..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="flex-1 bg-black/50 border border-white/10 rounded-full px-6 py-3 text-white focus:outline-none focus:border-red-500 transition-colors"
+              />
+              <Button variant="primary" className="rounded-full px-6">
+                <Search className="w-5 h-5" />
+              </Button>
+            </form>
+
+            <div className="mt-8 pt-8 border-t border-white/10">
+              <p className="text-sm text-gray-500 mb-4">Want to save your order history?</p>
+              <Link to="/login">
+                <Button variant="secondary" size="sm">Login / Sign Up</Button>
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </Container>
+    );
+  }
+
+  // LOADING STATE
   if (status === 'loading') {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -35,6 +87,7 @@ function OrderHistory() {
     );
   }
 
+  // ERROR STATE
   if (status === 'failed') {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
@@ -48,6 +101,7 @@ function OrderHistory() {
     )
   }
 
+  // EMPTY HISTORY STATE
   if (orders.length === 0) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">

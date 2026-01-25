@@ -23,8 +23,14 @@ async function fetchJSON(url, options = {}) {
   if (!res.ok) {
     if (res.status === 401) {
       localStorage.removeItem('token');
-      localStorage.removeItem('adminData');
-      window.location.href = '/admin/login'; // Force redirect to login
+      // If we are in an admin route or have admin data, go to admin login
+      if (window.location.pathname.startsWith('/admin') || localStorage.getItem('adminData')) {
+        localStorage.removeItem('adminData');
+        window.location.href = '/admin/login';
+      } else {
+        // Otherwise go to regular user login
+        window.location.href = '/login';
+      }
     }
     throw new Error(data.message || 'Something went wrong');
   }

@@ -26,6 +26,8 @@ function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const { user } = useSelector((state) => state.user);
+
   // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -35,7 +37,7 @@ function Header() {
     { name: 'Home', to: '/' },
     { name: 'Menu', to: '/menu' },
     { name: 'Favorites', to: '/favorites' },
-    { name: 'Orders', to: '/order/history' },
+    { name: 'Orders', to: user ? '/order/history' : '/order/track' },
   ];
 
   return (
