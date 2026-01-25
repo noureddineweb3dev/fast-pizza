@@ -87,7 +87,7 @@ export function getOrder(id) {
 }
 
 export function getMyOrders() {
-  return fetchJSON(`${API_URL}/api/orders/my-orders`);
+  return fetchJSON(`${API_URL}/api/orders/own`);
 }
 
 export function createOrder(newOrder) {
