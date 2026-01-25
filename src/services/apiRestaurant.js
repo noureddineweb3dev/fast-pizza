@@ -99,6 +99,31 @@ export async function createAdminUser(fullName, username, password, role) {
   return data;
 }
 
+export async function getAdmins() {
+  const res = await fetch(`${API_URL}/api/auth/admins`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch admins');
+  return data.data; // data.data contains the array of users
+}
+
+export async function updateAdminUser(id, userData) {
+  const res = await fetch(`${API_URL}/api/auth/admins/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: JSON.stringify(userData),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to update user');
+  return data.data.user;
+}
+
 export async function getMenu() {
   const menu = await fetchJSON(`${API_URL}/api/menu`);
   return menu.map(transformMenuItem);

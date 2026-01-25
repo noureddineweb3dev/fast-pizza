@@ -15,7 +15,7 @@ import {
 } from '../../store/adminSlice';
 import { ORDER_STATUSES, STATUS_CATEGORIES, getStatusById } from '../../utils/orderStatuses';
 import { formatCurrency } from '../../utils/helpers';
-import { getMenu, updateMenuItem, createMenuItem, deleteMenuItem, getAllOrders, updateOrder, deleteOrder, createAdminUser } from '../../services/apiRestaurant';
+import { getMenu, updateMenuItem, createMenuItem, deleteMenuItem, getAllOrders, updateOrder, deleteOrder, createAdminUser, getAdmins, updateAdminUser } from '../../services/apiRestaurant';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Container from '../../layout/Container';
@@ -682,15 +682,49 @@ function AddItemModal({ onClose, onAdd }) {
 
 
 function TeamManagement() {
-    const [showModal, setShowModal] = useState(false);
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [editingUser, setEditingUser] = useState(null);
+
+    const currentUser = useSelector(state => state.admin.user);
+    const canManage = currentUser?.role === 'admin';
+
+    useEffect(() => {
+        loadUsers();
+    }, []);
+
+    const loadUsers = async () => {
+        setLoading(true);
+        try {
+            const data = await getAdmins();
+            setUsers(data);
+        } catch (err) {
+            toast.error('Failed to load team members');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleCreateUser = async (formData) => {
         try {
             await createAdminUser(formData.fullName, formData.username, formData.password, formData.role);
-            toast.success(`User ${formData.fullName} created as ${formData.role.toUpperCase()}`);
-            setShowModal(false);
+            toast.success(`User ${formData.fullName} created`);
+            setShowAddModal(false);
+            loadUsers();
         } catch (err) {
             toast.error(err.message || 'Failed to create user');
+        }
+    };
+
+    const handleUpdateUser = async (formData) => {
+        try {
+            await updateAdminUser(editingUser.id, formData);
+            toast.success('User updated successfully');
+            setEditingUser(null);
+            loadUsers();
+        } catch (err) {
+            toast.error(err.message || 'Failed to update user');
         }
     };
 
@@ -699,59 +733,91 @@ function TeamManagement() {
             <div className="flex justify-between items-center bg-zinc-900/50 p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
                 <div>
                     <h2 className="text-2xl font-black text-white">Team Management</h2>
-                    <p className="text-gray-400">Create and manage access for your staff.</p>
+                    <p className="text-gray-400">View and manage your team/admins.</p>
                 </div>
-                <Button variant="primary" onClick={() => setShowModal(true)} className="flex items-center gap-2">
-                    <Plus className="w-4 h-4" /> Add Member
-                </Button>
+                {canManage && (
+                    <Button variant="primary" onClick={() => setShowAddModal(true)} className="flex items-center gap-2">
+                        <Plus className="w-4 h-4" /> Add Member
+                    </Button>
+                )}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-                <div className="p-6 bg-zinc-900/50 rounded-2xl border border-white/10">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-red-500/20 rounded-lg"><Shield className="w-6 h-6 text-red-500" /></div>
-                        <h3 className="font-bold text-white">Admin</h3>
-                    </div>
-                    <p className="text-sm text-gray-400">Full access. Can manage menu, orders, and create other users.</p>
+            {loading ? (
+                <div className="text-center py-12 text-gray-500">Loading team...</div>
+            ) : (
+                <div className="overflow-hidden bg-zinc-900/50 rounded-2xl border border-white/10">
+                    <table className="w-full">
+                        <thead className="bg-zinc-800/50 border-b border-white/10">
+                            <tr>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Name</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Username</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Role</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Joined</th>
+                                {canManage && <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>}
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {users.map(user => (
+                                <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                                    <td className="px-6 py-4 text-white font-medium">{user.full_name || user.fullName}</td>
+                                    <td className="px-6 py-4 text-gray-400">{user.username}</td>
+                                    <td className="px-6 py-4">
+                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold capitalize ${user.role === 'admin' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                                user.role === 'manager' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                                                    'bg-green-500/10 text-green-400 border border-green-500/20'
+                                            }`}>
+                                            {user.role}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-500 text-xs">
+                                        {new Date(user.created_at || user.createdAt).toLocaleDateString()}
+                                    </td>
+                                    {canManage && (
+                                        <td className="px-6 py-4 text-right">
+                                            <Button variant="ghost" onClick={() => setEditingUser(user)} className="!p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg">
+                                                <Edit2 className="w-4 h-4" />
+                                            </Button>
+                                        </td>
+                                    )}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-                <div className="p-6 bg-zinc-900/50 rounded-2xl border border-white/10">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-blue-500/20 rounded-lg"><Edit2 className="w-6 h-6 text-blue-500" /></div>
-                        <h3 className="font-bold text-white">Manager</h3>
-                    </div>
-                    <p className="text-sm text-gray-400">Can manage menu and orders. Cannot manage team members.</p>
-                </div>
-                <div className="p-6 bg-zinc-900/50 rounded-2xl border border-white/10">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-green-500/20 rounded-lg"><Package className="w-6 h-6 text-green-500" /></div>
-                        <h3 className="font-bold text-white">Staff</h3>
-                    </div>
-                    <p className="text-sm text-gray-400">Can view and update order status only. Read-only menu access.</p>
-                </div>
-            </div>
+            )}
 
-            {showModal && <AddUserModal onClose={() => setShowModal(false)} onSave={handleCreateUser} />}
+            {showAddModal && <AddUserModal onClose={() => setShowAddModal(false)} onSave={handleCreateUser} />}
+            {editingUser && <EditUserModal user={editingUser} onClose={() => setEditingUser(null)} onSave={handleUpdateUser} />}
         </div>
     );
 }
 
-function AddUserModal({ onClose, onSave }) {
-    const [formData, setFormData] = useState({ fullName: '', username: '', password: '', role: 'staff' });
+function EditUserModal({ user, onClose, onSave }) {
+    const [formData, setFormData] = useState({
+        fullName: user.full_name || user.fullName,
+        username: user.username,
+        role: user.role,
+        password: '' // Optional, only if changing
+    });
     const [showPassword, setShowPassword] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSave(formData);
+        setIsSaving(true);
+        // Only send fields that are computed/changed. Ideally backend handles partials.
+        await onSave(formData);
+        setIsSaving(false);
     };
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden">
                 <div className="p-6 border-b border-white/10 flex justify-between items-center">
-                    <h3 className="text-xl font-bold text-white">Add Team Member</h3>
+                    <h3 className="text-xl font-bold text-white">Edit Team Member</h3>
                     <button onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
                 </div>
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="p-6 space-y-4" autoComplete="off">
                     <div>
                         <label className="block text-sm font-bold text-gray-400 mb-1">Role</label>
                         <select
@@ -772,6 +838,87 @@ function AddUserModal({ onClose, onSave }) {
                             value={formData.fullName}
                             onChange={e => setFormData({ ...formData, fullName: e.target.value })}
                             className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                            autoComplete="off"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-400 mb-1">Username</label>
+                        <input
+                            type="text"
+                            required
+                            value={formData.username}
+                            onChange={e => setFormData({ ...formData, username: e.target.value })}
+                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                            autoComplete="off"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-400 mb-1">New Password (Optional)</label>
+                        <div className="relative">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                value={formData.password}
+                                onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 pr-10"
+                                placeholder="Leave blank to keep unchanged"
+                                autoComplete="new-password"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                            >
+                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                        </div>
+                    </div>
+                    <Button type="submit" variant="primary" className="w-full mt-4" disabled={isSaving}>
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                </form>
+            </motion.div>
+        </div>
+    );
+}
+
+function AddUserModal({ onClose, onSave }) {
+    const [formData, setFormData] = useState({ fullName: '', username: '', password: '', role: 'staff' });
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden">
+                <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                    <h3 className="text-xl font-bold text-white">Add Team Member</h3>
+                    <button onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-4" autoComplete="off">
+                    <div>
+                        <label className="block text-sm font-bold text-gray-400 mb-1">Role</label>
+                        <select
+                            value={formData.role}
+                            onChange={e => setFormData({ ...formData, role: e.target.value })}
+                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                        >
+                            <option value="staff">Staff (Orders Only)</option>
+                            <option value="manager">Manager (Menu + Orders)</option>
+                            <option value="admin">Admin (Full Access)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-400 mb-1">Full Name</label>
+                        <input
+                            type="text"
+                            required
+                            value={formData.fullName}
+                            onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                            autoComplete="off"
                         />
                     </div>
                     <div>
@@ -783,6 +930,7 @@ function AddUserModal({ onClose, onSave }) {
                             onChange={e => setFormData({ ...formData, username: e.target.value })}
                             className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
                             placeholder="e.g. noureddine"
+                            autoComplete="off"
                         />
                     </div>
                     <div>
@@ -794,6 +942,7 @@ function AddUserModal({ onClose, onSave }) {
                                 value={formData.password}
                                 onChange={e => setFormData({ ...formData, password: e.target.value })}
                                 className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 pr-10"
+                                autoComplete="new-password"
                             />
                             <button
                                 type="button"
