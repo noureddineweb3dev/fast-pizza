@@ -174,7 +174,19 @@ function AdminDashboard() {
         setItemToDelete(null);
     };
 
-    if (!isAuthenticated) return null;
+    // Debug logging
+    console.log('AdminDashboard Render:', { isAuthenticated, user, role, activeTab });
+
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center text-white">
+                <div className="text-center">
+                    <h2 className="text-xl font-bold mb-2">Verifying Access...</h2>
+                    <p className="text-gray-400 text-sm">Please wait while we check your credentials.</p>
+                </div>
+            </div>
+        );
+    }
 
     const canEditMenu = ['admin', 'manager'].includes(role);
     const canManageTeam = role === 'admin';
