@@ -199,6 +199,8 @@ function AdminDashboard() {
 
     const canEditMenu = ['admin', 'manager'].includes(role);
     const canManageTeam = role === 'admin';
+    const showFinancials = ['admin', 'manager'].includes(role);
+    const canDeleteOrders = role === 'admin';
 
     // Tabs configuration
     const tabs = [
@@ -276,10 +278,10 @@ function AdminDashboard() {
                         {/* Stats */}
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 mb-8">
                             <StatCard icon={<Package />} title="Total Orders" value={stats.totalOrders} color="blue" />
-                            <StatCard icon={<DollarSign />} title="Revenue" value={formatCurrency(stats.totalRevenue)} color="green" />
+                            {showFinancials && <StatCard icon={<DollarSign />} title="Revenue" value={formatCurrency(stats.totalRevenue)} color="green" />}
                             <StatCard icon={<Clock />} title="Active" value={stats.activeOrders} color="yellow" />
                             <StatCard icon={<CheckCircle />} title="Completed" value={stats.completedOrders} color="emerald" />
-                            <StatCard icon={<TrendingUp />} title="Avg. Order" value={formatCurrency(avgOrderValue)} color="purple" />
+                            {showFinancials && <StatCard icon={<TrendingUp />} title="Avg. Order" value={formatCurrency(avgOrderValue)} color="purple" />}
                             <StatCard icon={<Zap />} title="Priority" value={priorityOrders} color="orange" />
                         </div>
 
@@ -327,7 +329,7 @@ function AdminDashboard() {
                                 <table className="w-full">
                                     <thead className="bg-zinc-800/50 border-b border-white/10">
                                         <tr>
-                                            {['Order ID', 'Customer', 'Items', 'Total', 'Priority', 'Status', canEditMenu && 'Actions'].filter(Boolean).map(h => (
+                                            {['Order ID', 'Customer', 'Items', 'Total', 'Priority', 'Status', canDeleteOrders && 'Actions'].filter(Boolean).map(h => (
                                                 <th key={h} className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">{h}</th>
                                             ))}
                                         </tr>
@@ -337,7 +339,7 @@ function AdminDashboard() {
                                             <tr><td colSpan="7" className="px-6 py-12 text-center text-gray-500">No orders found</td></tr>
                                         ) : (
                                             filteredOrders.map(order => (
-                                                <OrderRow key={order.id} order={order} onStatusChange={handleStatusChange} onDelete={() => setOrderToDelete(order.id)} canEdit={canEditMenu} />
+                                                <OrderRow key={order.id} order={order} onStatusChange={handleStatusChange} onDelete={() => setOrderToDelete(order.id)} canDelete={canDeleteOrders} />
                                             ))
                                         )}
                                     </tbody>
