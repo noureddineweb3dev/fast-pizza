@@ -53,11 +53,11 @@ const router = createBrowserRouter([
       // Auth routes
       { path: '/login', element: <Login /> },
       { path: '/signup', element: <Signup /> },
-      // Admin routes
-      { path: '/admin/login', element: <AdminLogin /> },
-      { path: '/admin/dashboard', element: <AdminDashboard /> },
     ],
   },
+  // Admin routes (No AppLayout)
+  { path: '/admin/login', element: <AdminLogin /> },
+  { path: '/admin/dashboard', element: <AdminDashboard /> },
 ]);
 
 function App() {
