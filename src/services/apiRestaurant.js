@@ -39,6 +39,19 @@ async function fetchJSON(url, options = {}) {
   return data.data;
 }
 
+// Helper to standardise menu items from DB (snake_case) to Frontend (camelCase)
+function transformMenuItem(item) {
+  return {
+    ...item,
+    unitPrice: item.unit_price, // Database has unit_price
+    image: item.image_url,      // Database has image_url
+    soldOut: item.sold_out,     // Database has sold_out
+    available: !item.sold_out,  // Frontend uses available
+    // Ensure ingredients is an array if it comes as a JSON string
+    ingredients: typeof item.ingredients === 'string' ? JSON.parse(item.ingredients) : item.ingredients
+  };
+}
+
 export async function login(email, password) {
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
@@ -88,16 +101,7 @@ export async function createAdminUser(fullName, username, password, role) {
 
 export async function getMenu() {
   const menu = await fetchJSON(`${API_URL}/api/menu`);
-  // Map database snake_case fields to frontend camelCase
-  return menu.map(item => ({
-    ...item,
-    unitPrice: item.unit_price, // Database has unit_price, not price
-    image: item.image_url,      // Database has image_url
-    soldOut: item.sold_out,     // Database has sold_out
-    available: !item.sold_out,  // Frontend uses available
-    // Ensure ingredients is an array if it comes as a JSON string
-    ingredients: typeof item.ingredients === 'string' ? JSON.parse(item.ingredients) : item.ingredients
-  }));
+  return menu.map(transformMenuItem);
 }
 
 export function getOrder(id) {
@@ -151,10 +155,12 @@ export async function updateMenuItem(id, updateObj) {
     body = JSON.stringify(payload);
   }
 
-  return fetchJSON(`${API_URL}/api/menu/${id}`, {
+  const data = await fetchJSON(`${API_URL}/api/menu/${id}`, {
     method: 'PATCH',
     body,
   });
+
+  return transformMenuItem(data);
 }
 
 export async function createMenuItem(newItem) {
@@ -177,10 +183,12 @@ export async function createMenuItem(newItem) {
     body = JSON.stringify(payload);
   }
 
-  return fetchJSON(`${API_URL}/api/menu`, {
+  const data = await fetchJSON(`${API_URL}/api/menu`, {
     method: 'POST',
     body,
   });
+
+  return transformMenuItem(data);
 }
 
 export async function deleteMenuItem(id) {

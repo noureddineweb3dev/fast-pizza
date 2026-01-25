@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Package, DollarSign, Clock, CheckCircle, LogOut, Search, Filter, Trash2,
     TrendingUp, Zap, ChevronDown, LayoutDashboard, UtensilsCrossed, Edit2,
-    Plus, X, Save, Eye, EyeOff, Flame, Leaf, Award, RefreshCw, Shield
+    Plus, X, Save, Eye, EyeOff, Flame, Leaf, Award, RefreshCw, Shield, Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -147,8 +147,8 @@ function AdminDashboard() {
 
     const handleSaveEdit = async (item, formData) => {
         try {
-            await updateMenuItem(item.id, formData || item);
-            setMenuItems(prev => prev.map(i => i.id === item.id ? { ...item } : i));
+            const updatedItem = await updateMenuItem(item.id, formData || item);
+            setMenuItems(prev => prev.map(i => i.id === item.id ? { ...updatedItem } : i));
             setEditingItem(null);
             toast.success('Item updated');
         } catch {
@@ -508,7 +508,8 @@ function MenuItemCard({ item, onEdit, onToggle, onDelete }) {
 }
 
 function EditItemModal({ item, onClose, onSave }) {
-    const [formData, setFormData] = useState({ ...item, imageFile: null });
+    const [formData, setFormData] = useState({ ...item, price: item.unitPrice || item.price, imageFile: null });
+    const [isSaving, setIsSaving] = useState(false);
 
     const handleChange = (e) => {
         if (e.target.name === 'image') {
@@ -518,7 +519,8 @@ function EditItemModal({ item, onClose, onSave }) {
         }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
+        setIsSaving(true);
         const data = new FormData();
         data.append('name', formData.name);
         data.append('description', formData.description || '');
@@ -541,7 +543,8 @@ function EditItemModal({ item, onClose, onSave }) {
             data.append('imageUrl', formData.image || '');
         }
 
-        onSave({ ...formData, id: item.id }, data); // Pass prepared FormData as second arg if needed, or just let onSave handle it
+        await onSave({ ...formData, id: item.id }, data); // Pass prepared FormData as second arg if needed, or just let onSave handle it
+        setIsSaving(false);
     };
 
     return (
@@ -585,8 +588,11 @@ function EditItemModal({ item, onClose, onSave }) {
                     )}
                 </div>
                 <div className="flex gap-3 p-6 border-t border-white/10">
-                    <Button variant="secondary" onClick={onClose} className="flex-1 !bg-zinc-800 !border-white/10">Cancel</Button>
-                    <Button variant="primary" onClick={handleSave} className="flex-1 flex items-center justify-center gap-2"><Save className="w-4 h-4" /> Save</Button>
+                    <Button variant="secondary" onClick={onClose} className="flex-1 !bg-zinc-800 !border-white/10" disabled={isSaving}>Cancel</Button>
+                    <Button variant="primary" onClick={handleSave} className="flex-1 flex items-center justify-center gap-2" disabled={isSaving}>
+                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                        {isSaving ? 'Saving...' : 'Save'}
+                    </Button>
                 </div>
             </motion.div>
         </div>
