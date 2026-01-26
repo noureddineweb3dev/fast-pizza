@@ -108,7 +108,8 @@ function AdminDashboard() {
             const data = await getAllOrders();
             dispatch(setOrdersAdmin(data));
         } catch (err) {
-            toast.error('Failed to sync orders from server', { id: 'orders-error' });
+            console.error(err);
+            toast.error(`Sync failed: ${err.message}`, { id: 'orders-error' });
         } finally {
             setOrdersLoading(false);
         }
