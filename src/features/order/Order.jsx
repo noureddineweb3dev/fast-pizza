@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useLoaderData, Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
-import { Package, Clock, Zap, CheckCircle, ArrowLeft, ShoppingBag } from 'lucide-react';
+import { Package, Clock, Zap, CheckCircle, ArrowLeft, ShoppingBag, Sparkles } from 'lucide-react';
 import { getOrder } from '../../services/apiRestaurant';
 import { clearCart } from '../../store/cartSlice';
 import { addOrderToHistory } from '../../store/orderHistorySlice';
@@ -11,10 +11,12 @@ import { formatCurrency } from '../../utils/helpers';
 import { getStatusById } from '../../utils/orderStatuses';
 import Container from '../../layout/Container';
 import Button from '../../ui/Button';
+import { getIsAuthenticated } from '../../store/userSlice';
 
 function Order() {
   const order = useLoaderData();
   const dispatch = useDispatch();
+  const isAuthenticated = useSelector(getIsAuthenticated);
 
   const { id, status, priority, priorityPrice, orderPrice, estimatedDelivery, cart, customer } = order;
   const statusInfo = getStatusById(status);
@@ -70,6 +72,30 @@ function Order() {
           </motion.div>
         </Container>
       </section>
+
+      {!isAuthenticated && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 relative overflow-hidden rounded-2xl border border-yellow-500/20 bg-zinc-900/50 p-6 backdrop-blur-sm"
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(234,179,8,0.1),transparent_50%)]" />
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20 text-yellow-500">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white mb-1">Track this order forever!</h3>
+                <p className="text-gray-400 text-sm">Create an account to save this order to your history and get exclusive rewards.</p>
+              </div>
+            </div>
+            <Link to="/signup" className="w-full md:w-auto px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase tracking-wider rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-yellow-500/20">
+              Create Account
+            </Link>
+          </div>
+        </motion.div>
+      )}
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Left: Order Details */}
