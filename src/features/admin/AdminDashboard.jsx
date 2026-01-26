@@ -42,7 +42,27 @@ function AdminDashboard() {
     const role = user?.role;
 
     const [activeTab, setActiveTab] = useState('orders');
-    // ... (rest of state)
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [orderToDelete, setOrderToDelete] = useState(null);
+    const [viewingOrder, setViewingOrder] = useState(null);
+    const [sortBy, setSortBy] = useState('newest');
+    const [ordersLoading, setOrdersLoading] = useState(false);
+
+    // Menu state
+    const [menuItems, setMenuItems] = useState([]);
+    const [menuLoading, setMenuLoading] = useState(false);
+    const [editingItem, setEditingItem] = useState(null);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [menuSearch, setMenuSearch] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('all');
+
+    // Stats state
+    const [advancedStats, setAdvancedStats] = useState(null);
+
+    // Team State (if needed, adding basic state to be safe)
+    const [showAddMember, setShowAddMember] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated || !role || role === 'user') {
