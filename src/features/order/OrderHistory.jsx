@@ -159,7 +159,8 @@ function OrderHistory() {
 }
 
 function OrderHistoryCard({ order, index }) {
-  const { id, date, status, totalPrice, items, priority, orderPrice, priorityPrice } = order;
+  const { id, date, status, totalPrice, cart, priority, orderPrice, priorityPrice } = order;
+  const items = cart || [];
   const statusInfo = getStatusById(status);
   const orderDate = new Date(date);
   const formattedDate = orderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
