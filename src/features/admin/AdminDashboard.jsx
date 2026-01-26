@@ -39,31 +39,13 @@ function AdminDashboard() {
     const stats = useSelector(getAdminStats);
 
     const user = useSelector(state => state.admin.user);
-    const role = user?.role || 'staff'; // Default to lowest privilege if undefined
+    const role = user?.role;
 
     const [activeTab, setActiveTab] = useState('orders');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [orderToDelete, setOrderToDelete] = useState(null);
-    const [viewingOrder, setViewingOrder] = useState(null);
-    const [sortBy, setSortBy] = useState('newest');
-
-    // Menu state
-    const [menuItems, setMenuItems] = useState([]);
-    const [menuLoading, setMenuLoading] = useState(false);
-    const [editingItem, setEditingItem] = useState(null);
-    const [showAddForm, setShowAddForm] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState(null);
-    const [menuSearch, setMenuSearch] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('all');
-    const [ordersLoading, setOrdersLoading] = useState(false);
-    const [advancedStats, setAdvancedStats] = useState(null);
-
-    // Team state
-    const [showAddMember, setShowAddMember] = useState(false);
+    // ... (rest of state)
 
     useEffect(() => {
-        if (!isAuthenticated) {
+        if (!isAuthenticated || !role || role === 'user') {
             navigate('/admin/login');
             return;
         }
