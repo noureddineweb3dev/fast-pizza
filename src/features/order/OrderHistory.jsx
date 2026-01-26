@@ -159,7 +159,7 @@ function OrderHistory() {
 }
 
 function OrderHistoryCard({ order, index }) {
-  const { id, date, status, totalPrice, cart, priority, orderPrice, priorityPrice } = order;
+  const { id, date, status, totalPrice, cart, priority, orderPrice, priorityPrice, estimatedDelivery } = order;
   const items = cart || [];
   const statusInfo = getStatusById(status);
   const orderDate = new Date(date);
@@ -193,6 +193,11 @@ function OrderHistoryCard({ order, index }) {
             </span>
           </div>
           <p className="text-sm text-gray-400 mb-3">{formattedDate} at {formattedTime}</p>
+          {estimatedDelivery && status !== 'delivered' && (
+            <p className="text-sm font-bold text-green-400 mb-2">
+              Est. Arrival: {new Date(estimatedDelivery).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          )}
           <div className="flex flex-wrap gap-2">
             {items.slice(0, 3).map((item, idx) => (
               <span key={idx} className="px-3 py-1 bg-zinc-800/50 text-gray-300 text-sm rounded-full border border-white/5">
