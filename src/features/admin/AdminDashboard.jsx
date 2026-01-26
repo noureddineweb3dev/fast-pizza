@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Fragment } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import PizzaLogo from '../../ui/PizzaLogo';
@@ -131,6 +131,34 @@ function AdminDashboard() {
         else if (sortBy === 'lowest') result.sort((a, b) => a.totalPrice - b.totalPrice);
         return result;
     }, [orders, searchQuery, statusFilter, sortBy]);
+
+    // Group orders by date
+    const groupedOrders = useMemo(() => {
+        const groups = {};
+
+        filteredOrders.forEach(order => {
+            const d = order.date ? new Date(order.date) : new Date();
+            const dateKey = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+
+            if (!groups[dateKey]) {
+                const todayStr = new Date().toDateString();
+                const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toDateString();
+                const orderDateStr = d.toDateString();
+
+                let label = d.toLocaleDateString();
+                if (orderDateStr === todayStr) label = 'Today';
+                else if (orderDateStr === yesterdayStr) label = 'Yesterday';
+                else label = d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+                groups[dateKey] = { label, orders: [] };
+            }
+            groups[dateKey].orders.push(order);
+        });
+
+        // Sort keys descending (Newest dates first)
+        return Object.keys(groups).sort().reverse().map(key => groups[key]);
+    }, [filteredOrders]);
 
     // Filtered menu
     const filteredMenu = useMemo(() => {
@@ -363,8 +391,17 @@ function AdminDashboard() {
                                         {filteredOrders.length === 0 ? (
                                             <tr><td colSpan="7" className="px-6 py-12 text-center text-gray-500">No orders found</td></tr>
                                         ) : (
-                                            filteredOrders.map(order => (
-                                                <OrderRow key={order.id} order={order} onStatusChange={handleStatusChange} onDelete={() => setOrderToDelete(order.id)} onView={() => setViewingOrder(order)} canDelete={canDeleteOrders} />
+                                            groupedOrders.map(group => (
+                                                <Fragment key={group.label}>
+                                                    <tr className="bg-zinc-800/30">
+                                                        <td colSpan="7" className="px-6 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider sticky top-0 backdrop-blur-sm">
+                                                            {group.label} <span className="text-gray-600 font-normal ml-2">({group.orders.length})</span>
+                                                        </td>
+                                                    </tr>
+                                                    {group.orders.map(order => (
+                                                        <OrderRow key={order.id} order={order} onStatusChange={handleStatusChange} onDelete={() => setOrderToDelete(order.id)} onView={() => setViewingOrder(order)} canDelete={canDeleteOrders} />
+                                                    ))}
+                                                </Fragment>
                                             ))
                                         )}
                                     </tbody>
