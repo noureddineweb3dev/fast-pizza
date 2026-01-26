@@ -750,6 +750,11 @@ function OrderDetailsModal({ order, onClose }) {
                                 <p className="text-gray-400 text-xs mt-2">
                                     Placed: {new Date(order.date).toLocaleString()}
                                 </p>
+                                {order.updatedBy && (
+                                    <p className="text-gray-500 text-xs mt-1">
+                                        Last updated by: <span className="text-gray-300 font-bold">{order.updatedBy}</span>
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
