@@ -15,11 +15,12 @@ import {
 } from '../../store/adminSlice';
 import { ORDER_STATUSES, STATUS_CATEGORIES, getStatusById } from '../../utils/orderStatuses';
 import { formatCurrency } from '../../utils/helpers';
-import { getMenu, updateMenuItem, createMenuItem, deleteMenuItem, getAllOrders, updateOrder, deleteOrder, createAdminUser, getAdmins, updateAdminUser, deleteAdminUser } from '../../services/apiRestaurant';
+import { getMenu, updateMenuItem, createMenuItem, deleteMenuItem, getAllOrders, updateOrder, deleteOrder, createAdminUser, getAdmins, updateAdminUser, deleteAdminUser, getAdminStats as fetchAdminStats } from '../../services/apiRestaurant';
 import Button from '../../ui/Button';
 import Tooltip from '../../ui/Tooltip';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Container from '../../layout/Container';
+import AnalyticsTab from './AnalyticsTab';
 
 const CATEGORIES = ['pizza', 'side', 'drink', 'dessert', 'combo'];
 
@@ -56,6 +57,7 @@ function AdminDashboard() {
     const [menuSearch, setMenuSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [ordersLoading, setOrdersLoading] = useState(false);
+    const [advancedStats, setAdvancedStats] = useState(null);
 
     // Team state
     const [showAddMember, setShowAddMember] = useState(false);
@@ -70,10 +72,22 @@ function AdminDashboard() {
             loadMenu();
         } else if (activeTab === 'orders') {
             loadOrders();
+        } else if (activeTab === 'analytics') {
+            loadAdvancedStats();
         }
     }, [isAuthenticated, activeTab, navigate]);
 
+    const loadAdvancedStats = async () => {
+        try {
+            const data = await fetchAdminStats();
+            setAdvancedStats(data);
+        } catch (err) {
+            toast.error('Failed to load analytics');
+        }
+    };
+
     const loadMenu = async () => {
+        // ... (keep existing loadMenu)
         if (menuLoading) return;
         setMenuLoading(true);
         try {
@@ -87,6 +101,7 @@ function AdminDashboard() {
     };
 
     const loadOrders = async () => {
+        // ... (keep existing loadOrders)
         if (ordersLoading) return;
         setOrdersLoading(true);
         try {
@@ -99,6 +114,7 @@ function AdminDashboard() {
         }
     };
 
+    // ... (keep filteredOrders and filteredMenu)
     // Filtered orders
     const filteredOrders = useMemo(() => {
         let result = orders.filter((order) => {
@@ -126,6 +142,7 @@ function AdminDashboard() {
     const priorityOrders = orders.filter(o => o.priority).length;
 
     const handleLogout = () => { dispatch(adminLogout()); toast.success('Logged out'); navigate('/admin/login'); };
+    // ... (keep handlers)
     const handleStatusChange = async (orderId, newStatus) => {
         dispatch(updateOrderStatusAdmin({ orderId, status: newStatus }));
         try { await updateOrder(orderId, { status: newStatus }); toast.success('Status updated'); } catch { toast.error('Failed to update'); }
@@ -200,12 +217,13 @@ function AdminDashboard() {
 
     const canEditMenu = ['admin', 'manager'].includes(role);
     const canManageTeam = role === 'admin';
-    const showFinancials = ['admin', 'manager'].includes(role);
+    const showFinancials = ['admin', 'manager'].includes(role); // Also reused for visibility check
     const canDeleteOrders = role === 'admin';
 
     // Tabs configuration
     const tabs = [
         { id: 'orders', icon: Package, label: 'Live Orders' },
+        ...(showFinancials ? [{ id: 'analytics', icon: TrendingUp, label: 'Analytics' }] : []),
         { id: 'menu', icon: UtensilsCrossed, label: canEditMenu ? 'Menu Management' : 'Menu' },
         ...(canManageTeam ? [{ id: 'team', icon: Shield, label: 'Team Access' }] : []),
         { id: 'profile', icon: User, label: 'My Profile' }
@@ -215,6 +233,7 @@ function AdminDashboard() {
         <div className="min-h-screen bg-black pb-20">
             {/* Header / Hero */}
             <header className="relative overflow-hidden border-b border-white/10 bg-zinc-900/50 backdrop-blur-xl sticky top-0 z-40">
+                {/* ... (Keep existing header content) */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.15),transparent_70%)]" />
                 <Container className="relative z-10 py-4">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -272,7 +291,9 @@ function AdminDashboard() {
             </header>
 
             <Container className="pt-8">
-
+                {activeTab === 'analytics' && (
+                    <AnalyticsTab stats={advancedStats} />
+                )}
 
                 {activeTab === 'orders' && (
                     <>

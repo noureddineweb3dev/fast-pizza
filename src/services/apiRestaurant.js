@@ -166,6 +166,14 @@ export function updateOrder(id, updateObj) {
 
 // ============ ADMIN FUNCTIONS ============
 
+export async function getAdminStats() {
+  return fetchJSON(`${API_URL}/api/orders/stats`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+}
+
 export async function getAllOrders() {
   return fetchJSON(`${API_URL}/api/orders`);
 }
