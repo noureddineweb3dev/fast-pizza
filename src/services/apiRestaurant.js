@@ -52,11 +52,11 @@ function transformMenuItem(item) {
   };
 }
 
-export async function login(email, password) {
+export async function login(identifier, password) {
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ identifier: email, password }), // Backend expects identifier
+    body: JSON.stringify({ identifier, password }), // Backend expects identifier
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Login failed');

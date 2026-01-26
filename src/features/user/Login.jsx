@@ -9,7 +9,7 @@ import { loginUser, getAuthStatus, getAuthError } from '../../store/userSlice';
 import Container from '../../layout/Container';
 
 function Login() {
-    const [email, setEmail] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -19,9 +19,9 @@ function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!email || !password) return toast.error('Please fill in all fields');
+        if (!identifier || !password) return toast.error('Please fill in all fields');
 
-        const result = await dispatch(loginUser({ email, password }));
+        const result = await dispatch(loginUser({ identifier, password }));
         if (loginUser.fulfilled.match(result)) {
             toast.success('Welcome back!');
             navigate('/');
@@ -45,14 +45,14 @@ function Login() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-300 flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-red-500" /> Email
+                            <Mail className="w-4 h-4 text-red-500" /> Email or Phone
                         </label>
                         <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            type="text"
+                            value={identifier}
+                            onChange={(e) => setIdentifier(e.target.value)}
                             className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
-                            placeholder="you@example.com"
+                            placeholder="you@example.com or +1 234..."
                             required
                         />
                     </div>

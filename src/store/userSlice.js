@@ -2,9 +2,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { login, signup } from '../services/apiRestaurant';
 
 // Async Thunks
-export const loginUser = createAsyncThunk('user/login', async ({ email, password }, { rejectWithValue }) => {
+export const loginUser = createAsyncThunk('user/login', async ({ identifier, password }, { rejectWithValue }) => {
   try {
-    const data = await login(email, password);
+    const data = await login(identifier, password);
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.data.user));
     return data;
