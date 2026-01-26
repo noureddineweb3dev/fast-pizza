@@ -44,6 +44,7 @@ function AdminDashboard() {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [orderToDelete, setOrderToDelete] = useState(null);
+    const [viewingOrder, setViewingOrder] = useState(null);
     const [sortBy, setSortBy] = useState('newest');
 
     // Menu state
@@ -105,8 +106,8 @@ function AdminDashboard() {
             const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
             return matchesSearch && matchesStatus;
         });
-        if (sortBy === 'newest') result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        else if (sortBy === 'oldest') result.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        if (sortBy === 'newest') result.sort((a, b) => new Date(b.date) - new Date(a.date));
+        else if (sortBy === 'oldest') result.sort((a, b) => new Date(a.date) - new Date(b.date));
         else if (sortBy === 'highest') result.sort((a, b) => b.totalPrice - a.totalPrice);
         else if (sortBy === 'lowest') result.sort((a, b) => a.totalPrice - b.totalPrice);
         return result;
@@ -339,7 +340,7 @@ function AdminDashboard() {
                                             <tr><td colSpan="7" className="px-6 py-12 text-center text-gray-500">No orders found</td></tr>
                                         ) : (
                                             filteredOrders.map(order => (
-                                                <OrderRow key={order.id} order={order} onStatusChange={handleStatusChange} onDelete={() => setOrderToDelete(order.id)} canDelete={canDeleteOrders} />
+                                                <OrderRow key={order.id} order={order} onStatusChange={handleStatusChange} onDelete={() => setOrderToDelete(order.id)} onView={() => setViewingOrder(order)} canDelete={canDeleteOrders} />
                                             ))
                                         )}
                                     </tbody>
@@ -414,6 +415,9 @@ function AdminDashboard() {
                 {/* Add Modal */}
                 {showAddForm && canEditMenu && <AddItemModal onClose={() => setShowAddForm(false)} onAdd={handleAddItem} />}
 
+                {/* Order Details Modal */}
+                {viewingOrder && <OrderDetailsModal order={viewingOrder} onClose={() => setViewingOrder(null)} />}
+
                 {/* Delete Confirmations */}
                 <ConfirmDialog isOpen={!!orderToDelete} onClose={() => setOrderToDelete(null)} onConfirm={handleDeleteOrder} title="Delete this order?" message="This action cannot be undone." confirmText="Delete" cancelText="Cancel" variant="danger" />
                 <ConfirmDialog isOpen={!!itemToDelete} onClose={() => setItemToDelete(null)} onConfirm={handleDeleteItem} title="Delete this menu item?" message="This will remove the item from your menu." confirmText="Delete" cancelText="Cancel" variant="danger" />
@@ -446,7 +450,7 @@ function StatCard({ icon, title, value, color }) {
     );
 }
 
-function OrderRow({ order, onStatusChange, onDelete }) {
+function OrderRow({ order, onStatusChange, onDelete, onView, canDelete }) {
     const statusInfo = getStatusById(order.status);
 
     const statusColors = {
@@ -464,7 +468,7 @@ function OrderRow({ order, onStatusChange, onDelete }) {
         <motion.tr layout className="hover:bg-white/5 transition-colors">
             <td className="px-6 py-4"><span className="font-bold text-white">#{order.id}</span></td>
             <td className="px-6 py-4"><span className="text-gray-300">{order.customer || 'Guest'}</span></td>
-            <td className="px-6 py-4"><span className="text-gray-400">{order.items?.length || 0} items</span></td>
+            <td className="px-6 py-4"><span className="text-gray-400">{order.cart?.length || 0} items</span></td>
             <td className="px-6 py-4"><span className="font-bold text-red-500">{formatCurrency(order.totalPrice)}</span></td>
             <td className="px-6 py-4">{order.priority ? <span className="flex items-center gap-1 text-orange-400 text-xs font-bold"><Zap className="w-3 h-3" /> Yes</span> : <span className="text-gray-500 text-xs">No</span>}</td>
             <td className="px-6 py-4">
@@ -486,8 +490,11 @@ function OrderRow({ order, onStatusChange, onDelete }) {
                     ))}
                 </select>
             </td>
-            <td className="px-6 py-4">
-                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={onDelete} className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-600/10 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></motion.button>
+            <td className="px-6 py-4 flex items-center gap-2">
+                <button onClick={onView} className="p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-lg transition-colors"><Eye className="w-4 h-4" /></button>
+                {canDelete && (
+                    <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={onDelete} className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-600/10 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></motion.button>
+                )}
             </td>
         </motion.tr>
     );
@@ -700,6 +707,89 @@ function AddItemModal({ onClose, onAdd }) {
     );
 }
 
+function OrderDetailsModal({ order, onClose }) {
+    return (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-zinc-900 border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between p-6 border-b border-white/10">
+                    <div>
+                        <h2 className="text-xl font-black text-white">Order Details</h2>
+                        <p className="text-gray-400 text-sm">#{order.id}</p>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl"><X className="w-5 h-5 text-gray-400" /></button>
+                </div>
+                <div className="p-6 grid md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="text-sm font-bold text-gray-500 uppercase mb-3">Customer Info</h3>
+                            <div className="bg-zinc-800/50 rounded-xl p-4 space-y-3">
+                                <div className="flex items-start gap-3">
+                                    <User className="w-4 h-4 text-red-500 mt-1" />
+                                    <div><p className="text-white font-bold">{order.customer || 'Guest'}</p></div>
+                                </div>
+                                {order.phone && (
+                                    <div className="flex items-center gap-3">
+                                        <Zap className="w-4 h-4 text-gray-500" />
+                                        <p className="text-gray-300">{order.phone}</p>
+                                    </div>
+                                )}
+                                {order.address && (
+                                    <div className="flex items-start gap-3">
+                                        <div className="mt-1"><Package className="w-4 h-4 text-gray-500" /></div>
+                                        <p className="text-gray-300 text-sm">{order.address}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-gray-500 uppercase mb-3">Order Status</h3>
+                            <div className="bg-zinc-800/50 rounded-xl p-4">
+                                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold border ${order.status === 'delivered' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30'}`}>
+                                    {order.status}
+                                </span>
+                                <p className="text-gray-400 text-xs mt-2">
+                                    Placed: {new Date(order.date).toLocaleString()}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-bold text-gray-500 uppercase mb-3">Order Items</h3>
+                        <div className="bg-zinc-800/50 rounded-xl p-4 space-y-3 max-h-[300px] overflow-y-auto">
+                            {(order.cart || []).map((item, idx) => (
+                                <div key={idx} className="flex justify-between items-center border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                                    <div>
+                                        <p className="text-white font-bold"><span className="text-red-500">{item.quantity}x</span> {item.name}</p>
+                                    </div>
+                                    <p className="text-gray-300">{formatCurrency(item.totalPrice)}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
+                            <div className="flex justify-between text-gray-400">
+                                <span>Subtotal</span>
+                                <span>{formatCurrency(order.orderPrice)}</span>
+                            </div>
+                            {order.priority && (
+                                <div className="flex justify-between text-orange-400">
+                                    <span>Priority Fee</span>
+                                    <span>{formatCurrency(order.priorityPrice)}</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between text-xl font-black text-white pt-2">
+                                <span>Total</span>
+                                <span>{formatCurrency(order.totalPrice)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="p-6 border-t border-white/10 flex justify-end">
+                    <Button variant="secondary" onClick={onClose}>Close</Button>
+                </div>
+            </motion.div>
+        </div>
+    );
+}
 
 function ProfileSection() {
     const currentUser = useSelector(state => state.admin.user);

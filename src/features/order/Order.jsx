@@ -82,7 +82,9 @@ function Order() {
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Estimated Delivery</p>
-                <p className="text-xl font-black text-white">{estimatedDelivery}</p>
+                <p className="text-xl font-black text-white">
+                  {new Date(estimatedDelivery).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                </p>
               </div>
             </div>
             {priority && (
