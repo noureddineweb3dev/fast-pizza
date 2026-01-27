@@ -5,7 +5,7 @@ import Container from './Container';
 
 export default function JoinTheRanks() {
     return (
-        <section className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-black">
+        <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-black">
             {/* Background Image with Parallax-like feel (static for now but fixed intensity) */}
             <div className="absolute inset-0">
                 <img
@@ -17,7 +17,7 @@ export default function JoinTheRanks() {
                 <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 to-blue-900/20 mix-blend-overlay" />
             </div>
 
-            <Container className="relative z-10 text-center">
+            <Container className="relative z-10 text-center flex flex-col justify-center h-full w-full">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
@@ -54,6 +54,6 @@ export default function JoinTheRanks() {
                     </div>
                 </motion.div>
             </Container>
-        </section>
+        </div>
     );
 }
