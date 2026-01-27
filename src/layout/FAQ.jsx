@@ -27,7 +27,7 @@ function FAQItem({ question, answer, isOpen, onClick }) {
         <div className="border-b border-white/10 last:border-0">
             <button
                 onClick={onClick}
-                className="w-full py-6 flex items-center justify-between text-left group transition-colors hover:text-red-500"
+                className="w-full py-4 flex items-center justify-between text-left group transition-colors hover:text-red-500"
             >
                 <span className="text-lg md:text-xl font-bold text-white group-hover:text-red-500 transition-colors">
                     {question}
@@ -45,7 +45,7 @@ function FAQItem({ question, answer, isOpen, onClick }) {
                         transition={{ duration: 0.3 }}
                         className="overflow-hidden"
                     >
-                        <p className="pb-6 text-gray-400 leading-relaxed text-lg border-l-2 border-red-500/50 pl-4 ml-2">
+                        <p className="pb-4 text-gray-400 leading-relaxed text-lg border-l-2 border-red-500/50 pl-4 ml-2">
                             {answer}
                         </p>
                     </motion.div>
@@ -63,14 +63,14 @@ export default function FAQ() {
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5" />
 
             <Container className="relative z-10 h-full flex flex-col justify-center">
-                <div className="grid lg:grid-cols-12 gap-12 lg:gap-24 items-center">
+                <div className="grid lg:grid-cols-12 gap-8 lg:gap-16 items-center">
                     {/* Left Side: Header */}
                     <div className="lg:col-span-4">
                         <div className="relative">
                             <div className="inline-flex items-center gap-2 text-red-500 font-bold tracking-widest uppercase mb-4">
                                 <Sword className="w-5 h-5" /> Knowledge Base
                             </div>
-                            <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
+                            <h2 className="text-3xl md:text-4xl font-black text-white mb-6 leading-tight">
                                 COMMON <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-500">
                                     QUERIES
@@ -80,7 +80,7 @@ export default function FAQ() {
                                 Everything you need to know about our craft, our speed, and our honor code.
                             </p>
 
-                            <div className="hidden lg:block relative h-64 w-full rounded-2xl overflow-hidden grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
+                            <div className="hidden lg:block relative h-48 w-full rounded-2xl overflow-hidden grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
                                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent z-10" />
                                 <img src="/images/pizzas/ronin-pepperoni.png" alt="FAQ" className="w-full h-full object-cover" />
                             </div>
@@ -88,7 +88,7 @@ export default function FAQ() {
                     </div>
 
                     {/* Right Side: Accordion */}
-                    <div className="lg:col-span-8 bg-black/20 backdrop-blur-sm rounded-3xl p-8 border border-white/5">
+                    <div className="lg:col-span-8 bg-black/20 backdrop-blur-sm rounded-3xl p-6 border border-white/5">
                         {FAQS.map((faq, index) => (
                             <FAQItem
                                 key={index}

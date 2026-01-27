@@ -95,7 +95,7 @@ function Home() {
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="inline-flex items-center gap-3 bg-red-600/10 backdrop-blur-2xl px-4 py-1.5 rounded-full border border-red-500/30 shadow-inner shadow-red-500/10 w-fit"
+                className="inline-flex items-center gap-2 bg-red-600/10 backdrop-blur-2xl px-3 py-1 rounded-full border border-red-500/30 shadow-inner shadow-red-500/10 w-fit"
               >
                 <Zap className="w-3.5 h-3.5 text-red-500 animate-pulse" />
                 <span className="text-[10px] md:text-xs font-black tracking-[0.25em] uppercase text-red-400">
@@ -108,7 +108,7 @@ function Home() {
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: 'spring', damping: 15 }}
-                  className="text-6xl md:text-8xl lg:text-[7.5rem] font-black leading-[0.85] tracking-tighter italic select-none"
+                  className="text-4xl md:text-6xl lg:text-7xl font-black leading-[0.85] tracking-tighter italic select-none"
                 >
                   SLICE <br />
                   <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 filter drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
@@ -313,14 +313,14 @@ function EnhancedFeature({ icon, title, text, metric, delay, accentColor }) {
       whileHover={{ y: -8, scale: 1.02 }}
       className="relative group"
     >
-      <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 border border-gray-700 hover:border-gray-600 transition-all duration-300 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700 hover:border-gray-600 transition-all duration-300 overflow-hidden">
         {/* Animated gradient accent */}
         <div className={`absolute top - 0 left - 0 right - 0 h - 1 bg - gradient - to - r ${accentColor} transform origin - left scale - x - 0 group - hover: scale - x - 100 transition - transform duration - 500`} />
 
         {/* Icon with glow */}
         <div className="relative mb-6">
           <div className={`absolute inset - 0 bg - gradient - to - r ${accentColor} opacity - 20 blur - xl rounded - full scale - 150`} />
-          <div className={`relative w - 20 h - 20 flex items - center justify - center rounded - xl bg - gradient - to - br ${accentColor} text - white shadow - lg`}>
+          <div className={`relative w - 16 h - 16 flex items - center justify - center rounded - xl bg - gradient - to - br ${accentColor} text - white shadow - lg`}>
             {icon}
           </div>
         </div>

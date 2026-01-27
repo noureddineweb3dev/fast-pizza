@@ -23,9 +23,9 @@ export default function BrandStory() {
                 侍
             </div>
 
-            <Container className="relative z-20 grid md:grid-cols-2 gap-16 items-center content-center h-full">
+            <Container className="relative z-20 grid md:grid-cols-2 gap-10 items-center content-center h-full">
                 {/* Text Content */}
-                <div className="space-y-8">
+                <div className="space-y-6">
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
                         whileInView={{ opacity: 1, x: 0 }}
@@ -35,7 +35,7 @@ export default function BrandStory() {
                         <h2 className="text-sm font-bold tracking-[0.3em] text-red-500 uppercase mb-4">
                             Our Philosophy
                         </h2>
-                        <h3 className="text-5xl md:text-6xl font-black leading-tight mb-6">
+                        <h3 className="text-4xl md:text-5xl font-black leading-tight mb-4">
                             THE WAY OF THE <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
                                 SLICE
@@ -48,7 +48,7 @@ export default function BrandStory() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="space-y-6 text-lg text-gray-400 leading-relaxed"
+                        className="space-y-4 text-base md:text-lg text-gray-400 leading-relaxed"
                     >
                         <p>
                             In a world of mass-produced mediocrity, we choose the path of the artisan.
@@ -66,7 +66,7 @@ export default function BrandStory() {
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, delay: 0.4 }}
-                        className="relative p-8 mt-8 border-l-4 border-red-600 bg-white/5 backdrop-blur-sm rounded-r-2xl"
+                        className="relative p-6 mt-6 border-l-4 border-red-600 bg-white/5 backdrop-blur-sm rounded-r-2xl"
                     >
                         <p className="text-xl italic font-serif text-white mb-4">
                             "A samurai arrives exactly when the pizza is ready. Discipline is the secret ingredient."
@@ -84,7 +84,7 @@ export default function BrandStory() {
                 </div>
 
                 {/* Visual Content */}
-                <div className="relative h-[600px] hidden md:block">
+                <div className="relative h-[500px] hidden md:block">
                     <motion.div
                         style={{ y: parallaxY, rotate: rotateVar }}
                         className="absolute inset-0 z-10"

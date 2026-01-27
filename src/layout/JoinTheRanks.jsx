@@ -25,21 +25,21 @@ export default function JoinTheRanks() {
                     transition={{ duration: 0.8 }}
                     className="max-w-4xl mx-auto"
                 >
-                    <h2 className="text-6xl md:text-8xl font-black text-white mb-8 tracking-tighter leading-none">
+                    <h2 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter leading-none">
                         JOIN THE <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
                             RANK AND FILE
                         </span>
                     </h2>
 
-                    <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto font-light">
+                    <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto font-light">
                         The oven is hot, the blades are sharp. Your mission awaits.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                         <Link
                             to="/menu"
-                            className="group relative px-12 py-6 bg-red-600 hover:bg-red-700 text-white font-black text-xl rounded-full transition-all hover:scale-105 shadow-[0_0_40px_rgba(220,38,38,0.5)] flex items-center gap-3"
+                            className="group relative px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-black text-lg rounded-full transition-all hover:scale-105 shadow-[0_0_40px_rgba(220,38,38,0.5)] flex items-center gap-3"
                         >
                             START YOUR ORDER
                             <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
@@ -47,7 +47,7 @@ export default function JoinTheRanks() {
 
                         <Link
                             to="/about"
-                            className="px-12 py-6 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 text-white font-bold text-xl rounded-full transition-all"
+                            className="px-8 py-4 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 text-white font-bold text-lg rounded-full transition-all"
                         >
                             READ MANIFESTO
                         </Link>

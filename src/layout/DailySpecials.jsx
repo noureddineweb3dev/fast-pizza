@@ -51,7 +51,7 @@ function SpecialCard({ special, index }) {
             <div className={`absolute -right-20 -top-20 w-64 h-64 bg-gradient-to-br ${special.accent} opacity-10 blur-[80px] group-hover:opacity-20 transition-opacity duration-500`} />
 
             <div className="relative grid md:grid-cols-2 h-full">
-                <div className="h-48 md:h-full overflow-hidden">
+                <div className="h-40 md:h-full overflow-hidden">
                     <img
                         src={special.image}
                         alt={special.name}
@@ -60,12 +60,12 @@ function SpecialCard({ special, index }) {
                     <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 md:from-transparent to-transparent md:bg-none" />
                 </div>
 
-                <div className="p-8 flex flex-col justify-between">
+                <div className="p-6 flex flex-col justify-between">
                     <div>
-                        <div className={`inline-flex items-center gap-1 bg-gradient-to-r ${special.accent} text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 shadow-lg`}>
+                        <div className={`inline-flex items-center gap-1 bg-gradient-to-r ${special.accent} text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 shadow-lg`}>
                             <Sword className="w-3 h-3" /> {special.tag}
                         </div>
-                        <h3 className="text-2xl font-black text-white mb-2 leading-tight">
+                        <h3 className="text-xl font-black text-white mb-2 leading-tight">
                             {special.name}
                         </h3>
                         <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2">
@@ -144,7 +144,7 @@ export default function DailySpecials() {
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] opacity-20" />
 
             <Container className="relative z-10 h-full flex flex-col justify-center">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-8">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6">
                     <div className="text-left">
                         <div className="flex items-center gap-2 text-red-500 font-bold tracking-[0.2em] uppercase mb-4 animate-pulse">
                             <Timer className="w-5 h-5" /> Limited Time Offers
@@ -166,14 +166,14 @@ export default function DailySpecials() {
                         <div className="h-64 bg-zinc-900/50 rounded-3xl animate-pulse" />
                     </div>
                 ) : (
-                    <div className="grid lg:grid-cols-2 gap-8">
+                    <div className="grid lg:grid-cols-2 gap-6">
                         {specials.map((special, index) => (
                             <SpecialCard key={special.id} special={special} index={index} />
                         ))}
                     </div>
                 )}
 
-                <div className="mt-8 text-center">
+                <div className="mt-6 text-center">
                     <Link to="/menu" className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors border-b border-white/20 hover:border-white pb-1">
                         <span className="text-sm font-medium tracking-widest uppercase">View All Combos</span>
                         <ArrowRight className="w-4 h-4" />

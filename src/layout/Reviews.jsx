@@ -40,7 +40,7 @@ function ReviewCard({ review, index }) {
         >
             <div className="absolute inset-0 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 group-hover:border-white/20 transition-colors" />
 
-            <div className="relative p-8 flex flex-col h-full">
+            <div className="relative p-6 flex flex-col h-full">
                 {/* Quote Icon */}
                 <div className="absolute top-6 right-6 opacity-20 group-hover:opacity-100 transition-opacity">
                     <Quote className={`w-8 h-8 ${review.accent}`} />
@@ -83,25 +83,25 @@ export default function Reviews() {
             <div className="absolute bottom-1/4 -right-64 w-96 h-96 bg-blue-900/20 rounded-full blur-[100px]" />
 
             <Container className="relative z-10 h-full flex flex-col justify-center">
-                <div className="text-center max-w-2xl mx-auto mb-10">
+                <div className="text-center max-w-2xl mx-auto mb-8">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                     >
-                        <h2 className="text-4xl md:text-5xl font-black text-white mb-6">
+                        <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
                             LEGENDS OF THE <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
                                 TASTE TEST
                             </span>
                         </h2>
-                        <p className="text-gray-400 text-lg">
+                        <p className="text-gray-400 text-base">
                             Hear from the warriors who have tasted our blade.
                         </p>
                     </motion.div>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-3 gap-6">
                     {REVIEWS.map((review, index) => (
                         <ReviewCard key={review.id} review={review} index={index} />
                     ))}

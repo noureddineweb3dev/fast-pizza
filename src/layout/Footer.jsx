@@ -5,7 +5,7 @@ import Container from './Container';
 
 export default function Footer() {
   return (
-    <footer className="relative bg-black text-gray-400 border-t border-white/10 overflow-hidden">
+    <footer className="relative bg-black text-gray-400 border-t border-white/10 overflow-hidden snap-start">
       {/* Background Texture */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-linen.png')] opacity-20" />
 

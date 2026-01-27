@@ -32,8 +32,8 @@ function PizzaCard({ pizza, index }) {
 
       <div className={`absolute inset-0 bg-gradient-to-br ${accent} opacity-0 group-hover:opacity-20 blur-2xl transition-opacity duration-500 rounded-[2rem]`} />
 
-      <div className="relative h-full border border-white/5 bg-white/[0.02] backdrop-blur-sm rounded-[2rem] overflow-hidden p-6 flex flex-col">
-        <div className="relative aspect-square mb-6 overflow-hidden rounded-2xl bg-black/20">
+      <div className="relative h-full border border-white/5 bg-white/[0.02] backdrop-blur-sm rounded-[2rem] overflow-hidden p-4 flex flex-col">
+        <div className="relative h-32 md:h-40 w-full mb-2 overflow-hidden rounded-2xl bg-black/20 shrink-0">
           <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 bg-gradient-to-br ${accent} opacity-20 blur-3xl rounded-full`} />
 
           <motion.img
@@ -45,27 +45,27 @@ function PizzaCard({ pizza, index }) {
           />
 
           {tags.length > 0 && (
-            <div className="absolute top-3 left-3 flex flex-wrap gap-2 z-20">
+            <div className="absolute top-2 left-2 flex flex-wrap gap-1 z-20">
               {tags.map(tag => (
-                <span key={tag} className="bg-black/60 backdrop-blur-md border border-white/10 text-white text-[10px] uppercase font-bold px-2 py-1 rounded-full tracking-wider">
+                <span key={tag} className="bg-black/60 backdrop-blur-md border border-white/10 text-white text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full tracking-wider">
                   {tag}
                 </span>
               ))}
             </div>
           )}
 
-          <div className="absolute top-3 right-3 z-20">
-            <div className={`flex items-center gap-1.5 bg-gradient-to-r ${accent} px-3 py-1.5 rounded-full`}>
-              <span className="text-white font-black text-sm">€{pizza.unitPrice || pizza.price}</span>
+          <div className="absolute top-2 right-2 z-20">
+            <div className={`flex items-center gap-1.5 bg-gradient-to-r ${accent} px-2 py-1 rounded-full`}>
+              <span className="text-white font-black text-xs">€{pizza.unitPrice || pizza.price}</span>
             </div>
           </div>
         </div>
 
         <div className="flex-1 flex flex-col">
-          <h3 className="text-2xl font-black text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-400 transition-colors">
+          <h3 className="text-xl font-black text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-400 transition-colors">
             {pizza.name}
           </h3>
-          <p className="text-gray-400 text-sm leading-relaxed mb-6 flex-1 line-clamp-2">
+          <p className="text-gray-400 text-xs leading-relaxed mb-4 flex-1 line-clamp-2">
             {pizza.description || pizza.ingredients?.join(', ')}
           </p>
 
@@ -127,7 +127,7 @@ export default function SamuraiChoice() {
       </div>
 
       <Container className="relative z-10 w-full h-full flex flex-col justify-center">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6">
           <div className="max-w-2xl">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -144,7 +144,7 @@ export default function SamuraiChoice() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-4xl md:text-6xl font-black text-white leading-tight"
+              className="text-4xl md:text-5xl font-black text-white leading-tight"
             >
               THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">SAMURAI</span><br />
               CHOICE
@@ -171,7 +171,7 @@ export default function SamuraiChoice() {
             ))}
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-8 h-[50vh]">
+          <div className="grid md:grid-cols-3 gap-6 w-full">
             {featuredItems.map((pizza, index) => (
               <PizzaCard key={pizza.id} pizza={pizza} index={index} />
             ))}
