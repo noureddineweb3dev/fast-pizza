@@ -77,13 +77,13 @@ function ReviewCard({ review, index }) {
 
 export default function Reviews() {
     return (
-        <section className="relative py-24 bg-black overflow-hidden">
+        <div className="relative w-full h-full overflow-hidden bg-black">
             {/* Background Gradients */}
             <div className="absolute top-1/4 -left-64 w-96 h-96 bg-purple-900/20 rounded-full blur-[100px]" />
             <div className="absolute bottom-1/4 -right-64 w-96 h-96 bg-blue-900/20 rounded-full blur-[100px]" />
 
-            <Container className="relative z-10">
-                <div className="text-center max-w-2xl mx-auto mb-16">
+            <Container className="relative z-10 h-full flex flex-col justify-center">
+                <div className="text-center max-w-2xl mx-auto mb-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -107,6 +107,6 @@ export default function Reviews() {
                     ))}
                 </div>
             </Container>
-        </section>
+        </div>
     );
 }
