@@ -61,18 +61,7 @@ function OrderSearch() {
 
       {/* Quick Link */}
       <div className="flex flex-col items-center gap-6">
-        <Link to="/order/history">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="flex items-center gap-3 px-6 py-4 bg-zinc-900/50 rounded-2xl border border-white/10 hover:border-red-500/30 transition-colors cursor-pointer">
-            <div className="p-2 bg-red-600/20 rounded-xl border border-red-500/30">
-              <History className="w-5 h-5 text-red-500" />
-            </div>
-            <div className="text-left">
-              <p className="text-white font-bold">Order History</p>
-              <p className="text-gray-400 text-sm">View all your past orders</p>
-            </div>
-            <ArrowRight className="w-5 h-5 text-gray-500 ml-4" />
-          </motion.div>
-        </Link>
+
 
         {!isAuthenticated && (
           <motion.div
