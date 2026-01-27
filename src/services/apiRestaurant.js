@@ -248,3 +248,24 @@ export async function deleteOrder(id) {
     method: 'DELETE',
   });
 }
+
+// ============ FAVORITES FUNCTIONS ============
+
+export async function fetchFavorites() {
+  const data = await fetchJSON(`${API_URL}/api/favorites`);
+  return data.map(transformMenuItem);
+}
+
+export async function apiAddFavorite(pizzaId) {
+  const data = await fetchJSON(`${API_URL}/api/favorites`, {
+    method: 'POST',
+    body: JSON.stringify({ pizzaId }),
+  });
+  return transformMenuItem(data);
+}
+
+export async function apiRemoveFavorite(pizzaId) {
+  return fetchJSON(`${API_URL}/api/favorites/${pizzaId}`, {
+    method: 'DELETE',
+  });
+}

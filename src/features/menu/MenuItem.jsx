@@ -8,7 +8,7 @@ import Button from '../../ui/Button';
 import RatingStars from '../../ui/RatingStars';
 import RatingDialog from '../../ui/RatingDialog';
 import { addItem, getCurrentQuantityById, increaseItemQuantity, decreaseItemQuantity } from '../../store/cartSlice';
-import { toggleFavorite, isFavorite } from '../../store/favoritesSlice';
+import { toggleFavoriteAsync, isFavorite } from '../../store/favoritesSlice';
 import { getPizzaRating } from '../../store/ratingSlice';
 import { getPizzaAverageRating, getPizzaRatingCount } from '../../store/globalRatingsSlice';
 
@@ -59,7 +59,10 @@ function MenuItem({ pizza }) {
 
   function handleToggleFavorite(e) {
     e.stopPropagation();
-    dispatch(toggleFavorite(pizza));
+    dispatch(toggleFavoriteAsync(pizza));
+    // Toast is handled in slice or we can keep it here if we want custom message, 
+    // but the slice might handle errors. The slice doesn't explicitly toast success for add/remove in the thunk (except error).
+    // So we can keep toast here for optimistic UI or feedback.
     toast.success(isFavorited ? 'Removed from favorites' : 'Added to favorites', {
       id: `fav-${id}`,
     });
