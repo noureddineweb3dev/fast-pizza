@@ -1,13 +1,16 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, Package, History, ArrowRight } from 'lucide-react';
+import { Search, Package, History, ArrowRight, Sparkles } from 'lucide-react';
+import { getIsAuthenticated } from '../../store/userSlice';
 import Button from '../../ui/Button';
 import Container from '../../layout/Container';
 
 function OrderSearch() {
   const [orderId, setOrderId] = useState('');
   const navigate = useNavigate();
+  const isAuthenticated = useSelector(getIsAuthenticated);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -57,7 +60,7 @@ function OrderSearch() {
       </section>
 
       {/* Quick Link */}
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center gap-6">
         <Link to="/order/history">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="flex items-center gap-3 px-6 py-4 bg-zinc-900/50 rounded-2xl border border-white/10 hover:border-red-500/30 transition-colors cursor-pointer">
             <div className="p-2 bg-red-600/20 rounded-xl border border-red-500/30">
@@ -70,6 +73,31 @@ function OrderSearch() {
             <ArrowRight className="w-5 h-5 text-gray-500 ml-4" />
           </motion.div>
         </Link>
+
+        {!isAuthenticated && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="w-full max-w-2xl relative overflow-hidden rounded-2xl border border-yellow-500/20 bg-zinc-900/50 p-6 backdrop-blur-sm"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(234,179,8,0.1),transparent_50%)]" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20 text-yellow-500">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-lg font-bold text-white mb-1">Track history, get rewards!</h3>
+                  <p className="text-gray-400 text-sm">Create an account to keep your orders in one place.</p>
+                </div>
+              </div>
+              <Link to="/signup" className="w-full md:w-auto px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase tracking-wider rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-yellow-500/20">
+                Sign Up Now
+              </Link>
+            </div>
+          </motion.div>
+        )}
       </div>
     </>
   );
