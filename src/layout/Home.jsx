@@ -57,8 +57,8 @@ function Home() {
       />
 
       {/* ================= HERO ================= */}
-      <section className="h-screen w-full snap-start flex items-center justify-center p-4">
-        <div className="relative w-full h-full max-h-[95vh] overflow-hidden bg-black text-white rounded-[2.5rem] shadow-[0_0_50px_rgba(220,38,38,0.2)] border border-white/10 group flex flex-col justify-center">
+      <section className="h-screen w-full snap-start pt-28 pb-4 px-4 flex items-center justify-center">
+        <div className="relative w-full h-full overflow-hidden bg-black text-white rounded-[2.5rem] shadow-[0_0_50px_rgba(220,38,38,0.2)] border border-white/10 group flex flex-col justify-center">
           {/* Animated Background Layers */}
           <div className="absolute inset-0 bg-gradient-to-br from-red-950 via-sp-black to-black" />
           <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] mix-blend-overlay" />
@@ -90,15 +90,15 @@ function Home() {
             ))}
           </div>
 
-          <Container className="grid md:grid-cols-2 items-center gap-16 relative z-10 w-full">
-            <div className="space-y-10 text-left">
+          <Container className="grid md:grid-cols-2 items-center gap-8 md:gap-16 relative z-10 w-full h-full px-6 lg:px-12">
+            <div className="flex flex-col justify-center space-y-6 md:space-y-8 text-left h-full py-8">
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="inline-flex items-center gap-3 bg-red-600/10 backdrop-blur-2xl px-5 py-2 rounded-full border border-red-500/30 shadow-inner shadow-red-500/10"
+                className="inline-flex items-center gap-3 bg-red-600/10 backdrop-blur-2xl px-4 py-1.5 rounded-full border border-red-500/30 shadow-inner shadow-red-500/10 w-fit"
               >
-                <Zap className="w-4 h-4 text-red-500 animate-pulse" />
-                <span className="text-xs font-black tracking-[0.25em] uppercase text-red-400">
+                <Zap className="w-3.5 h-3.5 text-red-500 animate-pulse" />
+                <span className="text-[10px] md:text-xs font-black tracking-[0.25em] uppercase text-red-400">
                   FORGED IN FIRE & SPEED
                 </span>
               </motion.div>
@@ -108,7 +108,7 @@ function Home() {
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: 'spring', damping: 15 }}
-                  className="text-7xl md:text-9xl lg:text-[10rem] font-black leading-[0.85] tracking-tighter italic select-none"
+                  className="text-6xl md:text-8xl lg:text-[7.5rem] font-black leading-[0.85] tracking-tighter italic select-none"
                 >
                   SLICE <br />
                   <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 filter drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
@@ -129,7 +129,7 @@ function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="max-w-md text-xl text-gray-400 leading-relaxed font-medium border-l-2 border-red-900/50 pl-6"
+                className="max-w-md text-lg md:text-xl text-gray-400 leading-relaxed font-medium border-l-2 border-red-900/50 pl-6"
               >
                 Precision-cut recipes delivered with the unwavering discipline of a master. The
                 ultimate pizza mission begins at your command.
@@ -166,37 +166,39 @@ function Home() {
               initial={{ opacity: 0, x: 100, rotate: 15 }}
               animate={{ opacity: 1, x: 0, rotate: 0 }}
               transition={{ type: 'spring', stiffness: 40, damping: 12, delay: 0.2 }}
-              className="relative hidden md:block"
+              className="relative hidden md:flex items-center justify-center h-full"
             >
-              {/* Background Glow */}
-              <div className="absolute inset-0 bg-red-600/30 blur-[150px] rounded-full scale-150 animate-pulse" />
+              <div className="relative w-full max-w-lg lg:max-w-xl aspect-square flex items-center justify-center">
+                {/* Background Glow */}
+                <div className="absolute inset-0 bg-red-600/30 blur-[120px] rounded-full scale-110 animate-pulse" />
 
-              <motion.img
-                whileHover={{ rotate: 5, scale: 1.05 }}
-                src="/images/pizzas/shogun-inferno.png"
-                alt="Shogun Inferno Pizza"
-                className="relative z-10 w-full max-w-xl mx-auto drop-shadow-[0_45px_65px_rgba(0,0,0,0.8)]"
-              />
+                <motion.img
+                  whileHover={{ rotate: 5, scale: 1.05 }}
+                  src="/images/pizzas/shogun-inferno.png"
+                  alt="Shogun Inferno Pizza"
+                  className="relative z-10 w-full drop-shadow-[0_45px_65px_rgba(0,0,0,0.8)] object-contain"
+                />
 
-              {/* Floating Floating Badges */}
-              <motion.div
-                animate={{ y: [0, -25, 0] }}
-                transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut' }}
-                className="absolute -top-12 right-0 bg-gradient-to-br from-gray-900 to-black backdrop-blur-2xl p-6 rounded-3xl border border-white/10 shadow-3xl z-20 flex flex-col items-center"
-              >
-                <span className="text-yellow-500 font-black text-3xl">⭐ 5.0</span>
-                <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">
-                  Elite Rating
-                </span>
-              </motion.div>
+                {/* Floating Floating Badges */}
+                <motion.div
+                  animate={{ y: [0, -25, 0] }}
+                  transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut' }}
+                  className="absolute top-10 right-0 lg:-right-4 bg-gradient-to-br from-gray-900 to-black backdrop-blur-2xl p-5 rounded-3xl border border-white/10 shadow-3xl z-20 flex flex-col items-center"
+                >
+                  <span className="text-yellow-500 font-black text-2xl">⭐ 5.0</span>
+                  <span className="text-[9px] text-gray-500 uppercase font-bold tracking-widest mt-1">
+                    Elite Rating
+                  </span>
+                </motion.div>
 
-              <motion.div
-                animate={{ y: [0, 25, 0] }}
-                transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut', delay: 1 }}
-                className="absolute -bottom-10 left-10 bg-red-600 p-5 rounded-2xl shadow-2xl z-20"
-              >
-                <Flame className="w-8 h-8 text-white" />
-              </motion.div>
+                <motion.div
+                  animate={{ y: [0, 25, 0] }}
+                  transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut', delay: 1 }}
+                  className="absolute bottom-20 left-0 lg:-left-8 bg-red-600 p-4 rounded-2xl shadow-2xl z-20"
+                >
+                  <Flame className="w-6 h-6 text-white" />
+                </motion.div>
+              </div>
             </motion.div>
           </Container>
 
