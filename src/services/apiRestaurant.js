@@ -41,14 +41,18 @@ async function fetchJSON(url, options = {}) {
 
 // Helper to standardise menu items from DB (snake_case) to Frontend (camelCase)
 function transformMenuItem(item) {
+  const unitPrice = item.unit_price ?? item.unitPrice;
+  const image = item.image_url ?? item.image;
+  const soldOut = item.sold_out ?? item.soldOut;
+  const ingredients = typeof item.ingredients === 'string' ? JSON.parse(item.ingredients) : item.ingredients;
+
   return {
     ...item,
-    unitPrice: item.unit_price, // Database has unit_price
-    image: item.image_url,      // Database has image_url
-    soldOut: item.sold_out,     // Database has sold_out
-    available: !item.sold_out,  // Frontend uses available
-    // Ensure ingredients is an array if it comes as a JSON string
-    ingredients: typeof item.ingredients === 'string' ? JSON.parse(item.ingredients) : item.ingredients
+    unitPrice,
+    image,
+    soldOut,
+    available: !soldOut,
+    ingredients
   };
 }
 
