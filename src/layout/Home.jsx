@@ -41,8 +41,8 @@ function Home() {
   }, []);
 
   const SectionWrapper = ({ children, className = "" }) => (
-    <section className="h-screen w-full snap-start flex items-center justify-center p-4">
-      <div className={`w-full h-full max-h-[95vh] overflow-y-auto flex flex-col justify-center rounded-[2.5rem] shadow-xl border border-white/5 relative bg-black ${className}`}>
+    <section className="h-screen w-full snap-start pt-28 pb-4 px-4 flex items-center justify-center">
+      <div className={`w-full h-full overflow-y-auto flex flex-col justify-center rounded-[2.5rem] shadow-xl border border-white/5 relative bg-black ${className}`}>
         {children}
       </div>
     </section>
@@ -219,23 +219,23 @@ function Home() {
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900" />
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')]" />
 
-        <Container className="relative z-10 w-full">
+        <Container className="relative z-10 w-full h-full flex flex-col justify-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-16"
+            className="text-center mb-10 md:mb-16"
           >
-            <h2 className="text-5xl font-black text-white mb-4 tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
               The Samurai Way
             </h2>
-            <p className="text-gray-400 text-xl max-w-2xl mx-auto">
+            <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
               Three principles that define our legendary service
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             <EnhancedFeature
               icon={<Zap className="w-12 h-12" />}
               title="Lightning Fast"
