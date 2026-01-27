@@ -69,6 +69,32 @@ body {
 }
 
 /* Apply shake to input field when it has error */
+
 input.error {
   animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Home Page Scroll Snap Mode */
+html.home-scroll-snap {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+html.home-scroll-snap body {
+  height: 100%;
+  overflow: unset; /* Let html handle scroll */
+}
+
+/* Remove default layout padding so sections can be full height */
+html.home-scroll-snap main {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Ensure sections snap correctly */
+html.home-scroll-snap section.snap-start {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
