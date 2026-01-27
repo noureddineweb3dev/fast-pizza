@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, Package, History, ArrowRight, Sparkles } from 'lucide-react';
+import { Search, ArrowRight, Sparkles, MapPin, Clock, ChefHat, Package } from 'lucide-react';
 import { getIsAuthenticated } from '../../store/userSlice';
 import Button from '../../ui/Button';
 import Container from '../../layout/Container';
@@ -12,83 +12,106 @@ function OrderSearch() {
   const navigate = useNavigate();
   const isAuthenticated = useSelector(getIsAuthenticated);
 
+  const isValid = orderId.length === 10 && orderId.startsWith('SAP');
+
   function handleSubmit(e) {
     e.preventDefault();
-    if (!orderId.trim()) return;
+    if (!isValid) return;
     navigate(`/order/${orderId}`);
   }
 
+  // Auto-format input to uppercase
+  const handleChange = (e) => {
+    let val = e.target.value.toUpperCase();
+    if (val.length <= 10) setOrderId(val);
+  };
+
+  const steps = [
+    { icon: <Package className="w-4 h-4" />, label: 'Order' },
+    { icon: <ChefHat className="w-4 h-4" />, label: 'Prep' },
+    { icon: <Clock className="w-4 h-4" />, label: 'Bake' },
+    { icon: <MapPin className="w-4 h-4" />, label: 'Deliv' },
+  ];
+
   return (
-    <>
-      {/* Hero */}
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-black mb-12 border border-white/10 shadow-2xl">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.15),transparent_50%)]" />
-        <Container className="relative z-10 py-20 md:py-28 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-red-600/20 border border-red-500/30 text-red-400 font-bold tracking-widest text-xs uppercase backdrop-blur-md">
-            <Package className="w-4 h-4" /> Order Tracking
+    <div className="min-h-[80vh] flex flex-col items-center justify-center p-4">
+      <Container className="w-full max-w-4xl">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+
+          {/* Left Column: Search */}
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-left">
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-none tracking-tighter">
+              FIND YOUR <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">FEAST.</span>
+            </h1>
+            <p className="text-gray-400 text-lg mb-8 max-w-sm">
+              Enter the <span className="text-white font-bold">10-digit ID</span> from your receipt (e.g. SAP1234567).
+            </p>
+
+            <form onSubmit={handleSubmit} className="relative max-w-md group">
+              <div className="absolute inset-0 bg-red-600/20 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity rounded-2xl" />
+              <div className="relative flex items-center">
+                <Search className="absolute left-5 w-5 h-5 text-gray-500" />
+                <input
+                  type="text"
+                  placeholder="SAP..."
+                  value={orderId}
+                  onChange={handleChange}
+                  className="w-full bg-zinc-900 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-red-500 text-xl font-mono tracking-widest uppercase transition-colors"
+                />
+                <Button
+                  type="submit"
+                  disabled={!isValid}
+                  className={`absolute right-2 p-2 rounded-xl transition-all ${isValid ? 'bg-red-600 text-white hover:bg-red-500' : 'bg-zinc-800 text-zinc-600'}`}
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </div>
+              <p className="text-xs text-zinc-600 mt-2 ml-2 h-4">
+                {orderId && !orderId.startsWith('SAP') ? 'Must start with "SAP"' :
+                  orderId && orderId.length < 10 ? `${10 - orderId.length} characters remaining` : ''}
+              </p>
+            </form>
+
+            <div className="mt-12 flex items-center gap-8 opacity-50">
+              {steps.map((step, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <div className="p-1.5 bg-zinc-800 rounded-lg text-gray-400">{step.icon}</div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500">{step.label}</span>
+                  {i < steps.length - 1 && <div className="h-px w-4 bg-zinc-800" />}
+                </div>
+              ))}
+            </div>
           </motion.div>
 
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-4xl md:text-6xl font-black text-white mb-4">
-            Track Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">Order</span>
-          </motion.h1>
-
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-gray-400 text-lg max-w-md mx-auto mb-8">
-            Enter your order ID and let the Pizza Samurai find your feast.
-          </motion.p>
-
-          {/* Search Form */}
-          <motion.form initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} onSubmit={handleSubmit} className="flex items-center gap-3 max-w-lg mx-auto">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Order ID (e.g. SDDS0001)"
-                value={orderId}
-                onChange={(e) => setOrderId(e.target.value.toUpperCase())}
-                className="w-full bg-zinc-800 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600 text-lg font-semibold tracking-wider"
-              />
-            </div>
-            <Button type="submit" variant="primary" size="lg" className="!rounded-xl !py-4 !px-6" disabled={!orderId.trim()}>
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </motion.form>
-
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-gray-500 text-sm mt-4">
-            Your order ID is shown after checkout
-          </motion.p>
-        </Container>
-      </section>
-
-      {/* Quick Link */}
-      <div className="flex flex-col items-center gap-6">
-
-
-        {!isAuthenticated && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="w-full max-w-2xl relative overflow-hidden rounded-2xl border border-yellow-500/20 bg-zinc-900/50 p-6 backdrop-blur-sm"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(234,179,8,0.1),transparent_50%)]" />
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20 text-yellow-500">
-                  <Sparkles className="w-6 h-6" />
+          {/* Right Column: Signup (Conditional) or Decorative */}
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }} className="hidden lg:block">
+            {!isAuthenticated ? (
+              <div className="relative overflow-hidden rounded-[2rem] bg-zinc-900 border border-white/5 p-8 text-center">
+                <div className="absolute top-0 right-0 p-24 bg-red-600/10 rounded-full blur-3xl -mr-10 -mt-10" />
+                <div className="inline-flex p-4 bg-yellow-500/10 rounded-2xl text-yellow-500 mb-6">
+                  <Sparkles className="w-8 h-8" />
                 </div>
-                <div className="text-left">
-                  <h3 className="text-lg font-bold text-white mb-1">Track history, get rewards!</h3>
-                  <p className="text-gray-400 text-sm">Create an account to keep your orders in one place.</p>
+                <h3 className="text-2xl font-black text-white mb-2">Track Faster Next Time</h3>
+                <p className="text-gray-400 mb-8 mx-auto max-w-xs">Create an account to save your order history and unlock exclusive rewards.</p>
+                <Link to="/signup" className="inline-block w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase tracking-wider rounded-xl transition-transform hover:scale-[1.02]">
+                  Create Account
+                </Link>
+              </div>
+            ) : (
+              // If authenticated, show a nice decorative element or order history quick link
+              <div className="relative overflow-hidden rounded-[2rem] bg-zinc-900/50 border border-white/5 p-8 flex items-center justify-center aspect-square">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(220,38,38,0.1),transparent_70%)]" />
+                <div className="text-center opacity-30">
+                  <Package className="w-24 h-24 mx-auto text-red-500 mb-4" />
+                  <p className="font-bold text-lg">READY TO TRACK</p>
                 </div>
               </div>
-              <Link to="/signup" className="w-full md:w-auto px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase tracking-wider rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-yellow-500/20">
-                Sign Up Now
-              </Link>
-            </div>
+            )}
           </motion.div>
-        )}
-      </div>
-    </>
+        </div>
+      </Container>
+    </div>
   );
 }
 
