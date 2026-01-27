@@ -119,15 +119,15 @@ export default function SamuraiChoice() {
   }, []);
 
   return (
-    <section ref={containerRef} className="relative py-32 overflow-hidden bg-black">
+    <div ref={containerRef} className="relative w-full h-full overflow-hidden">
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-30" />
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-red-900/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[10%] left-[5%] w-[300px] h-[300px] bg-blue-900/10 rounded-full blur-[100px]" />
       </div>
 
-      <Container className="relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
+      <Container className="relative z-10 w-full h-full flex flex-col justify-center">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
           <div className="max-w-2xl">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -144,7 +144,7 @@ export default function SamuraiChoice() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-5xl md:text-7xl font-black text-white leading-tight"
+              className="text-4xl md:text-6xl font-black text-white leading-tight"
             >
               THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">SAMURAI</span><br />
               CHOICE
@@ -171,13 +171,13 @@ export default function SamuraiChoice() {
             ))}
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 h-[50vh]">
             {featuredItems.map((pizza, index) => (
               <PizzaCard key={pizza.id} pizza={pizza} index={index} />
             ))}
           </div>
         )}
       </Container>
-    </section>
+    </div>
   );
 }
