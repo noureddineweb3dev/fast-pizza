@@ -18,7 +18,7 @@ function Order() {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(getIsAuthenticated);
 
-  const { id, status, priority, priorityPrice, orderPrice, estimatedDelivery, cart, customer } = order;
+  const { id, status, priority, priorityPrice, orderPrice, estimatedDelivery, cart, customer, customer_id } = order;
   const statusInfo = getStatusById(status);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ function Order() {
         </Container>
       </section>
 
-      {!isAuthenticated && (
+      {!isAuthenticated && !customer_id && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
