@@ -13,7 +13,7 @@ export default function BrandStory() {
     const rotateVar = useTransform(scrollYProgress, [0, 1], [5, -5]);
 
     return (
-        <section ref={containerRef} className="relative py-32 overflow-hidden bg-sp-black text-white">
+        <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-sp-black text-white">
             {/* Background patterns */}
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/shattered-island.png')] opacity-10" />
             <div className="absolute inset-0 bg-gradient-to-r from-black via-black/90 to-transparent z-10" />
@@ -23,7 +23,7 @@ export default function BrandStory() {
                 侍
             </div>
 
-            <Container className="relative z-20 grid md:grid-cols-2 gap-16 items-center">
+            <Container className="relative z-20 grid md:grid-cols-2 gap-16 items-center content-center h-full">
                 {/* Text Content */}
                 <div className="space-y-8">
                     <motion.div
@@ -119,6 +119,6 @@ export default function BrandStory() {
                     </motion.div>
                 </div>
             </Container>
-        </section>
+        </div>
     );
 }
