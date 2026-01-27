@@ -140,11 +140,11 @@ export default function DailySpecials() {
     }, []);
 
     return (
-        <section className="relative py-24 bg-black overflow-hidden">
+        <div className="relative w-full h-full overflow-hidden bg-black">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] opacity-20" />
 
-            <Container className="relative z-10">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+            <Container className="relative z-10 h-full flex flex-col justify-center">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-8">
                     <div className="text-left">
                         <div className="flex items-center gap-2 text-red-500 font-bold tracking-[0.2em] uppercase mb-4 animate-pulse">
                             <Timer className="w-5 h-5" /> Limited Time Offers
@@ -173,13 +173,13 @@ export default function DailySpecials() {
                     </div>
                 )}
 
-                <div className="mt-16 text-center">
+                <div className="mt-8 text-center">
                     <Link to="/menu" className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors border-b border-white/20 hover:border-white pb-1">
                         <span className="text-sm font-medium tracking-widest uppercase">View All Combos</span>
                         <ArrowRight className="w-4 h-4" />
                     </Link>
                 </div>
             </Container>
-        </section>
+        </div>
     );
 }
