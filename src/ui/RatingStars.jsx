@@ -39,16 +39,15 @@ function RatingStars({ rating = 0, onRate, size = 'md', showValue = false, inter
             disabled={!isInteractive}
           >
             <Star
-              className={`${sizeClass} transition-colors ${
-                isFilled ? 'fill-yellow-400 text-yellow-400' : 'fill-none text-gray-300'
-              }`}
+              className={`${sizeClass} transition-colors ${isFilled ? 'fill-yellow-400 text-yellow-400' : 'fill-none text-gray-300'
+                }`}
             />
           </motion.button>
         );
       })}
 
       {showValue && (
-        <span className="ml-2 text-sm font-medium text-gray-700">{rating.toFixed(1)}</span>
+        <span className="ml-2 text-sm font-medium text-gray-400">{rating.toFixed(1)}</span>
       )}
     </div>
   );
