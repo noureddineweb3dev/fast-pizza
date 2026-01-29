@@ -117,12 +117,22 @@ function AdminDashboard() {
         }
     };
 
-    // ... (keep filteredOrders and filteredMenu)
-    // Filtered orders
+    // Filtered orders - Staff only sees today's orders
     const filteredOrders = useMemo(() => {
+        const today = new Date();
+        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
         let result = orders.filter((order) => {
             const matchesSearch = order.id.toLowerCase().includes(searchQuery.toLowerCase()) || order.customer?.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+
+            // Staff only sees today's orders
+            if (role === 'staff') {
+                const orderDate = order.date ? new Date(order.date) : new Date();
+                const isToday = orderDate >= todayStart;
+                return matchesSearch && matchesStatus && isToday;
+            }
+
             return matchesSearch && matchesStatus;
         });
         if (sortBy === 'newest') result.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -130,7 +140,7 @@ function AdminDashboard() {
         else if (sortBy === 'highest') result.sort((a, b) => b.totalPrice - a.totalPrice);
         else if (sortBy === 'lowest') result.sort((a, b) => a.totalPrice - b.totalPrice);
         return result;
-    }, [orders, searchQuery, statusFilter, sortBy]);
+    }, [orders, searchQuery, statusFilter, sortBy, role]);
 
     // Group orders by date
     const groupedOrders = useMemo(() => {
