@@ -6,6 +6,7 @@ import { User, Mail, Lock, LogIn, ArrowRight, Phone, MapPin } from 'lucide-react
 import toast from 'react-hot-toast';
 import Button from '../../ui/Button';
 import { signupUser, getAuthStatus, getAuthError } from '../../store/userSlice';
+import { switchUserContext } from '../../store/ratingSlice';
 import Container from '../../layout/Container';
 
 function Signup() {
@@ -27,6 +28,10 @@ function Signup() {
 
         const result = await dispatch(signupUser({ fullName, email, phone, password, address }));
         if (signupUser.fulfilled.match(result)) {
+            // Switch rating context to the new customer
+            const customerId = result.payload.data.user.id;
+            dispatch(switchUserContext(customerId));
+
             toast.success('Account created!');
             navigate('/');
         } else {

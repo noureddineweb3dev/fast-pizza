@@ -6,6 +6,7 @@ import { Mail, Lock, LogIn, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../../ui/Button';
 import { loginUser, getAuthStatus, getAuthError } from '../../store/userSlice';
+import { switchUserContext } from '../../store/ratingSlice';
 import Container from '../../layout/Container';
 
 function Login() {
@@ -23,6 +24,10 @@ function Login() {
 
         const result = await dispatch(loginUser({ identifier, password }));
         if (loginUser.fulfilled.match(result)) {
+            // Switch rating context to the logged-in customer
+            const customerId = result.payload.data.user.id;
+            dispatch(switchUserContext(customerId));
+
             toast.success('Welcome back!');
             navigate('/');
         } else {

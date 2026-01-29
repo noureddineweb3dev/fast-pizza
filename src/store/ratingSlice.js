@@ -1,26 +1,35 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-// USER ID HELPER - Get or create a unique user identifier
-function getUserId() {
-  let userId = localStorage.getItem('userId');
-  if (!userId) {
-    userId = 'user_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('userId', userId);
+// BROWSER ID - Always the same for this browser (for guests)
+function getBrowserId() {
+  let browserId = localStorage.getItem('browserId');
+  if (!browserId) {
+    browserId = 'guest_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('browserId', browserId);
   }
-  return userId;
+  return browserId;
 }
 
-// Get storage key for the current user
-function getStorageKey() {
-  const userId = getUserId();
-  return `pizzaRatings_${userId}`;
+// Get effective user identifier based on login state
+// This function checks Redux state, but for initial load we need to check localStorage
+function getEffectiveUserId(customerId = null) {
+  if (customerId) {
+    return `customer_${customerId}`;
+  }
+  return getBrowserId();
+}
+
+// Get storage key for the effective user
+function getStorageKey(customerId = null) {
+  const effectiveId = getEffectiveUserId(customerId);
+  return `pizzaRatings_${effectiveId}`;
 }
 
 // LOCALSTORAGE HELPERS - User-specific storage
 
-function loadRatingsFromStorage() {
+function loadRatingsFromStorage(customerId = null) {
   try {
-    const storageKey = getStorageKey();
+    const storageKey = getStorageKey(customerId);
     const serializedRatings = localStorage.getItem(storageKey);
     if (serializedRatings === null) {
       return {};
@@ -32,9 +41,9 @@ function loadRatingsFromStorage() {
   }
 }
 
-function saveRatingsToStorage(ratings) {
+function saveRatingsToStorage(ratings, customerId = null) {
   try {
-    const storageKey = getStorageKey();
+    const storageKey = getStorageKey(customerId);
     const serializedRatings = JSON.stringify(ratings);
     localStorage.setItem(storageKey, serializedRatings);
   } catch (err) {
@@ -42,11 +51,27 @@ function saveRatingsToStorage(ratings) {
   }
 }
 
+// Check if user is logged in from localStorage (for initial state)
+function getInitialCustomerId() {
+  try {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsed = JSON.parse(userData);
+      return parsed?.id || null;
+    }
+  } catch (err) {
+    console.error('Error reading user data:', err);
+  }
+  return null;
+}
+
 // INITIAL STATE
+const initialCustomerId = getInitialCustomerId();
 
 const initialState = {
-  ratings: loadRatingsFromStorage(),
-  userId: getUserId(),
+  ratings: loadRatingsFromStorage(initialCustomerId),
+  effectiveUserId: getEffectiveUserId(initialCustomerId),
+  customerId: initialCustomerId,
 };
 
 // RATING SLICE
@@ -66,38 +91,45 @@ const ratingSlice = createSlice({
         date: new Date().toISOString(),
       };
 
-      saveRatingsToStorage(state.ratings);
+      saveRatingsToStorage(state.ratings, state.customerId);
     },
 
     // Remove a rating
     removeRating(state, action) {
       const pizzaId = action.payload;
       delete state.ratings[pizzaId];
-      saveRatingsToStorage(state.ratings);
+      saveRatingsToStorage(state.ratings, state.customerId);
     },
 
     // Clear all ratings for current user
     clearAllRatings(state) {
       state.ratings = {};
-      saveRatingsToStorage(state.ratings);
+      saveRatingsToStorage(state.ratings, state.customerId);
     },
 
-    // Reload ratings for current user (call after user change)
-    reloadUserRatings(state) {
-      state.ratings = loadRatingsFromStorage();
-      state.userId = getUserId();
+    // Switch user context (call on login/logout)
+    switchUserContext(state, action) {
+      const newCustomerId = action.payload; // null for guest, customer id for logged in user
+      state.customerId = newCustomerId;
+      state.effectiveUserId = getEffectiveUserId(newCustomerId);
+      state.ratings = loadRatingsFromStorage(newCustomerId);
     },
   },
 });
 
 // EXPORTS
 
-export const { addRating, removeRating, clearAllRatings, reloadUserRatings } = ratingSlice.actions;
+export const { addRating, removeRating, clearAllRatings, switchUserContext } = ratingSlice.actions;
 
 export default ratingSlice.reducer;
 
-// Re-export getUserId for use in other components
-export { getUserId };
+// Helper to get the effective userId for API calls
+export function getEffectiveUserIdForApi(customerId = null) {
+  return getEffectiveUserId(customerId);
+}
+
+// Re-export getBrowserId for edge cases
+export { getBrowserId };
 
 // SELECTORS
 
@@ -121,5 +153,8 @@ export const getAverageRating = (state) => {
 // Get total number of ratings by current user
 export const getTotalRatingsCount = (state) => Object.keys(state.rating.ratings).length;
 
-// Get current userId
-export const getCurrentUserId = (state) => state.rating.userId;
+// Get current effective userId
+export const getCurrentUserId = (state) => state.rating.effectiveUserId;
+
+// Get customer ID (null if guest)
+export const getCustomerId = (state) => state.rating.customerId;

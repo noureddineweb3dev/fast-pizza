@@ -5,19 +5,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import RatingStars from './RatingStars';
 import Button from './Button';
-import { addRating, getPizzaRating, getUserId } from '../store/ratingSlice';
+import { addRating, getPizzaRating, getEffectiveUserIdForApi, getCustomerId } from '../store/ratingSlice';
 import { submitRatingToBackend } from '../store/globalRatingsSlice';
 
 function RatingDialog({ isOpen, onClose, pizza }) {
   const dispatch = useDispatch();
   const existingRating = useSelector(getPizzaRating(pizza?.id));
 
-  // Get customerId if user is logged in
-  const user = useSelector(state => state.user?.user);
-  const customerId = user?.id || null;
+  // Get customerId from rating slice (login-aware)
+  const customerId = useSelector(getCustomerId);
 
   const [rating, setRating] = useState(0);
-  const [review, setReview] = useState('');
+  const [review, setReview] = useState('')
 
   useEffect(() => {
     if (existingRating) {
@@ -37,13 +36,14 @@ function RatingDialog({ isOpen, onClose, pizza }) {
       return;
     }
 
-    const userId = getUserId();
+    // Get the effective userId (customer_id for logged in, guest_id for guests)
+    const effectiveUserId = getEffectiveUserIdForApi(customerId);
 
     // Save locally (for personal tracking)
     dispatch(addRating({ pizzaId: pizza.id, rating, review }));
 
     // Sync to backend + global ratings
-    dispatch(submitRatingToBackend(pizza.id, rating, review, userId, customerId));
+    dispatch(submitRatingToBackend(pizza.id, rating, review, effectiveUserId, customerId));
 
     toast.success(existingRating ? 'Rating updated!' : 'Rating submitted!', { id: 'rating' });
     onClose();

@@ -9,6 +9,7 @@ import PizzaLogo from '../ui/PizzaLogo';
 import CartPopup from '../features/cart/CartPopup';
 import { getTotalCartQuantity } from '../store/cartSlice';
 import { logout } from '../store/userSlice';
+import { switchUserContext } from '../store/ratingSlice';
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -185,7 +186,7 @@ function AuthControls() {
           <p className="text-sm text-white font-bold">{user.full_name.split(' ')[0]}</p>
         </div>
         <button
-          onClick={() => dispatch(logout())}
+          onClick={() => { dispatch(logout()); dispatch(switchUserContext(null)); }}
           className="text-xs font-bold text-red-500 hover:text-white border border-red-500/30 hover:bg-red-600 hover:border-red-600 px-3 py-1.5 rounded-lg transition-all"
         >
           Logout
