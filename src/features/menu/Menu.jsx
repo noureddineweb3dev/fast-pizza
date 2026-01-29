@@ -1,18 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLoaderData } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMenu } from '../../services/apiRestaurant';
-import { getAllGlobalRatings } from '../../store/globalRatingsSlice';
+import { getAllGlobalRatings, fetchAllRatingsFromBackend } from '../../store/globalRatingsSlice';
 import MenuItem from './MenuItem';
 import MenuHero from './MenuHero';
 import MenuControls from './MenuControls';
 
 function Menu() {
+  const dispatch = useDispatch();
   const menu = useLoaderData();
   const [sortBy, setSortBy] = useState('default');
   const [activeCategory, setActiveCategory] = useState('all');
   const globalRatings = useSelector(getAllGlobalRatings);
+
+  // Fetch global ratings from backend on mount
+  useEffect(() => {
+    dispatch(fetchAllRatingsFromBackend());
+  }, [dispatch]);
 
   // 1. Filter Menu by Category
   const filteredMenu =

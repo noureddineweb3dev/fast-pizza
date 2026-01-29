@@ -6,6 +6,7 @@ function RatingStars({ rating = 0, onRate, size = 'md', showValue = false, inter
   const [hoverRating, setHoverRating] = useState(0);
 
   const sizes = {
+    xs: 'w-3 h-3',
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
     lg: 'w-6 h-6',
