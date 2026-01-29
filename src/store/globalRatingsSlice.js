@@ -88,25 +88,23 @@ const globalRatingsSlice = createSlice({
     },
 
     // Set ratings from backend (for initial load/sync)
+    // Backend is the SINGLE SOURCE OF TRUTH - completely replace local data
     setRatingsFromBackend(state, action) {
       const backendRatings = action.payload;
-      // Merge backend ratings with local structure
+
+      // Completely replace local ratings with backend data
+      const newRatings = {};
       Object.keys(backendRatings).forEach(pizzaId => {
         const backendData = backendRatings[pizzaId];
-        if (!state.ratings[pizzaId]) {
-          state.ratings[pizzaId] = {
-            totalRating: backendData.average * backendData.count,
-            count: backendData.count,
-            average: backendData.average,
-            reviews: [],
-          };
-        } else {
-          // Update with backend data (backend is source of truth for aggregates)
-          state.ratings[pizzaId].average = backendData.average;
-          state.ratings[pizzaId].count = backendData.count;
-          state.ratings[pizzaId].totalRating = backendData.average * backendData.count;
-        }
+        newRatings[pizzaId] = {
+          totalRating: backendData.average * backendData.count,
+          count: backendData.count,
+          average: backendData.average,
+          reviews: [], // Reviews are not needed for display
+        };
       });
+
+      state.ratings = newRatings;
       saveGlobalRatingsToStorage(state.ratings);
     },
 
@@ -152,8 +150,12 @@ export const submitRatingToBackend = (pizzaId, rating, review, userId, customerI
   dispatch(submitGlobalRating({ pizzaId, rating, review, userId }));
 
   try {
-    // Sync to backend (fire and forget, don't block UI)
+    // Sync to backend
     await apiSubmitRating(pizzaId, rating, review, userId, customerId);
+
+    // Refresh ratings from backend to get accurate average
+    const ratingsMap = await apiFetchAllRatings();
+    dispatch(setRatingsFromBackend(ratingsMap));
   } catch (error) {
     console.error('Failed to sync rating to backend:', error);
     // Rating is still saved locally, will sync next time

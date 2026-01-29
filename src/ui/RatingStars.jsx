@@ -16,16 +16,29 @@ function RatingStars({ rating = 0, onRate, size = 'md', showValue = false, inter
   const sizeClass = sizes[size] || sizes.md;
   const isInteractive = interactive && onRate;
 
+  // Calculate display rating (use hover for interactive, actual rating otherwise)
+  const displayRating = hoverRating || rating;
+
   const handleClick = (value) => {
     if (isInteractive) {
       onRate(value);
     }
   };
 
+  // Calculate fill percentage for each star
+  const getStarFill = (starIndex) => {
+    if (starIndex <= Math.floor(displayRating)) {
+      return 100; // Fully filled
+    } else if (starIndex === Math.ceil(displayRating) && displayRating % 1 !== 0) {
+      return (displayRating % 1) * 100; // Partially filled
+    }
+    return 0; // Empty
+  };
+
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => {
-        const isFilled = star <= (hoverRating || rating);
+        const fillPercent = getStarFill(star);
 
         return (
           <motion.button
@@ -34,15 +47,26 @@ function RatingStars({ rating = 0, onRate, size = 'md', showValue = false, inter
             onClick={() => handleClick(star)}
             onMouseEnter={() => isInteractive && setHoverRating(star)}
             onMouseLeave={() => isInteractive && setHoverRating(0)}
-            className={`${isInteractive ? 'cursor-pointer' : 'cursor-default'} focus:outline-none`}
+            className={`${isInteractive ? 'cursor-pointer' : 'cursor-default'} focus:outline-none relative`}
             whileHover={isInteractive ? { scale: 1.2 } : {}}
             whileTap={isInteractive ? { scale: 0.9 } : {}}
             disabled={!isInteractive}
           >
+            {/* Background star (gray/empty) */}
             <Star
-              className={`${sizeClass} transition-colors ${isFilled ? 'fill-yellow-400 text-yellow-400' : 'fill-none text-gray-300'
-                }`}
+              className={`${sizeClass} text-gray-500 fill-gray-700`}
             />
+            {/* Foreground star (yellow/filled) with clip for partial fill */}
+            {fillPercent > 0 && (
+              <div
+                className="absolute inset-0 overflow-hidden"
+                style={{ width: `${fillPercent}%` }}
+              >
+                <Star
+                  className={`${sizeClass} text-yellow-400 fill-yellow-400`}
+                />
+              </div>
+            )}
           </motion.button>
         );
       })}
