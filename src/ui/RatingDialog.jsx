@@ -5,17 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import RatingStars from './RatingStars';
 import Button from './Button';
-import { addRating, getPizzaRating } from '../store/ratingSlice';
+import { addRating, getPizzaRating, getUserId } from '../store/ratingSlice';
 import { submitRatingToBackend } from '../store/globalRatingsSlice';
-
-function getUserId() {
-  let userId = localStorage.getItem('userId');
-  if (!userId) {
-    userId = 'user_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('userId', userId);
-  }
-  return userId;
-}
 
 function RatingDialog({ isOpen, onClose, pizza }) {
   const dispatch = useDispatch();
