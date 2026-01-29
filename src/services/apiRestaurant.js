@@ -273,3 +273,47 @@ export async function apiRemoveFavorite(pizzaId) {
     method: 'DELETE',
   });
 }
+
+// ============ RATINGS FUNCTIONS ============
+
+export async function submitRating(menuItemId, rating, review, userId, customerId = null) {
+  const res = await fetch(`${API_URL}/api/ratings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ menuItemId, rating, review, userId, customerId }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to submit rating');
+  return data;
+}
+
+export async function getAllRatings() {
+  const res = await fetch(`${API_URL}/api/ratings`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to fetch ratings');
+  return data;
+}
+
+export async function getMenuItemRatings(menuItemId) {
+  const res = await fetch(`${API_URL}/api/ratings/${menuItemId}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to fetch ratings');
+  return data;
+}
+
+export async function getUserRating(menuItemId, userId) {
+  const res = await fetch(`${API_URL}/api/ratings/${menuItemId}/user/${userId}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to fetch rating');
+  return data;
+}
+
+export async function deleteRating(menuItemId, userId) {
+  const res = await fetch(`${API_URL}/api/ratings/${menuItemId}/user/${userId}`, {
+    method: 'DELETE',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to delete rating');
+  return data;
+}
+

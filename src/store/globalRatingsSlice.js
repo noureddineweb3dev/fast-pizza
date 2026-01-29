@@ -37,7 +37,8 @@ const globalRatingsSlice = createSlice({
   initialState,
 
   reducers: {
-    // Submit a rating to the global system
+    // Submit a rating to the global system (Redux + localStorage)
+    // Backend sync is handled separately via thunk
     submitGlobalRating(state, action) {
       const { pizzaId, rating, review, userId } = action.payload;
 
@@ -86,6 +87,29 @@ const globalRatingsSlice = createSlice({
       saveGlobalRatingsToStorage(state.ratings);
     },
 
+    // Set ratings from backend (for initial load/sync)
+    setRatingsFromBackend(state, action) {
+      const backendRatings = action.payload;
+      // Merge backend ratings with local structure
+      Object.keys(backendRatings).forEach(pizzaId => {
+        const backendData = backendRatings[pizzaId];
+        if (!state.ratings[pizzaId]) {
+          state.ratings[pizzaId] = {
+            totalRating: backendData.average * backendData.count,
+            count: backendData.count,
+            average: backendData.average,
+            reviews: [],
+          };
+        } else {
+          // Update with backend data (backend is source of truth for aggregates)
+          state.ratings[pizzaId].average = backendData.average;
+          state.ratings[pizzaId].count = backendData.count;
+          state.ratings[pizzaId].totalRating = backendData.average * backendData.count;
+        }
+      });
+      saveGlobalRatingsToStorage(state.ratings);
+    },
+
     removeGlobalRating(state, action) {
       const { pizzaId, userId } = action.payload;
 
@@ -115,9 +139,37 @@ const globalRatingsSlice = createSlice({
 
 // EXPORTS
 
-export const { submitGlobalRating, removeGlobalRating } = globalRatingsSlice.actions;
+export const { submitGlobalRating, removeGlobalRating, setRatingsFromBackend } = globalRatingsSlice.actions;
 
 export default globalRatingsSlice.reducer;
+
+// ASYNC THUNKS (for backend syncing)
+import { submitRating as apiSubmitRating, getAllRatings as apiFetchAllRatings } from '../services/apiRestaurant.js';
+
+// Thunk to submit rating to backend and update Redux
+export const submitRatingToBackend = (pizzaId, rating, review, userId, customerId) => async (dispatch) => {
+  // Update local state immediately for responsive UI
+  dispatch(submitGlobalRating({ pizzaId, rating, review, userId }));
+
+  try {
+    // Sync to backend (fire and forget, don't block UI)
+    await apiSubmitRating(pizzaId, rating, review, userId, customerId);
+  } catch (error) {
+    console.error('Failed to sync rating to backend:', error);
+    // Rating is still saved locally, will sync next time
+  }
+};
+
+// Thunk to fetch all ratings from backend
+export const fetchAllRatingsFromBackend = () => async (dispatch) => {
+  try {
+    const ratingsMap = await apiFetchAllRatings();
+    dispatch(setRatingsFromBackend(ratingsMap));
+  } catch (error) {
+    console.error('Failed to fetch ratings from backend:', error);
+    // Use local ratings as fallback
+  }
+};
 
 // SELECTORS
 

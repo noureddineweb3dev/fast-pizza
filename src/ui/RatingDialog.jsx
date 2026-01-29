@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import RatingStars from './RatingStars';
 import Button from './Button';
 import { addRating, getPizzaRating } from '../store/ratingSlice';
-import { submitGlobalRating } from '../store/globalRatingsSlice';
+import { submitRatingToBackend } from '../store/globalRatingsSlice';
 
 function getUserId() {
   let userId = localStorage.getItem('userId');
@@ -20,6 +20,10 @@ function getUserId() {
 function RatingDialog({ isOpen, onClose, pizza }) {
   const dispatch = useDispatch();
   const existingRating = useSelector(getPizzaRating(pizza?.id));
+
+  // Get customerId if user is logged in
+  const user = useSelector(state => state.user?.user);
+  const customerId = user?.id || null;
 
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
@@ -44,8 +48,11 @@ function RatingDialog({ isOpen, onClose, pizza }) {
 
     const userId = getUserId();
 
+    // Save locally (for personal tracking)
     dispatch(addRating({ pizzaId: pizza.id, rating, review }));
-    dispatch(submitGlobalRating({ pizzaId: pizza.id, rating, review, userId }));
+
+    // Sync to backend + global ratings
+    dispatch(submitRatingToBackend(pizza.id, rating, review, userId, customerId));
 
     toast.success(existingRating ? 'Rating updated!' : 'Rating submitted!', { id: 'rating' });
     onClose();
