@@ -172,8 +172,8 @@ function MenuItem({ pizza }) {
           {/* Ratings */}
           {ratingCount > 0 ? (
             <div className="flex items-center gap-2 mb-3">
-              <RatingStars rating={averageRating} size="xs" interactive={false} />
-              <span className="text-xs text-gray-400">({ratingCount})</span>
+              <RatingStars rating={averageRating} size="md" interactive={false} />
+              <span className="text-md text-gray-400">({ratingCount})</span>
             </div>
           ) : (
             <div className="mb-3 text-xs text-gray-500 italic">No ratings yet</div>

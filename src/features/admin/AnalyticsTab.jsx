@@ -44,34 +44,125 @@ function AnalyticsTab({ stats }) {
             <div className="grid lg:grid-cols-3 gap-8">
                 {/* Revenue Chart */}
                 <div className="lg:col-span-2 bg-zinc-900/50 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-                    <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-red-500" /> Revenue Trend (Last 30 Days)
                     </h3>
-                    <div className="h-64 flex items-end gap-2">
-                        {graph.map((day, index) => {
-                            const maxVal = Math.max(...graph.map(d => d.value)) || 1;
-                            const heightPercentage = (day.value / maxVal) * 100;
-                            return (
-                                <div key={day.date} className="flex-1 flex flex-col justify-end group relative">
-                                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 border border-white/10">
-                                        {day.date}: {formatCurrency(day.value)}
+                    {(!graph || graph.length === 0) ? (
+                        <div className="h-64 flex items-center justify-center text-gray-500">
+                            No revenue data available yet
+                        </div>
+                    ) : (() => {
+                        const maxVal = Math.max(...graph.map(d => d.value)) || 1;
+                        const totalRevenue = graph.reduce((sum, d) => sum + d.value, 0);
+                        const avgRevenue = totalRevenue / graph.length;
+                        const peakDay = graph.reduce((max, d) => d.value > max.value ? d : max, graph[0]);
+                        const daysWithSales = graph.filter(d => d.value > 0).length;
+
+                        // Format date helper (2026-01-15 -> Jan 15)
+                        const formatDate = (dateStr) => {
+                            if (!dateStr) return '';
+                            const date = new Date(dateStr);
+                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        };
+
+                        return (
+                            <>
+                                {/* Chart Summary Stats */}
+                                <div className="grid grid-cols-3 gap-4 mb-6">
+                                    <div className="bg-zinc-800/50 rounded-xl p-3 border border-white/5">
+                                        <p className="text-xs text-gray-500 uppercase tracking-wider">Total (30d)</p>
+                                        <p className="text-xl font-black text-green-400">{formatCurrency(totalRevenue)}</p>
                                     </div>
-                                    <motion.div
-                                        initial={{ height: 0 }}
-                                        animate={{ height: `${heightPercentage}%` }}
-                                        transition={{ duration: 0.8, delay: index * 0.02, ease: "easeOut" }}
-                                        className="w-full bg-gradient-to-t from-red-600/20 to-red-500 rounded-t-sm hover:from-red-500 hover:to-red-400 transition-colors"
-                                    />
+                                    <div className="bg-zinc-800/50 rounded-xl p-3 border border-white/5">
+                                        <p className="text-xs text-gray-500 uppercase tracking-wider">Daily Average</p>
+                                        <p className="text-xl font-black text-blue-400">{formatCurrency(avgRevenue)}</p>
+                                    </div>
+                                    <div className="bg-zinc-800/50 rounded-xl p-3 border border-white/5">
+                                        <p className="text-xs text-gray-500 uppercase tracking-wider">Peak Day</p>
+                                        <p className="text-xl font-black text-yellow-400">{formatCurrency(peakDay.value)}</p>
+                                        <p className="text-xs text-gray-500">{formatDate(peakDay.date)}</p>
+                                    </div>
                                 </div>
-                            );
-                        })}
-                    </div>
-                    {/* X-Axis Labels (simplified) */}
-                    <div className="flex justify-between mt-2 text-xs text-gray-500">
-                        <span>{graph[0]?.date}</span>
-                        <span>{graph[Math.floor(graph.length / 2)]?.date}</span>
-                        <span>{graph[graph.length - 1]?.date}</span>
-                    </div>
+
+                                <div className="flex">
+                                    {/* Y-Axis Labels */}
+                                    <div className="flex flex-col justify-between text-xs text-gray-500 pr-2 h-56 py-1 min-w-[60px]">
+                                        <span className="text-right font-mono">{formatCurrency(maxVal)}</span>
+                                        <span className="text-right font-mono">{formatCurrency(maxVal * 0.5)}</span>
+                                        <span className="text-right font-mono">$0</span>
+                                    </div>
+
+                                    {/* Chart Area */}
+                                    <div className="flex-1">
+                                        {/* Grid lines */}
+                                        <div className="relative h-56 border-l border-b border-zinc-600 bg-zinc-800/20 rounded-tr-lg">
+                                            {/* Horizontal grid lines */}
+                                            <div className="absolute w-full h-px bg-zinc-600/30 top-0 border-dashed"></div>
+                                            <div className="absolute w-full h-px bg-zinc-600/30 top-1/2 border-dashed"></div>
+
+                                            {/* Bars */}
+                                            <div className="absolute inset-0 flex items-end gap-px px-1 pb-px">
+                                                {graph.map((day, index) => {
+                                                    let heightPercent = (day.value / maxVal) * 100;
+                                                    if (day.value > 0 && heightPercent < 3) heightPercent = 3;
+                                                    const isPeak = day.date === peakDay.date && day.value > 0;
+
+                                                    return (
+                                                        <div key={day.date} className="flex-1 flex flex-col justify-end group relative h-full">
+                                                            {/* Tooltip */}
+                                                            <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-xs px-4 py-3 rounded-xl opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100 pointer-events-none whitespace-nowrap z-20 border border-white/20 shadow-2xl">
+                                                                <div className="text-gray-400 text-[10px] uppercase tracking-wider mb-1">Revenue</div>
+                                                                <div className="font-black text-lg text-white">{formatCurrency(day.value)}</div>
+                                                                <div className="text-gray-400 mt-1 flex items-center gap-1">
+                                                                    <Calendar className="w-3 h-3" /> {formatDate(day.date)}
+                                                                </div>
+                                                                {isPeak && <div className="text-yellow-400 text-[10px] mt-1 font-bold">🏆 Peak Day</div>}
+                                                                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-zinc-900 border-r border-b border-white/20 rotate-45"></div>
+                                                            </div>
+                                                            {/* Bar */}
+                                                            <motion.div
+                                                                initial={{ height: 0, opacity: 0 }}
+                                                                animate={{ height: day.value > 0 ? `${heightPercent}%` : '2px', opacity: 1 }}
+                                                                transition={{ duration: 0.6, delay: index * 0.015, ease: "easeOut" }}
+                                                                className={`w-full rounded-t transition-all cursor-pointer
+                                                                    ${isPeak
+                                                                        ? 'bg-gradient-to-t from-yellow-600 to-yellow-400 shadow-lg shadow-yellow-500/30'
+                                                                        : day.value > 0
+                                                                            ? 'bg-gradient-to-t from-red-700 to-red-500 hover:from-red-600 hover:to-red-400 hover:shadow-lg hover:shadow-red-500/20'
+                                                                            : 'bg-zinc-700/50'
+                                                                    }`}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* X-Axis Labels */}
+                                        <div className="flex justify-between mt-3 text-xs text-gray-500 px-1">
+                                            <span className="font-medium text-gray-400">{formatDate(graph[0]?.date)}</span>
+                                            <span>{formatDate(graph[Math.floor(graph.length / 2)]?.date)}</span>
+                                            <span className="font-medium text-gray-400">{formatDate(graph[graph.length - 1]?.date)}</span>
+                                        </div>
+
+                                        {/* Legend */}
+                                        <div className="flex items-center justify-center gap-6 mt-4 text-xs text-gray-500">
+                                            <span className="flex items-center gap-2">
+                                                <span className="w-3 h-3 rounded bg-gradient-to-t from-red-700 to-red-500"></span>
+                                                Daily Revenue
+                                            </span>
+                                            <span className="flex items-center gap-2">
+                                                <span className="w-3 h-3 rounded bg-gradient-to-t from-yellow-600 to-yellow-400"></span>
+                                                Peak Day
+                                            </span>
+                                            <span className="text-gray-600">|</span>
+                                            <span>{daysWithSales} active days</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        );
+                    })()}
                 </div>
 
                 {/* Top Items Leaderboard */}
