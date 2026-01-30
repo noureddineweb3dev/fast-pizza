@@ -499,22 +499,59 @@ function AdminDashboard() {
 
 // ============ COMPONENTS ============
 
-function StatCard({ icon, title, value, color }) {
-    const colors = {
-        blue: 'bg-blue-600/20 text-blue-400 border-blue-500/30',
-        green: 'bg-green-600/20 text-green-400 border-green-500/30',
-        yellow: 'bg-yellow-600/20 text-yellow-400 border-yellow-500/30',
-        emerald: 'bg-emerald-600/20 text-emerald-400 border-emerald-500/30',
-        purple: 'bg-purple-600/20 text-purple-400 border-purple-500/30',
-        orange: 'bg-orange-600/20 text-orange-400 border-orange-500/30',
+function StatCard({ icon, title, value, color, subtitle }) {
+    const colorStyles = {
+        blue: {
+            bg: 'bg-gradient-to-br from-blue-500/15 to-blue-600/5',
+            border: 'border-blue-500/30',
+            icon: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+        },
+        green: {
+            bg: 'bg-gradient-to-br from-green-500/15 to-green-600/5',
+            border: 'border-green-500/30',
+            icon: 'bg-green-500/20 text-green-400 border-green-500/30',
+        },
+        yellow: {
+            bg: 'bg-gradient-to-br from-yellow-500/15 to-yellow-600/5',
+            border: 'border-yellow-500/30',
+            icon: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+        },
+        emerald: {
+            bg: 'bg-gradient-to-br from-emerald-500/15 to-emerald-600/5',
+            border: 'border-emerald-500/30',
+            icon: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+        },
+        purple: {
+            bg: 'bg-gradient-to-br from-purple-500/15 to-purple-600/5',
+            border: 'border-purple-500/30',
+            icon: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+        },
+        orange: {
+            bg: 'bg-gradient-to-br from-orange-500/15 to-orange-600/5',
+            border: 'border-orange-500/30',
+            icon: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+        },
     };
+
+    const styles = colorStyles[color] || colorStyles.blue;
+
     return (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-zinc-900/50 rounded-2xl border border-white/10 p-5 backdrop-blur-sm">
-            <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${colors[color]}`}>{icon}</div>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`${styles.bg} rounded-2xl border ${styles.border} p-5 backdrop-blur-sm relative overflow-hidden group hover:scale-[1.02] transition-all duration-300`}
+        >
+            {/* Background decoration */}
+            <div className="absolute -right-3 -bottom-3 w-20 h-20 rounded-full bg-white/[0.02] group-hover:bg-white/[0.04] transition-colors"></div>
+
+            <div className="flex items-center gap-4 relative z-10">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${styles.icon}`}>
+                    {icon}
+                </div>
                 <div>
-                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{title}</p>
-                    <p className="text-xl font-black text-white">{value}</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">{title}</p>
+                    <p className="text-2xl font-black text-white leading-none">{value}</p>
+                    {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
                 </div>
             </div>
         </motion.div>
