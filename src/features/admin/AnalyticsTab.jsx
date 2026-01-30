@@ -35,10 +35,39 @@ function AnalyticsTab({ stats }) {
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <KPICard title="Revenue (Today)" value={formatCurrency(financials.revenueToday)} subvalue={`${financials.ordersToday} orders`} icon={<DollarSign className="text-green-500" />} trend="+12%" color="green" />
-                <KPICard title="Revenue (7 Days)" value={formatCurrency(financials.revenue7d)} subvalue={`${financials.orders7d} orders`} icon={<Calendar className="text-blue-500" />} trend="This Week" color="blue" />
-                <KPICard title="Revenue (30 Days)" value={formatCurrency(financials.revenue30d)} subvalue={`${financials.orders30d} orders`} icon={<TrendingUp className="text-purple-500" />} trend="This Month" color="purple" />
-                <KPICard title="Total Orders" value={financials.totalOrders} subvalue="Lifetime" icon={<ShoppingBag className="text-orange-500" />} trend="All Time" color="orange" />
+                <KPICard
+                    title="Revenue (Today)"
+                    value={formatCurrency(financials.revenueToday)}
+                    subvalue={`${financials.ordersToday} orders`}
+                    icon={<DollarSign className="w-5 h-5" />}
+                    badge="Today"
+                    color="green"
+                    highlight={financials.ordersToday > 0}
+                />
+                <KPICard
+                    title="Revenue (7 Days)"
+                    value={formatCurrency(financials.revenue7d)}
+                    subvalue={`${financials.orders7d} orders`}
+                    icon={<Calendar className="w-5 h-5" />}
+                    badge="This Week"
+                    color="blue"
+                />
+                <KPICard
+                    title="Revenue (30 Days)"
+                    value={formatCurrency(financials.revenue30d)}
+                    subvalue={`${financials.orders30d} orders`}
+                    icon={<TrendingUp className="w-5 h-5" />}
+                    badge="This Month"
+                    color="purple"
+                />
+                <KPICard
+                    title="Total Revenue"
+                    value={formatCurrency(financials.totalRevenue)}
+                    subvalue={`${financials.totalOrders} orders`}
+                    icon={<ShoppingBag className="w-5 h-5" />}
+                    badge="All Time"
+                    color="orange"
+                />
             </div>
 
             <div className="grid lg:grid-cols-3 gap-8">
@@ -193,26 +222,65 @@ function AnalyticsTab({ stats }) {
     );
 }
 
-function KPICard({ title, value, subvalue, icon, trend, color }) {
-    const bgColors = {
-        green: 'bg-green-500/10 border-green-500/20',
-        blue: 'bg-blue-500/10 border-blue-500/20',
-        purple: 'bg-purple-500/10 border-purple-500/20',
-        orange: 'bg-orange-500/10 border-orange-500/20'
+function KPICard({ title, value, subvalue, icon, badge, color, highlight }) {
+    const colorStyles = {
+        green: {
+            bg: 'bg-gradient-to-br from-green-500/10 to-green-600/5',
+            border: 'border-green-500/20',
+            icon: 'bg-green-500/20 text-green-400',
+            badge: 'bg-green-500/20 text-green-400',
+            glow: highlight ? 'shadow-lg shadow-green-500/10' : ''
+        },
+        blue: {
+            bg: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5',
+            border: 'border-blue-500/20',
+            icon: 'bg-blue-500/20 text-blue-400',
+            badge: 'bg-blue-500/20 text-blue-400',
+            glow: ''
+        },
+        purple: {
+            bg: 'bg-gradient-to-br from-purple-500/10 to-purple-600/5',
+            border: 'border-purple-500/20',
+            icon: 'bg-purple-500/20 text-purple-400',
+            badge: 'bg-purple-500/20 text-purple-400',
+            glow: ''
+        },
+        orange: {
+            bg: 'bg-gradient-to-br from-orange-500/10 to-orange-600/5',
+            border: 'border-orange-500/20',
+            icon: 'bg-orange-500/20 text-orange-400',
+            badge: 'bg-orange-500/20 text-orange-400',
+            glow: ''
+        }
     };
 
+    const styles = colorStyles[color] || colorStyles.blue;
+
     return (
-        <div className={`p-6 rounded-2xl border ${bgColors[color]} relative overflow-hidden group hover:scale-[1.02] transition-transform`}>
-            <div className="flex justify-between items-start mb-4">
-                <div className="p-3 bg-white/5 rounded-xl text-white">{icon}</div>
-                <span className="text-xs font-bold bg-white/5 px-2 py-1 rounded text-white">{trend}</span>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`p-5 rounded-2xl border ${styles.bg} ${styles.border} ${styles.glow} relative overflow-hidden group hover:scale-[1.02] transition-all duration-300`}
+        >
+            {/* Background decoration */}
+            <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-white/[0.02] group-hover:bg-white/[0.04] transition-colors"></div>
+
+            <div className="flex justify-between items-start mb-4 relative z-10">
+                <div className={`p-3 rounded-xl ${styles.icon}`}>{icon}</div>
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md ${styles.badge}`}>
+                    {badge}
+                </span>
             </div>
-            <h4 className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">{title}</h4>
-            <div className="flex items-baseline gap-2">
-                <h3 className="text-2xl font-black text-white">{value}</h3>
-                <span className="text-sm text-gray-500">{subvalue}</span>
+
+            <h4 className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2 relative z-10">{title}</h4>
+
+            <div className="relative z-10">
+                <h3 className="text-2xl font-black text-white mb-1">{value}</h3>
+                <p className="text-sm text-gray-500 flex items-center gap-1">
+                    {subvalue}
+                </p>
             </div>
-        </div>
+        </motion.div>
     );
 }
 
