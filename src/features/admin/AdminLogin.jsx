@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
-import { User, Lock, Shield, KeyRound, ArrowLeft, Loader2 } from 'lucide-react';
+import { User, Lock, Shield, KeyRound, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../../ui/Button';
 import { loginAdmin } from '../../store/adminSlice';
@@ -10,6 +10,7 @@ import PizzaLogo from '../../ui/PizzaLogo';
 function AdminLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
 
@@ -17,10 +18,19 @@ function AdminLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!username || !password) {
-      toast.error('Please enter credentials', { id: 'admin-login' });
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+
+    // Simple Validation
+    const newErrors = {};
+    if (!username.trim()) newErrors.username = 'Username is required';
+    if (!password) newErrors.password = 'Password is required';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
+    setErrors({});
 
     setIsLoading(true);
     try {
@@ -82,10 +92,15 @@ function AdminLogin() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="admin"
-              className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all placeholder-gray-600"
+              className={`w-full bg-black/50 border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 transition-all placeholder-gray-600 ${errors.username ? 'border-red-500 focus:ring-red-600' : 'border-white/10 focus:ring-red-600 focus:border-transparent'}`}
               autoFocus
               disabled={isLoading}
             />
+            {errors.username && (
+              <div className="flex items-center gap-2 text-xs text-red-500 mt-1 font-bold">
+                <AlertCircle className="w-3 h-3" /> {errors.username}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -97,9 +112,14 @@ function AdminLogin() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all placeholder-gray-600"
+              className={`w-full bg-black/50 border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 transition-all placeholder-gray-600 ${errors.password ? 'border-red-500 focus:ring-red-600' : 'border-white/10 focus:ring-red-600 focus:border-transparent'}`}
               disabled={isLoading}
             />
+            {errors.password && (
+              <div className="flex items-center gap-2 text-xs text-red-500 mt-1 font-bold">
+                <AlertCircle className="w-3 h-3" /> {errors.password}
+              </div>
+            )}
           </div>
 
           <Button
