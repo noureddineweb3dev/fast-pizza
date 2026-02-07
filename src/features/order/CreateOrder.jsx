@@ -46,19 +46,32 @@ function CreateOrder() {
 
   const handleBlur = (fieldName) => {
     setTouched({ ...touched, [fieldName]: true });
-    let validation;
+    let result = { valid: true, error: null };
+
     switch (fieldName) {
-      case 'customer': validation = isValidName(customer); break;
-      case 'phone': validation = isValidPhone(phone); break;
-      case 'address': validation = isValidAddress(address); break;
-      default: return;
+      case 'customer': result = isValidName(customer); break;
+      case 'phone': result = isValidPhone(phone); break;
+      case 'address': result = isValidAddress(address); break;
+      default: break;
     }
-    setErrors({ ...errors, [fieldName]: validation.valid ? null : validation.error });
+    setErrors({ ...errors, [fieldName]: result.error });
   };
 
   const handleChange = (fieldName, value, setter) => {
     setter(value);
-    if (touched[fieldName] && errors[fieldName]) {
+
+    // Real-time validation if touched
+    if (touched[fieldName]) {
+      let result = { valid: true, error: null };
+      switch (fieldName) {
+        case 'customer': result = isValidName(value); break;
+        case 'phone': result = isValidPhone(value); break;
+        case 'address': result = isValidAddress(value); break;
+        default: break;
+      }
+      setErrors({ ...errors, [fieldName]: result.error });
+    } else if (errors[fieldName]) {
+      // Clear error if user starts typing again (optional UX choice, but here we stick to real-time)
       setErrors({ ...errors, [fieldName]: null });
     }
   };
