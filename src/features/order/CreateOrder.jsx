@@ -19,6 +19,7 @@ import {
   calculateTotalPrice,
 } from '../../utils/validation';
 import { getUserAddress } from '../../utils/geolocation';
+import { getUser } from '../../store/userSlice';
 import EmptyCart from '../cart/EmptyCart';
 
 function CreateOrder() {
@@ -29,10 +30,11 @@ function CreateOrder() {
   const cart = useSelector(getCart);
   const orderPrice = useSelector(getTotalCartPrice);
   const totalQuantity = useSelector(getTotalCartQuantity);
+  const user = useSelector(getUser);
 
-  const [customer, setCustomer] = useState('');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
+  const [customer, setCustomer] = useState(user?.full_name || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [address, setAddress] = useState(user?.address || '');
   const [priority, setPriority] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [errors, setErrors] = useState({});
