@@ -4,8 +4,6 @@ export function formatCurrency(value) {
     currency: 'EUR',
   }).format(value);
 }
-  }).format(value);
-}
 
 export function getSortedMenu(menu, sortBy, ratings) {
   let sorted = [...menu];
