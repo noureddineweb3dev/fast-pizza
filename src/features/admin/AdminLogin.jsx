@@ -18,9 +18,6 @@ function AdminLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-
     // Simple Validation
     const newErrors = {};
     if (!username.trim()) newErrors.username = 'Username is required';
