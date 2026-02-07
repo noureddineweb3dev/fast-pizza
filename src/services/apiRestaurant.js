@@ -34,7 +34,7 @@ async function fetchJSON(url, options = {}) {
     }
     throw new Error(data.message || 'Something went wrong');
   }
-  // console.log('API Response:', data);
+
 
   return data.data;
 }

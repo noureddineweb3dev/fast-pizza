@@ -242,8 +242,7 @@ function AdminDashboard() {
         setItemToDelete(null);
     };
 
-    // Debug logging
-    console.log('AdminDashboard Render:', { isAuthenticated, user, role, activeTab });
+
 
     if (!isAuthenticated) {
         return (
