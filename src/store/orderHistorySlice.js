@@ -32,10 +32,12 @@ const orderHistorySlice = createSlice({
   reducers: {
     // Optimistically add an order (fallback if re-fetch is slow)
     addOrderToHistory(state, action) {
-      state.orders.unshift(action.payload);
-      // Keep only last 50 orders
-      if (state.orders.length > 50) {
-        state.orders.pop();
+      if (!state.orders.some(o => o.id === action.payload.id)) {
+        state.orders.unshift(action.payload);
+        // Keep only last 50 orders
+        if (state.orders.length > 50) {
+          state.orders.pop();
+        }
       }
     },
 
