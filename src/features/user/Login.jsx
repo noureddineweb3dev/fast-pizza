@@ -2,25 +2,68 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
-import { Mail, Lock, LogIn, ArrowRight } from 'lucide-react';
+import { Mail, Lock, LogIn, ArrowRight, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../../ui/Button';
 import { loginUser, getAuthStatus, getAuthError } from '../../store/userSlice';
 import { switchUserContext } from '../../store/ratingSlice';
+import { isValidEmail, isValidPhone, isValidPassword } from '../../utils/validation';
 import Container from '../../layout/Container';
 
 function Login() {
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
+    const [errors, setErrors] = useState({});
+    const [touched, setTouched] = useState({});
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const status = useSelector(getAuthStatus);
     const error = useSelector(getAuthError);
     const isSubmitting = status === 'loading';
 
+    const validateField = (name, value) => {
+        let result = { valid: true, error: null };
+        if (name === 'identifier') {
+            // Identifier can be email OR phone
+            const emailValid = isValidEmail(value);
+            const phoneValid = isValidPhone(value);
+            if (!emailValid.valid && !phoneValid.valid) {
+                result = { valid: false, error: 'Please enter a valid email or phone number' };
+            }
+        }
+        if (name === 'password') result = isValidPassword(value);
+        return result;
+    };
+
+    const handleBlur = (e) => {
+        const { name, value } = e.target;
+        setTouched({ ...touched, [name]: true });
+        const validation = validateField(name, value);
+        setErrors({ ...errors, [name]: validation.error });
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name === 'identifier') setIdentifier(value);
+        if (name === 'password') setPassword(value);
+
+        if (touched[name]) {
+            const validation = validateField(name, value);
+            setErrors({ ...errors, [name]: validation.error });
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!identifier || !password) return toast.error('Please fill in all fields');
+
+        // Final validation before submit
+        const idVal = validateField('identifier', identifier);
+        const passVal = validateField('password', password);
+
+        setErrors({ identifier: idVal.error, password: passVal.error });
+        setTouched({ identifier: true, password: true });
+
+        if (!idVal.valid || !passVal.valid) return;
 
         const result = await dispatch(loginUser({ identifier, password }));
         if (loginUser.fulfilled.match(result)) {
@@ -53,13 +96,19 @@ function Login() {
                             <Mail className="w-4 h-4 text-red-500" /> Email or Phone
                         </label>
                         <input
+                            name="identifier"
                             type="text"
                             value={identifier}
-                            onChange={(e) => setIdentifier(e.target.value)}
-                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            className={`w-full bg-zinc-800 border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 transition ${errors.identifier && touched.identifier ? 'border-red-500 focus:ring-red-600' : 'border-white/10 focus:ring-red-600'}`}
                             placeholder="you@example.com or +1 234..."
-                            required
                         />
+                        {errors.identifier && touched.identifier && (
+                            <div className="flex items-center gap-2 text-sm text-red-500 mt-1">
+                                <AlertCircle className="w-4 h-4" /> {errors.identifier}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -67,13 +116,19 @@ function Login() {
                             <Lock className="w-4 h-4 text-red-500" /> Password
                         </label>
                         <input
+                            name="password"
                             type="password"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            className={`w-full bg-zinc-800 border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 transition ${errors.password && touched.password ? 'border-red-500 focus:ring-red-600' : 'border-white/10 focus:ring-red-600'}`}
                             placeholder="••••••••"
-                            required
                         />
+                        {errors.password && touched.password && (
+                            <div className="flex items-center gap-2 text-sm text-red-500 mt-1">
+                                <AlertCircle className="w-4 h-4" /> {errors.password}
+                            </div>
+                        )}
                     </div>
 
                     <Button type="submit" variant="primary" className="w-full !py-4 text-lg !rounded-xl" disabled={isSubmitting}>
